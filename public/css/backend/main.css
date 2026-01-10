@@ -1,0 +1,23 @@
+.col-id, .col-debt, .col-price {
+    width: 1%;              /* avtomatik eng kichik joyni oladi */
+    white-space: nowrap;    /* satrni bo‘lib yubormasin */
+    min-width: 100px;        /* minimal kenglik (masalan 4 xonali raqam uchun yetarli) */
+}
+
+.col-date {
+    width: 12.5%;
+    white-space: nowrap;
+}
+
+.col-title {
+    width: 15%;
+    white-space: nowrap;
+}
+
+#addCountModal .modal-content,
+#addProductCountModal .modal-content,
+#addRawMaterialCountModal .modal-content {
+    border-radius: 5px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+}
+
