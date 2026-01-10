@@ -101,7 +101,10 @@ class TelegramController extends Controller
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
         curl_close($ch);
+
+        return $result;
     }
 
     private function sendMessage($chatId, $text)
@@ -119,6 +122,9 @@ class TelegramController extends Controller
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
         curl_close($ch);
+
+        return $result;
     }
 }
