@@ -494,6 +494,31 @@ class UserController extends Controller
         return redirect()->route('user.index')->with('success', 'Фойдаланувчи яратилди!');
     }
 
+    public function storeAjax(Request $request)
+    {
+        $data = $request->validate([
+            'username' => 'required|string|max:64|unique:user,username',
+            'phone' => ['nullable', 'regex:/^\+998\s?\(\d{2}\)\s?\d{3}\s?\d{2}\s?\d{2}$/'],
+            'role_id' => 'required|integer|exists:role,id',
+        ]);
+
+        $user = new User();
+        $user->username = $data['username'];
+        $user->phone = User::sanitizePhone($data['phone'] ?? null);
+        $user->role_id = $data['role_id'];
+        $user->password_hash = Hash::make(env('DEFAULT_USER_PASSWORD', 'castle4525'));
+        $user->token = Str::random(32);
+        $user->auth_key = Str::random(32);
+        $user->status = StatusService::STATUS_ACTIVE;
+        $user->save();
+
+        return response()->json([
+            'id' => $user->id,
+            'username' => $user->username,
+            'phone' => $user->phone,
+        ]);
+    }
+
 
     public function edit(User $user)
     {

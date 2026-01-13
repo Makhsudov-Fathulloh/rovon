@@ -25,6 +25,7 @@
 
     'back' => false,
 
+    'create' => false,
     'add' => false,
     'addCount' => false,
     'list' => false,
@@ -39,6 +40,7 @@
     'isCloseTextLabel' => 'Бугунги ҳисоботни ёпишни истайсизми?',
     'todayReport' => null,
 
+    'createLabel' => 'Яратиш',
     'editLabel' => null,
     'deleteLabel' => null,
     'viewClass' => 'btn btn-info btn-sm',
@@ -75,7 +77,11 @@
     {{--    @endif--}}
 
     @if($back)
-        <a href="{{ url()->previous() }}" class="btn btn-dark"><i class="fa fa-arrow-left"></i> Орқага</a>
+        <a href="javascript:history.back()" class="btn btn-dark"><i class="fa fa-arrow-left"></i> Орқага</a>
+    @endif
+
+    @if ($create)
+        <a href="{{ route($route . '.create') }}" class="btn btn-primary">{{ $createLabel }}</a>
     @endif
 
     @if($add && in_array(auth()->user()->role->title, $addEditDel))

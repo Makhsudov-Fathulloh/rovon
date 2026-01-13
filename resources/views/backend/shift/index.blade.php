@@ -121,7 +121,7 @@
                                     <td>{{ optional($shift->section)->title }}</td>
                                     <td>{{ $shift->title }}</td>
                                     <td>
-                                        @foreach($shift->user as $user)
+                                        @foreach($shift->users as $user)
                                             <span class="badge bg-info">{{ $user->username }}</span>
                                         @endforeach
                                     </td>
@@ -180,7 +180,7 @@
                                         <strong>{!! sortLink('title', 'Номи') !!}</strong>{{ $shift->title }} </p>
                                     <p class="card-text">
                                         <strong>Ходимлар:</strong>
-                                        @foreach($shift->user as $user)
+                                        @foreach($shift->users as $user)
                                             <span class="badge bg-info">{{ $user->username }}</span>
                                         @endforeach
                                     </p>

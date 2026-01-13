@@ -8,9 +8,7 @@
                         <x-backend.action route="cash-report" :report="true" :todayReport="$todayReport"/>
                     @elseif($todayReport->isOpen())
                         <div class="col-sm-12 col-md-auto text-start">
-                            <a href="{{ route('order.create') }}" class="btn btn-primary w-100 w-md-auto">
-                                {{ 'Яратиш' }}
-                            </a>
+                            <x-backend.action route="order" :back="true" :create="true"/>
                         </div>
                     @endif
                 </div>

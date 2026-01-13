@@ -13,6 +13,8 @@ return new class extends Migration
             $table->foreignId('shift_id')->nullable()->constrained('shift')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('user')->nullOnDelete();
             $table->timestamps();
+
+            $table->unique(['shift_id', 'user_id']); // duplicate oldini olish
         });
     }
 

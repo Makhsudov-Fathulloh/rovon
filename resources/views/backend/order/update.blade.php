@@ -2,6 +2,7 @@
     <div class="order-update">
         <x-backend.order.form
             :users="$users"
+            :clientRoleId="$clientRoleId"
             :order="$order"
             :variations="$variations"
             :method="'PUT'"

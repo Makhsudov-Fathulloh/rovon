@@ -83,9 +83,11 @@ class User extends Authenticatable
         return $this->hasManyThrough(OrderItem::class, Order::class, 'user_id', 'order_id', 'id', 'id');
     }
 
-    public function shift()
+    public function shifts()
     {
-        return $this->belongsToMany(Shift::class, 'shift_user', 'user_id', 'shift_id');
+        return $this->belongsToMany(Shift::class, 'shift_user', 'user_id', 'shift_id')
+            ->using(ShiftUser::class)
+            ->withTimestamps();
     }
 
     public function shiftUser()
@@ -112,36 +114,9 @@ class User extends Authenticatable
         return $this->hasMany(UserDebt::class);
     }
 
-    public function transaction()
+    public function organization()
     {
-        return $this->hasMany(Transaction::class);
-    }
-
-    /**
-     * Har bir valyuta bo‘yicha balansni hisoblash
-     */
-    public function getBalancesAttribute()
-    {
-        $payment = Transaction::TYPE_PAYMENT;
-        $debt = Transaction::TYPE_DEBT;
-        $expense = Transaction::TYPE_EXPENSE;
-        $income = Transaction::TYPE_INCOME;
-
-        return $this->transactions()
-            ->selectRaw("
-            currency,
-            SUM(
-                CASE
-                    WHEN type = {$payment} THEN amount
-                    WHEN type = {$debt} THEN -amount
-                    WHEN type = {$expense} THEN -amount
-                    WHEN type = {$income} THEN amount
-                    ELSE 0
-                END
-            ) as total
-        ")
-            ->groupBy('currency')
-            ->pluck('total', 'currency');
+        return $this->belongsToMany(Organization::class, 'organization_user')->withTimestamps();
     }
 
     protected function sanitizePhone(?string $phone): ?string

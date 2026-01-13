@@ -42,10 +42,9 @@ class Shift extends Model
         return $this->belongsTo(Section::class);
     }
 
-    public function user()
+    public function users()
     {
-        return $this->belongsToMany(User::class, 'shift_user', 'shift_id', 'user_id')
-            ->withTimestamps();
+        return $this->belongsToMany(User::class, 'shift_user', 'shift_id', 'user_id')->withTimestamps();
     }
 
     public function shiftOutputs()
@@ -53,4 +52,3 @@ class Shift extends Model
         return $this->hasMany(ShiftOutput::class);
     }
 }
-

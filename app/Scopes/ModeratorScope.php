@@ -14,7 +14,6 @@ class ModeratorScope implements Scope
     {
         $user = Auth::user();
 
-        // Faqat Moderator uchun
         if (!$user || $user->role->title !== 'Moderator') {
             return;
         }
@@ -23,70 +22,70 @@ class ModeratorScope implements Scope
 
         // 1. organization_id mavjud
         if (Schema::hasColumn($table, 'organization_id')) {
-            $builder->whereHas('organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
         // 2. warehouse_id mavjud
         if (Schema::hasColumn($table, 'warehouse_id')) {
-            $builder->whereHas('warehouse.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('warehouse.organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
         // 3. section_id mavjud
         if (Schema::hasColumn($table, 'section_id')) {
-            $builder->whereHas('section.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('section.organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
         // 4. shift_id mavjud
         if (Schema::hasColumn($table, 'shift_id')) {
-            $builder->whereHas('shift.section.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('shift.section.organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
-        // 5. shift_output_id mavjud (ShiftOutputWorker uchun)
+        // 5. shift_output_id
         if (Schema::hasColumn($table, 'shift_output_id')) {
-            $builder->whereHas('shiftOutput.shift.section.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('shiftOutput.shift.section.organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
-        // 6. raw_material_id mavjud
+        // 6. raw_material_id
         if (Schema::hasColumn($table, 'raw_material_id')) {
-            $builder->whereHas('rawMaterial.warehouse.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('rawMaterial.warehouse.organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
-        // 7. product_id mavjud
+        // 7. product_id
         if (Schema::hasColumn($table, 'product_id')) {
-            $builder->whereHas('product.warehouse.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('product.warehouse.organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
-        // 8. stage_id mavjud
+        // 8. stage_id
         if (Schema::hasColumn($table, 'stage_id')) {
-            $builder->whereHas('stage.section.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+            $builder->whereHas('stage.section.organization.users', function ($q) use ($user) {
+                $q->where('user.id', $user->id);
             });
             return;
         }
 
-        // 9. Fallback: user_id mavjud bo‘lsa
-        if (in_array('user_id', Schema::getColumnListing($table))) {
+        // 9. fallback
+        if (Schema::hasColumn($table, 'user_id')) {
             $builder->where('user_id', $user->id);
         }
     }

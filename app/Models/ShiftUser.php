@@ -2,23 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ShiftUser extends Model
+class ShiftUser extends Pivot
 {
-    use HasFactory;
-
     protected $table = 'shift_user';
 
     protected $fillable = [
-        'shift_output_id',
+        'shift_id',
         'user_id',
     ];
 
-    public function shiftOutput()
+    public function shift()
     {
-        return $this->belongsTo(ShiftOutput::class);
+        return $this->belongsTo(Shift::class);
     }
 
     public function user()

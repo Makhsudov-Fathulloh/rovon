@@ -3,6 +3,7 @@
         <x-backend.order.form
             :method="'POST'"
             :users="$users"
+            :clientRoleId="$clientRoleId"
             :variations="$variations"
             :defaultUserId="$defaultUserId"
             :currentCurrency="$currentCurrency"

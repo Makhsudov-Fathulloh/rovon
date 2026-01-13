@@ -8,9 +8,7 @@
                         @if(!$todayReport || $todayReport->isClose())
                             <x-backend.action route="cash-report" :report="true" :todayReport="$todayReport"/>
                         @elseif($todayReport->isOpen())
-                            <a href="{{ route('product-return.create') }}" class="btn btn-primary w-100 w-md-auto">
-                                {{ 'Қайтариш' }}
-                            </a>
+                            <x-backend.action route="product-return" :back="true" :create="true" createLabel="Қайтариш"/>
                         @endif
                     </div>
                 </div>

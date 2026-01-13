@@ -167,3 +167,56 @@ updateToMin();
 
 // from o‘zgarganda min ni yangilash
 from?.addEventListener('change', updateToMin);
+
+// Show Custom Alert
+function showCustomAlert(message, type = 'info') {
+    const container = document.getElementById('custom-confirm-container');
+    const alertBox = document.createElement('div');
+
+    const isMobile = window.innerWidth <= 768;
+
+    alertBox.className = 'custom-alert';
+    alertBox.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: ${isMobile ? 'flex-start' : 'center'};
+        ${isMobile ? 'padding-top: 60px;' : ''}
+        z-index: 9999;
+    `;
+
+    alertBox.innerHTML = `
+        <div style="
+            background: #fff;
+            padding: 20px 30px;
+            border: none;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        ">
+            <p style="margin-bottom: 20px; font-size: 1.1rem;">${message}</p>
+            <button id="alert-ok" style="
+                background: linear-gradient(135deg, #38b000, #70e000);
+                color: #fff;
+                padding: 8px 16px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            ">OK</button>
+        </div>
+    `;
+
+    container.appendChild(alertBox);
+
+    alertBox.querySelector('#alert-ok').addEventListener('click', () => {
+        alertBox.remove();
+    });
+
+    // Avtomatik yopilish 5 soniyadan keyin
+    setTimeout(() => alertBox.remove(), 5000);
+}

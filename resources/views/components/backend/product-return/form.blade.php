@@ -117,7 +117,12 @@
         @method($method)
     @endif
 
-    <div class="container-fluid py-4">
+      <div class="container-fluid py-2">
+
+        <div class="mb-2">
+            <x-backend.action :back="true"/>
+        </div>
+
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card border-0 shadow-sm">
@@ -202,7 +207,7 @@
                       <div class="card-header bg-white py-3 border-bottom-0">
                         <div class="d-flex justify-content-between align-items-center">
                             <button type="button" class="btn btn-primary btn-sm px-3" id="add-row">
-                                <i class="bi bi-plus-lg"></i> + Mahsulot qo'shish
+                                <i class="bi bi-plus-lg"></i> + Маҳсулот қўшиш
                             </button>
                             <div class="mb-3">
                                 <h2 class="fw-bold text-primary mb-0" id="grand-total">0</h2>

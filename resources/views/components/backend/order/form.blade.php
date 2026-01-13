@@ -2,28 +2,94 @@
     use \App\Services\StatusService;
 @endphp
 
-<form action="{{ $action }}" method="POST">
+<style>
+    .debt-switch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .debt-switch input {
+        display: none;
+    }
+
+    .debt-switch label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .debt-switch .switch {
+        width: 44px;
+        height: 24px;
+        background: #dee2e6;
+        border-radius: 20px;
+        position: relative;
+        transition: background .25s;
+    }
+
+    .debt-switch .switch::after {
+        content: '';
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        border-radius: 50%;
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        transition: transform .25s;
+        box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+
+    .debt-switch input:checked + label .switch {
+        background: #198754;
+    }
+
+    .debt-switch input:checked + label .switch::after {
+        transform: translateX(20px);
+    }
+
+    .debt-switch .text {
+        font-weight: 600;
+        color: #212529;
+    }
+</style>
+
+<form id="order-form" action="{{ $action }}" method="POST">
     @csrf
     @if ($method === 'PUT')
         @method('PUT')
     @endif
 
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2">
+
+        {{-- <div class="mb-2">
+            <x-backend.action :back="true"/>
+        </div> --}}
+
         <div class="card shadow">
             <div class="card-body">
 
                 <div class="col-md-11 mb-3">
                     <label for="user_id">Клиент</label>
-                    <select name="user_id" id="user_id"
-                            class="form-control filter-select2" data-placeholder="Клиентни танланг" {{ Route::is('order.create') ? 'required' : '' }}>
-                        <option value="">Клиентни танланг</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}"
-                                {{ old('user_id', $order->user_id ?? $defaultUserId) == $user->id ? 'selected' : '' }}>
-                                {{ $user->username }} ({{ \App\Services\PhoneFormatService::uzPhone($user->phone) }})
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="d-flex gap-2">
+                        <select name="user_id" id="user_id"
+                                class="form-control filter-select2" data-placeholder="Клиентни танланг" {{ Route::is('order.create') ? 'required' : '' }}>
+                            <option value="">Клиентни танланг</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}"
+                                    {{ old('user_id', $order->user_id ?? $defaultUserId) == $user->id ? 'selected' : '' }}>
+                                    {{ $user->username }} ({{ \App\Services\PhoneFormatService::uzPhone($user->phone) }})
+                                </option>
+                            @endforeach
+                        </select>
+                         <button type="button"
+                            class="btn btn-success d-inline-flex align-items-center justify-content-center"
+                            style="height: 28px; white-space: nowrap; padding: 0 10px; font-size: 14px;"
+                            data-bs-toggle="modal"
+                            data-bs-target="#createClientModal">
+                            <i class="fas fa-plus me-1" style="font-size: 10px;"></i> Клиент
+                        </button>
+                    </div>
                 </div>
 
                 <div class="col-md-11 mb-3">
@@ -118,9 +184,21 @@
                 <button type="button" class="btn btn-sm btn-success mb-4" onclick="addItem()">+ Қўшиш</button>
 
                 <div class="mb-3">
-                    <label>Жами сумма (<span id="currency-label">{{ $currencyLabel }}</span>)</label>
-                    <input type="text" id="total_price" name="total_price" class="form-control"
-                           value="{{ $totalPriceValue }}" readonly>
+                    <div class="mb-2 debt-switch d-flex align-items-center gap-2">
+                        <label for="total_price" class="mb-0">Жами сумма (<span id="currency-label">{{ $currencyLabel }}</span>)</label>
+                        <div class="debt-switch">
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="checkbox" id="allowZeroPayment">
+                                <label for="allowZeroPayment" class="d-flex align-items-center gap-2 mb-0">
+                                    <span class="switch"></span>
+                                </label>
+                            </div>
+                            <span class="text">Қарздорлик</span>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="text" id="total_price" name="total_price" class="form-control" value="{{ $totalPriceValue }}" readonly>
+                    </div>
                 </div>
 
                 <div class="row mb-3">
@@ -166,6 +244,38 @@
         </div>
     </div>
 </form>
+
+<div class="modal fade" id="createClientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Клиент яратиш</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="client-create-form">
+                    @csrf
+                    <input type="hidden" name="role_id" value="{{ $clientRoleId }}">
+
+                    <div class="mb-3">
+                        <label>Username</label>
+                        <input name="username" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input id="phone" type="text" name="phone" class="form-control">
+                    </div>
+
+                    <button type="button" id="save-client-btn" class="btn btn-primary">
+                        Сақлаш
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     let itemIndex = $('#items .item').length;
@@ -461,7 +571,6 @@
         }
     }
 
-
     // 🔹 Valyutani almashtirish
     function changeCurrency() {
         const newCurrency = $('#currency').val();
@@ -497,4 +606,81 @@
         $('#currency').on('change', changeCurrency);
         $('#cash_paid, #card_paid, #transfer_paid, #bank_paid').on('input keyup', calculateRemainingDebt);
     });
+</script>
+
+<script>
+    $('#save-client-btn').on('click', function () {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+        $.ajax({
+            url: '{{ route('user.storeAjax') }}',
+            method: 'POST',
+            data: {
+                username: $('input[name="username"]').val(),
+                phone: $('input[name="phone"]').val(),
+                role_id: '{{ $clientRoleId }}'
+            },
+            success: function (res) {
+
+                const option = new Option(
+                    res.username + ' (' + res.phone + ')',
+                    res.id,
+                    true,
+                    true
+                );
+
+                $('#user_id')
+                    .val(null)
+                    .append(option)
+                    .trigger('change');
+
+                $('#createClientModal').modal('hide');
+            },
+            error: function () {
+                showCustomAlert('Клиент яратилмади', 'error');
+                console.error(xhr);
+            }
+        });
+    });
+</script>
+
+<script>
+    $('#order-form').on('submit', function (e) {
+    const totalPaid =
+            getNumericValue('#cash_paid') +
+            getNumericValue('#card_paid') +
+            getNumericValue('#transfer_paid') +
+            getNumericValue('#bank_paid');
+
+        const confirmed = $('#allowZeroPayment').is(':checked');
+
+        if (totalPaid <= 0 && !confirmed) {
+            e.preventDefault();
+                showCustomAlert('Тўлов 0. Қарздорликни белгилан!', 'info');
+                return false;
+        }
+    });
+
+    function toggleZeroPaymentSwitch() {
+        const totalPaid =
+            getNumericValue('#cash_paid') +
+            getNumericValue('#card_paid') +
+            getNumericValue('#transfer_paid') +
+            getNumericValue('#bank_paid');
+
+        if (totalPaid > 0) {
+            $('.debt-switch').hide();
+            $('#allowZeroPayment').prop('checked', false);
+        } else {
+            $('.debt-switch').show();
+        }
+    }
+
+    $('#cash_paid, #card_paid, #transfer_paid, #bank_paid')
+        .on('input keyup', toggleZeroPaymentSwitch);
+
+    toggleZeroPaymentSwitch();
 </script>

@@ -11,7 +11,6 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\DateFilterService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -127,11 +126,13 @@ class ShiftController extends Controller
 
         $shift = null;
 
-        // Barcha "Worker" rolidagi foydalanuvchilar
-        $allUsers = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();
-        // Create uchun: allUsers ichidan faqat hali bir smenaga biriktirilmaganlar
-        $assignedUserIds = DB::table('shift_user')->pluck('user_id')->toArray();
-        $users = $allUsers->whereNotIn('id', $assignedUserIds);
+        // // Barcha "Worker" rolidagi foydalanuvchilar
+        // $allUsers = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();
+        // // Create uchun: allUsers ichidan faqat hali bir smenaga biriktirilmaganlar
+        // $assignedUserIds = DB::table('shift_user')->pluck('user_id')->toArray();
+        // $users = $allUsers->whereNotIn('id', $assignedUserIds);
+
+        $users = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();
 
         return view('backend.shift.create', compact('organizations', 'sections', 'users', 'shift'));
     }
@@ -165,7 +166,7 @@ class ShiftController extends Controller
         ]));
 
         // ❗ Pivot jadvalga userlarni ulash
-        $shift->user()->sync($request->user_id);
+        $shift->users()->sync($request->user_id);
 
         return redirect()->route('shift.index')->with('success', 'Смена яратилди!');
     }
@@ -176,16 +177,13 @@ class ShiftController extends Controller
         $organizations = Organization::pluck('title', 'id');
         $sections = Section::all();
 
-        // Barcha "Ходим" rolidagi foydalanuvchilar
-        $allUsers = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();
+        // // Barcha "Ходим" rolidagi foydalanuvchilar
+        // $allUsers = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();
+        // // Edit uchun: boshqa smenalarga biriktirilganlarni filterlash, hozirgi shift xodimlari bilan birga
+        // $assignedUserIds = DB::table('shift_user')->where('shift_id', '!=', $shift->id)->pluck('user_id')->toArray();
+        // $users = $allUsers->whereNotIn('id', $assignedUserIds)->merge($shift->user)->unique('id');
 
-        // Edit uchun: boshqa smenalarga biriktirilganlarni filterlash, hozirgi shift xodimlari bilan birga
-        $assignedUserIds = DB::table('shift_user')
-            ->where('shift_id', '!=', $shift->id)
-            ->pluck('user_id')
-            ->toArray();
-
-        $users = $allUsers->whereNotIn('id', $assignedUserIds)->merge($shift->user)->unique('id');
+        $users = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();
 
         return view('backend.shift.update', compact('shift', 'organizations', 'sections', 'users'));
     }
@@ -219,7 +217,7 @@ class ShiftController extends Controller
         ]));
 
         // ❗ Pivot yangilash
-        $shift->user()->sync($request->user_id);
+        $shift->users()->sync($request->user_id);
 
         return redirect()->route('shift.index')->with('success', 'Смена янгиланди!');
     }

@@ -65,8 +65,8 @@ class UserSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        
-         DB::table('user')->insert([
+
+        DB::table('user')->insert([
             'first_name' => 'Imronbek',
             'last_name' => 'Imronbek',
             'username' => 'Imronbek',
@@ -95,6 +95,24 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'photo' => null,
             'phone' => '+998000000002',
+            'role_id' => $roleMap['Moderator'],
+            'status' => StatusService::STATUS_ACTIVE,
+            'remember_token' => Str::random(10),
+            'token' => Str::random(32),
+            'auth_key' => Str::random(32),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('user')->insert([
+            'first_name' => 'Dimuhammad',
+            'last_name' => 'Dimuhammad',
+            'username' => 'Dimuhammad',
+            'password_hash' => Hash::make('castle4525'),
+            'email' => 'dimuhammad@gmail.com',
+            'email_verified_at' => now(),
+            'photo' => null,
+            'phone' => '+998901447743',
             'role_id' => $roleMap['Moderator'],
             'status' => StatusService::STATUS_ACTIVE,
             'remember_token' => Str::random(10),

@@ -29,7 +29,7 @@
                 <tr>
                     <th>Ҳодимлар</th>
                     <td>
-                        @foreach($shift->user as $user)
+                        @foreach($shift->users as $user)
                             <span class="badge bg-info">{{ $user->username }}</span>
                         @endforeach
                     </td>

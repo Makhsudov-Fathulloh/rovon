@@ -194,6 +194,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::resource('stage-material', StageMaterialController::class)->middleware('role:Admin,Manager,Developer');
 
     Route::prefix('user')->group(function () {
+        Route::post('storeAjax', [UserController::class, 'storeAjax'])->name('user.storeAjax')->middleware('role:Admin,Manager,Moderator,Developer');
         Route::get('staff', [UserController::class, 'staff'])->name('user.staff')->middleware('role:Admin,Manager,Moderator,Developer');
     });
     Route::resource('user', UserController::class)->middleware('role:Admin,Manager,Moderator,Developer');
