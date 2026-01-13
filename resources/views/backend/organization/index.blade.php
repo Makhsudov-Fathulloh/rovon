@@ -33,7 +33,11 @@
                                     <td class="col-id">{{ $organization->id }}</td>
                                     <td class="col-title">{{ $organization->title }}</td>
                                     <td>{{ $organization->description }}</td>
-                                    <td class="col-title">{{ optional($organization->user)->username }}</td>
+                                    <td class="col-title">
+                                        @foreach($organization->users as $user)
+                                            <span class="badge bg-info">{{ $user->username }}</span>
+                                        @endforeach
+                                    </td>
                                     <td class="col-date">{{ $organization->created_at?->format('Y-m-d H:i') }}</td>
                                     <td class="col-date">{{ $organization->updated_at?->format('Y-m-d H:i') }}</td>
                                     <td>
@@ -69,7 +73,11 @@
                                     <p class="card-text">
                                         <strong>Тавсифи: </strong>{{ $organization->description }} </p>
                                     <p class="card-text">
-                                        <strong>Жавобгар ходим: </strong>{{ optional($organization->user)->username }}
+                                        <strong>Жавобгар ходимлар:</strong>
+                                        @foreach($organization->users as $user)
+                                            <span class="badge bg-info">{{ $user->username }}</span>
+                                        @endforeach
+                                    </p>
                                     <p class="card-text">
                                         <strong>Яратилди: </strong> {{ $organization->created_at?->format('Y-m-d H:i') }}
                                     </p>

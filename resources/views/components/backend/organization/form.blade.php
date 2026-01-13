@@ -1,3 +1,16 @@
+<style>
+     /* Dropdown optionlari bir xil rangda, hover uchun quyuqroq */
+    .moderator-select2 .select2-results__option {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    .moderator-select2 .select2-results__option--highlighted {
+        background-color: #0b5ed7 !important;
+        color: #fff !important;
+    }
+</style>
+
 <form action="{{ $action }}" method="POST" enctype="multipart/form-data">
     @csrf
     @if ($method === 'PUT')
@@ -40,7 +53,7 @@
             <div class="col-md-4">
                 <div class="card shadow">
                     <div class="card-body">
-                        <div class="col-md-11 mb-3">
+                        {{-- <div class="col-md-11 mb-3">
                             <label for="user_id">Жавобгар ходим</label>
                             <select name="user_id" id="user_id" class="form-control" required>
                                 <option value="">Жавобгар ходимни танланг</option>
@@ -54,7 +67,23 @@
                             @error('user_id')
                             <div class="text-danger small">{{ $message }}</div>
                             @enderror
+                        </div> --}}
+
+                        <div class="col-md-11 mb-3">
+                            <label for="users">Жавобгар ходимлар</label>
+                            <select name="users[]" id="users" class="form-control moderator-select2" multiple required>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}"
+                                        {{ in_array($user->id, old('users', $organization->users->pluck('id')->toArray() ?? [])) ? 'selected' : '' }}>
+                                        {{ $user->username }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('users')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         @if (Route::currentRouteName() == 'organization.create')
                             <button type="submit" class="btn btn-success">{{ 'Сақлаш' }}</button>
                         @elseif (Route::currentRouteName() == 'organization.edit')
@@ -66,4 +95,38 @@
         </div>
     </div>
 </form>
+
+<script>
+    $('.moderator-select2').select2({
+        placeholder: "Барчаси",
+        allowClear: true,
+        minimumInputLength: 2,
+        language: {
+            inputTooShort: function () {
+                return "Камида 2 та белги киритинг";
+            },
+            noResults: function () {
+                return "Натижа топилмади";
+            }
+        },
+        templateResult: function (user) {
+            return user.text;
+        },
+        templateSelection: function (user) {
+            return user.text;
+        },
+        matcher: function (params, data) {
+            if (!data.id) return data;
+
+            var selected = $('#user_id').val() || [];
+            if (selected.includes(data.id)) return null; // tanlangan optionni dropdowndan yashirish
+
+            if ($.trim(params.term) === '') return data;
+
+            if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) return data;
+
+            return null;
+        }
+    });
+</script>
 

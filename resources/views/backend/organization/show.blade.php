@@ -28,9 +28,13 @@
                     <th>Тавсифи</th>
                     <td>{!! $organization->description !!}</td>
                 </tr>
-                <tr>
-                    <th>Ҳодим</th>
-                    <td>{{ $organization->user->username }}</td>
+                 <tr>
+                    <th>Ҳодимлар</th>
+                    <td>
+                        @foreach($organization->users as $user)
+                            <span class="badge bg-info">{{ $user->username }}</span>
+                        @endforeach
+                    </td>
                 </tr>
                 <tr>
                     <th>Яратилди</th>

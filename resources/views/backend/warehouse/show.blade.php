@@ -23,7 +23,11 @@
                 </tr>
                 <tr>
                     <th>Филиал</th>
-                    <td>{{ optional($warehouse->organization)->title }}</td>
+                    <td>
+                        @foreach($warehouse->organization as $organization)
+                            <span class="badge bg-info">{{ $organization->title }}</span>
+                        @endforeach
+                    </td>
                 </tr>
                 <tr>
                     <th>Номи</th>

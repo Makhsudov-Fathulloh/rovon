@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::create('organization', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('user')->onDelete('set null');
-            $table->string('title'); // 1-bino", 2-bino
+            $table->string('title');
             $table->text('description')->nullable();
             $table->timestamps();
         });
@@ -19,10 +18,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('organization', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-        });
-
         Schema::dropIfExists('organization');
     }
 };

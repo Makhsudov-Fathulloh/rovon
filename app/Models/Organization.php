@@ -12,7 +12,6 @@ class Organization extends Model
     protected $table = 'organization';
 
     protected $fillable = [
-        'user_id',
         'title',
         'description',
     ];
@@ -22,9 +21,9 @@ class Organization extends Model
         static::addGlobalScope(new \App\Scopes\ModeratorScope());
     }
 
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'organization_user')->withTimestamps();
     }
 
     public function section()
@@ -34,6 +33,6 @@ class Organization extends Model
 
     public function warehouse()
     {
-        return $this->hasOne(Warehouse::class);
+        return $this->belongsToMany(Warehouse::class, 'organization_warehouse', 'organization_id', 'warehouse_id')->withTimestamps();
     }
 }

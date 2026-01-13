@@ -32,7 +32,11 @@
                             @forelse($warehouses as $warehouse)
                                 <tr class="text-center" id="row-{{ $warehouse->id }}">
                                     <td class="col-id">{{ $warehouse->id }}</td>
-                                    <td class="col-title">{{ optional($warehouse->organization)->title }}</td>
+                                    <td class="col-title">
+                                        @foreach($warehouse->organization as $organization)
+                                            <span class="badge bg-info">{{ $organization->title }}</span>
+                                        @endforeach
+                                    </td>
                                     <td class="col-title">{{ $warehouse->title }}</td>
                                     <td>{{ $warehouse->description }}</td>
                                     <td class="col-title">{{ \App\Services\StatusService::getList()[$warehouse->status] ?? '-' }}</td>
@@ -70,7 +74,11 @@
                                     <p class="card-text">
                                         <strong>ID: </strong>{{ $warehouse->id }} </p>
                                     <p class="card-text">
-                                        <strong>Филиал: </strong>{{ optional($warehouse->organization)->title }}
+                                        <strong>Филиал: </strong>
+                                        @foreach($warehouse->organization as $organization)
+                                            <span class="badge bg-info">{{ $organization->title }}</span>
+                                        @endforeach
+                                    </p>
                                     <p class="card-text">
                                         <strong>Номи: </strong>{{ $warehouse->title }} </p>
                                     <p class="card-text">

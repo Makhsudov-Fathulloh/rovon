@@ -236,13 +236,20 @@ class WarehouseController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'organization_id' => 'required|exists:organization,id',
+            'organization_id'   => 'required|array',
+            'organization_id.*' => 'exists:organization,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
 
-        Warehouse::create($validated);
+        $warehouse = Warehouse::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'],
+        ]);
+
+        $warehouse->organization()->sync($validated['organization_id']);
 
         return redirect()->route('warehouse.index')->with('success', 'Омбор яратилди!');
     }
@@ -250,19 +257,30 @@ class WarehouseController extends Controller
     public function edit(Warehouse $warehouse)
     {
         $organizations = Organization::pluck('title', 'id');
+        $warehouse->load('organization');
+
         return view('backend.warehouse.update', compact('organizations', 'warehouse'));
     }
+
 
     public function update(Request $request, Warehouse $warehouse)
     {
         $validated = $request->validate([
-            'organization_id' => 'required|exists:organization,id',
+            'organization_id'   => 'required|array',
+            'organization_id.*' => 'exists:organization,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
 
-        $warehouse->update($validated);
+        $warehouse->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'],
+        ]);
+
+        // ✅ Pivotni yangilash
+        $warehouse->organization()->sync($validated['organization_id']);
 
         return redirect()->route('warehouse.index')->with('success', 'Омбор янгиланди!');
     }

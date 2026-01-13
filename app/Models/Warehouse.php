@@ -12,7 +12,6 @@ class Warehouse extends Model
     protected $table = 'warehouse';
 
     protected $fillable = [
-        'organization_id',
         'title',
         'description',
         'status',
@@ -20,7 +19,8 @@ class Warehouse extends Model
 
     public function organization()
     {
-        return $this->belongsTo(Organization::class);
+        return $this->belongsToMany(Organization::class, 'organization_warehouse', 'warehouse_id', 'organization_id')
+            ->withTimestamps();
     }
 
     public function rawMaterial()

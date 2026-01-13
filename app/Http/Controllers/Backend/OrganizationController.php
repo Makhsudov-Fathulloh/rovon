@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Models\Organization;
-use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
+use App\Models\Organization;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class OrganizationController extends Controller
 {
     public function index()
     {
-        $organizations = Organization::with('user:id,username')->orderBy('id')->paginate(20);
+        $organizations = Organization::with('users:id,username')->orderBy('id')->paginate(20);
         return view('backend.organization.index', compact('organizations'));
     }
 
@@ -30,8 +31,8 @@ class OrganizationController extends Controller
 
     public function create()
     {
+        $users = User::whereHas('role', fn($q) => $q->where('title', 'Moderator'))->get();
         $organization = new Organization();
-        $users = User::where('role_id', \App\Models\Role::where('title', 'Moderator')->value('id'))->get();
 
         return view('backend.organization.create', compact('users', 'organization'));
     }
@@ -39,16 +40,18 @@ class OrganizationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:user,id',
+            'users' => 'required|array',
+            'users.*' => 'exists:user,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
         ], [
-            'user_id.required' => 'Филиалга жавобгарни ходимни танланг.',
+            'users.required' => 'Филиалга жавобгарни ходимни танланг.',
             'title.required' => 'Филиал номи мажбурий.',
             'title.string'   => 'Филиал номи матн бўлиши керак.',
         ]);
 
-        Organization::create($request->all());
+        $organization = Organization::create($request->only('title', 'description'));
+        $organization->users()->sync($request->users);
 
         return redirect()->route('organization.index')->with('success', 'Филиал яратилди!');
     }
@@ -56,7 +59,8 @@ class OrganizationController extends Controller
 
     public function edit(Organization $organization)
     {
-        $users = User::where('role_id', \App\Models\Role::where('title', 'Moderator')->value('id'))->get();
+        $users = User::whereHas('role', fn($q) => $q->where('title', 'Moderator'))->get();
+        $organization->load('users');
 
         return view('backend.organization.update', compact('users', 'organization'));
     }
@@ -64,16 +68,18 @@ class OrganizationController extends Controller
     public function update(Request $request, Organization $organization)
     {
         $request->validate([
-            'user_id' => 'required|exists:user,id',
+            'users' => 'required|array',
+            'users.*' => 'exists:user,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
         ], [
-            'user_id.required' => 'Филиалга жавобгарни ходимни танланг.',
+            'users.required' => 'Филиалга жавобгарни ходимни танланг.',
             'title.required' => 'Филиал номи мажбурий.',
             'title.string'   => 'Филиал номи матн бўлиши керак.',
         ]);
 
-        $organization->update($request->all());
+        $organization->update($request->only('title', 'description'));
+        $organization->users()->sync($request->users);
 
         return redirect()->route('organization.index')->with('success', 'Филиал янгиланди!');
     }

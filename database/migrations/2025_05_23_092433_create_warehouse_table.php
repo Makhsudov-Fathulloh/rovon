@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('warehouse', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained('organization')->cascadeOnDelete();
             $table->string('title');
             $table->string('description')->nullable();
             $table->tinyInteger('status');
@@ -20,10 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('warehouse', function (Blueprint $table) {
-            $table->dropForeign(['organization_id']);
-        });
-
         Schema::dropIfExists('warehouse');
     }
 };

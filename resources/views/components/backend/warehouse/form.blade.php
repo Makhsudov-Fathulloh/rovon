@@ -1,3 +1,16 @@
+<style>
+     /* Dropdown optionlari bir xil rangda, hover uchun quyuqroq */
+    .warehouse-select2 .select2-results__option {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    .warehouse-select2 .select2-results__option--highlighted {
+        background-color: #0b5ed7 !important;
+        color: #fff !important;
+    }
+</style>
+
 <form action="{{ $action }}" method="POST" enctype="multipart/form-data">
     @csrf
     @if ($method === 'PUT')
@@ -41,12 +54,22 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <div class="col-md-11 mb-3">
-                            <label for="organization_id">Филиал</label>
-                            <select name="organization_id" id="organization_id" class="form-control" required>
+                            <label for="organization">Филиал</label>
+
+                            {{-- <select name="organization_id" id="organization_id" class="form-control" required>
                                 <option value="">Филиални танланг</option>
                                 @foreach($organizations as $id => $title)
                                     <option value="{{ $id }}"
                                         {{ old('organization_id', $warehouse->organization_id ?? '') == $id ? 'selected' : '' }}>
+                                        {{ $title }}
+                                    </option>
+                                @endforeach
+                            </select> --}}
+
+                             <select name="organization_id[]" id="organization_id" class="form-control warehouse-select2" multiple required>
+                                @foreach($organizations as $id => $title)
+                                    <option value="{{ $id }}"
+                                        {{ in_array($id, old('organization', $warehouse->organization->pluck('id')->toArray())) ? 'selected' : '' }}>
                                         {{ $title }}
                                     </option>
                                 @endforeach
@@ -78,3 +101,39 @@
     </div>
 </form>
 
+<script>
+    $('.warehouse-select2').select2({
+        placeholder: "Барчаси",
+        allowClear: true,
+        minimumInputLength: 2,
+        language: {
+            inputTooShort: function () {
+                return "Камида 2 та белги киритинг";
+            },
+            noResults: function () {
+                return "Натижа топилмади";
+            }
+        },
+        templateResult: function (data) {
+            return data.text;
+        },
+        templateSelection: function (data) {
+            return data.text;
+        },
+        matcher: function (params, data) {
+            if (!data.id) return data;
+
+            var selected = $('#organization_id').val() || [];
+            if (selected.includes(data.id)) return null;
+
+            if ($.trim(params.term) === '') return data;
+
+            if (data.text.toLowerCase().includes(params.term.toLowerCase())) {
+                return data;
+            }
+
+            return null;
+        }
+
+    });
+</script>
