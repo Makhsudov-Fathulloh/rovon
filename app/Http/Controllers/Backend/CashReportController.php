@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CashReport;
 use App\Models\ExpenseAndIncome;
 use App\Models\Order;
-use App\Models\User;
+use App\Models\ProductReturn;
 use App\Models\UserDebt;
 use App\Services\StatusService;
 use Illuminate\Http\Request;
@@ -86,6 +86,7 @@ class CashReportController extends Controller
                 'total_order_amount' => array_fill_keys($currencies, 0),
                 'total_amount_paid' => array_fill_keys($currencies, 0),
                 'total_remaining_debt' => array_fill_keys($currencies, 0),
+                'total_return_amount' => array_fill_keys($currencies, 0),
                 'total_expense' => array_fill_keys($currencies, 0),
                 'total_income' => array_fill_keys($currencies, 0),
                 'total_debt_paid' => array_fill_keys($currencies, 0),
@@ -138,6 +139,7 @@ class CashReportController extends Controller
     //                'total_order_amount' => $totalOrderAmount,
     //                'total_amount_paid' => $totalAmountPaid,
     //                'total_remaining_debt' => $totalRemainingDebt,
+    //                'total_return_amount' => $totalReturnAmount
     //                'total_expense' => $totalExpense,
     //                'total_income' => $totalIncome,
     //                'total_debt_paid' => $totalDebtPaid,
@@ -167,6 +169,7 @@ class CashReportController extends Controller
             'total_order_amount' => [],
             'total_amount_paid' => [],
             'total_remaining_debt' => [],
+            'total_return_amount' => [],
             'total_expense' => [],
             'total_income' => [],
             'total_debt_paid' => [],
@@ -176,7 +179,7 @@ class CashReportController extends Controller
             $totals['total_order_amount'][$currency] = Order::where('currency', $currency)->whereDate('created_at', $today)->sum('total_price');
             $totals['total_amount_paid'][$currency] = Order::where('currency', $currency)->whereDate('created_at', $today)->sum('total_amount_paid');
             $totals['total_remaining_debt'][$currency] = UserDebt::where('currency', $currency)->whereDate('created_at', $today)->sum('amount');
-            // $totals['total_return_amount'][$currency] = ProductReturn::where('currency', $currency)->whereDate('created_at', $today)->sum('total_amount');
+            $totals['total_return_amount'][$currency] = ProductReturn::where('currency', $currency)->whereDate('created_at', $today)->sum('total_amount');
             $totals['total_expense'][$currency] = ExpenseAndIncome::where('currency', $currency)->where('type', ExpenseAndIncome::TYPE_EXPENSE)->whereDate('created_at', $today)->sum('amount');
             $totals['total_income'][$currency] = ExpenseAndIncome::where('currency', $currency)->where('type', ExpenseAndIncome::TYPE_INCOME)->whereDate('created_at', $today)->sum('amount');
             $totals['total_debt_paid'][$currency] = ExpenseAndIncome::where('currency', $currency)->where('type', ExpenseAndIncome::TYPE_DEBT)->whereDate('created_at', $today)->sum('amount');
@@ -187,7 +190,7 @@ class CashReportController extends Controller
             'total_order_amount' => $totals['total_order_amount'],
             'total_amount_paid' => $totals['total_amount_paid'],
             'total_remaining_debt' => $totals['total_remaining_debt'],
-            // 'total_return_amount' => $totals['total_return_amount'],
+            'total_return_amount' => $totals['total_return_amount'],
             'total_expense' => $totals['total_expense'],
             'total_income' => $totals['total_income'],
             'total_debt_paid' => $totals['total_debt_paid'],
@@ -221,6 +224,7 @@ class CashReportController extends Controller
             'total_order_amount'   => 'Жами буюртма',
             'total_amount_paid'    => 'Жами тўланган',
             'total_remaining_debt' => 'Жами қолган қарз',
+            'total_return_amount' => 'Жами қайтиш',
             'total_expense'        => 'Жами харажат',
             'total_income'         => 'Жами кирим',
             'total_debt_paid'      => 'Жами қарз сўндириш',

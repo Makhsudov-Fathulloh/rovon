@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\Search\CategorySearch;
 use App\Models\User;
-use App\Services\DateFilterService;
+use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Services\StatusService;
+use App\Services\DateFilterService;
+use App\Http\Controllers\Controller;
+use App\Models\Search\CategorySearch;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -64,11 +65,10 @@ class CategoryController extends Controller
     public function create()
     {
         $category = new Category();
-        $categoryDropdown = Category::getDropdownList(null, Category::TYPE_PRODUCT);;
+        $categoryDropdown = Category::getDropdownList(null, StatusService::TYPE_PRODUCT);;
 
         return view('backend.category.create', compact('category', 'categoryDropdown'));
     }
-
 
     public function store(Request $request, Category $category)
     {
@@ -79,7 +79,7 @@ class CategoryController extends Controller
                 'subtitle' => 'nullable|string|max:255',
                 'description' => 'nullable|string',
                 'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
-                'type' => 'nullable|string|max:50',
+                'type' => 'required|in:1,2,3,4',
             ],
             [
                 'title.required' => 'Категория номи мажбурий.',
@@ -121,10 +121,9 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
-        $categoryDropdown = Category::getDropdownList(null, Category::TYPE_PRODUCT);
+        $categoryDropdown = Category::getDropdownList(null, StatusService::TYPE_PRODUCT);
         return view('backend.category.update', compact('category', 'categoryDropdown'));
     }
-
 
     public function update(Request $request, Category $category)
     {
@@ -135,7 +134,7 @@ class CategoryController extends Controller
                 'subtitle' => 'nullable|string|max:255',
                 'description' => 'nullable|string',
                 'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
-                'type' => 'nullable|string|max:50',
+                'type' => 'required|in:1,2,3,4',
             ],
             [
                 'title.required' => 'Категория номи мажбурий.',
@@ -167,7 +166,7 @@ class CategoryController extends Controller
             $category->image = $file->id;
         }
 
-        //        $category->user_id = auth()->id();
+        // $category->user_id = auth()->id();
         $category->type = $request->type;
 
         $category->save();

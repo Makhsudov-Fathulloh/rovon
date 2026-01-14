@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Қатегория янгилаш: ' . ucfirst($category->title) }}">
+<x-backend.layouts.main title="{!! 'Қатегория янгилаш: ' . ucfirst($category->title) !!}">
     <div class="category-update">
         <x-backend.category.form
             :category="$category"

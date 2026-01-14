@@ -17,6 +17,7 @@ class CashReport extends Model
         'total_order_amount', // jami_buyurtma_summa
         'total_amount_paid', // jami_to'langan_summa
         'total_remaining_debt', // jami_qolgan_qarz
+        'total_return_amount', // jami_raytish_miqdori
         'total_expense', // jami_xarajat
         'total_income', // jami_kirim
         'total_debt_paid', // jami_qarz_so'ndirish
@@ -30,6 +31,7 @@ class CashReport extends Model
         'total_order_amount' => 'array',
         'total_amount_paid' => 'array',
         'total_remaining_debt' => 'array',
+        'total_return_amount' => 'array',
         'total_expense' => 'array',
         'total_income' => 'array',
         'total_debt_paid' => 'array',

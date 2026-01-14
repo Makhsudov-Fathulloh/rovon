@@ -1,13 +1,46 @@
 <x-backend.layouts.main title="{{ 'Қатегориялар' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.count {
+            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
+            border-left: 5px solid #00d68f;
+        }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header">
                 <div class="row justify-content-start">
                     <div class="col-sm-12 col-md-auto text-start">
-                        <a href="{{ route('category.create') }}" class="btn btn-primary w-100 w-md-auto">
-                            {{ 'Яратиш' }}
-                        </a>
+                        <x-backend.action route="category" :back="true" :create="true"/>
                     </div>
                 </div>
             </div>
@@ -49,7 +82,7 @@
                                 <th>
                                     <select name="filters[type]" class="form-control form-control-sm w-100">
                                         <option value="">Барчаси</option>
-                                        @foreach(\App\Models\Category::getTypeList() as $key => $label)
+                                        @foreach(\App\Services\StatusService::getType() as $key => $label)
                                             <option
                                                 value="{{ $key }}" {{ (string) request('filters.type') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
                                         @endforeach
@@ -108,7 +141,7 @@
 
                                         @endif
                                     </td>
-                                    <td style="width: 100px">{{ \App\Models\Category::getTypeList()[$category->type] ?? '-' }}</td>
+                                    <td style="width: 100px">{{ \App\Services\StatusService::getType()[$category->type] ?? '-' }}</td>
                                     <td>{{ optional($category->user)->username }}</td>
                                     <td class="col-date">{{ $category->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>
@@ -167,45 +200,10 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center">
                     {{ $categories->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-                    .card-stats.count {
-                        background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                        border-left: 5px solid #00d68f;
-                    }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="row mt-4">
                     <div class="col-md-12 mb-3">
                         <div class="card-stats count">

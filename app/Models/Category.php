@@ -11,10 +11,6 @@ class Category extends Model
 {
     use HasFactory;
 
-    const TYPE_SPARE_PART = 1;
-    const TYPE_RAW_MATERIAL = 2;
-    const TYPE_PRODUCT = 3;
-
     protected $table = 'category';
 
     protected $fillable = [
@@ -98,14 +94,5 @@ class Category extends Model
         return static::where('parent_id', $cat_id)
             ->get(['id', 'title as title'])
             ->toArray();
-    }
-
-    public static function getTypeList()
-    {
-        return [
-            self::TYPE_SPARE_PART => 'Эхтиёт кисм',
-            self::TYPE_RAW_MATERIAL => 'Хомашё',
-            self::TYPE_PRODUCT => 'Маҳсулот',
-        ];
     }
 }

@@ -11,7 +11,7 @@
                     <div class="card-body">
                         <div class="tab-content" style="margin: 0">
                             <div class="tab-pane fade show active">
-                                <div class="pt-4">
+                                <div class="pt-2">
 
                                     <div class="mb-3">
                                         <label for="title" class="form-label">Номи</label>
@@ -22,11 +22,10 @@
                                         @enderror
                                     </div>
 
-                                    {{--                                    <div class="mb-3">--}}
-                                    {{--                                        <label for="subtitle" class="form-label">Субтитр</label>--}}
-                                    {{--                                        <input type="text" id="subtitle" name="subtitle" class="form-control"--}}
-                                    {{--                                               value="{{ old('subtitle', $category->subtitle ?? '') }}">--}}
-                                    {{--                                    </div>--}}
+                                    {{-- <div class="mb-3">
+                                       <label for="subtitle" class="form-label">Субтитр</label>
+                                       <input type="text" id="subtitle" name="subtitle" class="form-control" value="{{ old('subtitle', $category->subtitle ?? '') }}">
+                                    </div> --}}
 
                                     <div class="mb-3">
                                         <label for="description" class="form-label">Тавсифи</label>
@@ -34,8 +33,8 @@
                                                   name="description"
                                                   class="form-control ckeditor"
                                                   rows="10">
-                                                {{ old('description', $category->description ?? '') }}
-                                            </textarea>
+                                                  {{ old('description', $category->description ?? '') }}
+                                        </textarea>
                                     </div>
 
                                 </div>
@@ -72,7 +71,7 @@
                         <div class="mb-3">
                             <label for="type" class="form-label">Тури</label>
                             <select name="type" id="type" class="form-control">
-                                @foreach (\App\Models\Category::getTypeList() as $key => $label)
+                                @foreach (\App\Services\StatusService::getType() as $key => $label)
                                     <option
                                         value="{{ $key }}" {{ old('type', $category->type ?? '') == $key ? 'selected' : '' }}>
                                         {{ $label }}
@@ -93,13 +92,13 @@
                             </select>
                         </div>
 
-                        @if (Route::currentRouteName() == 'category.create')
-                            {{--                            <div class="mb-3">--}}
-                            {{--                                <label for="slug">Слаг</label>--}}
-                            {{--                                <input type="text" name="slug" class="form-control" placeholder="Автоматик яратилади"--}}
-                            {{--                                       value="{{ old('slug', $category->slug) }}">--}}
-                            {{--                            </div>--}}
-                        @endif
+                        {{-- @if (Route::currentRouteName() == 'category.create')
+                            <div class="mb-3">
+                                <label for="slug">Слаг</label>
+                                <input type="text" name="slug" class="form-control" placeholder="Автоматик яратилади"
+                                        value="{{ old('slug', $category->slug) }}">
+                            </div>
+                        @endif --}}
 
                         @if (Route::currentRouteName() == 'category.create')
                             <button type="submit" class="btn btn-success">{{ 'Сақлаш' }}</button>
