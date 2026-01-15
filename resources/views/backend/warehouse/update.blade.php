@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Омборни янгилаш: ' . ucfirst($warehouse->title) }}">
+<x-backend.layouts.main title="{!! 'Омборни янгилаш: ' . ucfirst($warehouse->title) !!}">
     <div class="warehouse-update">
         <x-backend.warehouse.form
             :organizations="$organizations"

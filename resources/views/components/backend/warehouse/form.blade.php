@@ -79,6 +79,17 @@
                             @enderror
                         </div>
                         <div class="col-md-11 mb-3">
+                            <label for="type">Тури</label>
+                            <select id="type" name="type" class="form-control" required>
+                                @foreach(\App\Services\StatusService::getType() as $key => $label)
+                                    <option value="{{ $key }}"
+                                        {{ old('type', $warehouse->type ?? '') == $key ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                         <div class="col-md-11 mb-3">
                             <label for="status">Статус</label>
                             <select id="status" name="status" class="form-control" required>
                                 @foreach(\App\Services\StatusService::getList() as $key => $label)

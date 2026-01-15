@@ -6,9 +6,7 @@
                 @can('coreAccess')
                     <div class="row justify-content-start">
                         <div class="col-sm-12 col-md-auto text-start">
-                            <a href="{{ route('organization.create') }}" class="btn btn-primary w-100 w-md-auto">
-                                {{ 'Яратиш' }}
-                            </a>
+                            <x-backend.action route="organization" :back="true" :create="true"/>
                         </div>
                     </div>
                 @endcan
@@ -95,7 +93,7 @@
                     </div>
                     {{-- Mobile version end --}}
                 </form>
-                {{-- Pagination --}}
+
                 <div class="d-flex mt-3 justify-content-center">
                     {{ $organizations->links('pagination::bootstrap-4') }}
                 </div>

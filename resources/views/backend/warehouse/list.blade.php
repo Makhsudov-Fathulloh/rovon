@@ -52,7 +52,7 @@
                                 <th class="fw-bold">Код</th>
                                 <th class="fw-bold">Номи</th>
                                 <th class="fw-bold">Нархи</th>
-                                <th class="fw-bold">Сони</th>
+                                <th class="fw-bold">Микдори</th>
                                 <th class="fw-bold">Умумий (сўм)</th>
                                 <th class="fw-bold">Статус</th>
                                 <th class="fw-bold">Яратилган сана</th>
@@ -64,12 +64,8 @@
                                     <td>{{ $item->id }}</td>
                                     <td>{{ $item->code }}</td>
                                     <td>{{ $item->title }}</td>
-                                    <td class="fw-bold text-primary text-nowrap">
-                                        {{ \App\Helpers\PriceHelper::format($item->total_price, $item->currency) }}
-                                    </td>
-                                    <td class="count fw-bold text-success">
-                                        {{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}
-                                    </td>
+                                    <td class="fw-bold text-primary text-nowrap">{{ \App\Helpers\PriceHelper::format($item->total_price, $item->currency) }}</td>
+                                    <td class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</td>
                                     <td class="total_price fw-bold text-info">{{ number_format($item->total_price, 0, '', ' ') }}</td>
                                     <td>{{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</td>
                                     <td>{{ $item->created_at?->format('d-m-Y H:i') }}</td>
@@ -80,7 +76,7 @@
                                                 :id="$item->id"
                                                 :variation="$item"
                                                 :addCount="true"
-                                                addCountTitle="Махсулот сонини ошириш"
+                                                addCountTitle="Махсулот микдорини ошириш"
                                                 :view="true"
                                                 data-model="product"
                                                 data-id="{{ $item->id }}"
@@ -109,20 +105,17 @@
                                     <p class="card-text"><strong>Код: </strong> {{ $item->code }}</p>
                                     <p class="card-text"><strong>Номи: </strong> {{ $item->title }}</p>
                                     <p class="card-text">
-                                        <strong>Сони:</strong>
-                                        <span
-                                            class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</span>
+                                        <strong>Микдори:</strong>
+                                        <span class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</span>
                                     </p>
-                                    <p class="card-text">
-                                        <strong>Статус: </strong> {{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}
-                                    </p>
+                                    <p class="card-text"><strong>Статус: </strong> {{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</p>
                                     <div class="btn-group w-100">
                                         <x-backend.action
                                             route="product-variation"
                                             :id="$item->id"
                                             :variation="$item"
                                             :addCount="true"
-                                            addCountTitle="Махсулот сонини ошириш"
+                                            addCountTitle="Махсулот микдорини ошириш"
                                             :view="true"
                                             data-model="product"
                                             data-id="{{ $item->id }}"
@@ -166,7 +159,7 @@
                                 <th class="fw-bold">Код</th>
                                 <th class="fw-bold">Номи</th>
                                 <th class="fw-bold">Нархи</th>
-                                <th class="fw-bold">Сони</th>
+                                <th class="fw-bold">Микдори</th>
                                 <th class="fw-bold">Умумий (сўм)</th>
                                 <th class="fw-bold">Статус</th>
                                 <th class="fw-bold">Яратилган сана</th>
@@ -178,12 +171,8 @@
                                     <td>{{ $item->id }}</td>
                                     <td>{{ $item->code }}</td>
                                     <td>{{ $item->title }}</td>
-                                    <td class="fw-bold text-primary">
-                                        {{ \App\Helpers\PriceHelper::format($item->price, $item->currency) }}
-                                    </td>
-                                    <td class="count fw-bold text-success">
-                                        {{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}
-                                    </td>
+                                    <td class="fw-bold text-primary">{{ \App\Helpers\PriceHelper::format($item->price, $item->currency) }}</td>
+                                    <td class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</td>
                                     <td class="total_price fw-bold text-info">{{ number_format($item->total_price, 0, '', ' ') }}</td>
                                     <td>{{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</td>
                                     <td>{{ $item->created_at?->format('d-m-Y H:i') }}</td>
@@ -193,7 +182,7 @@
                                             :id="$item->id"
                                             :variation="$item"
                                             :addCount="true"
-                                            addCountTitle="Хомашё сонини ошириш"
+                                            addCountTitle="Хомашё микдорини ошириш"
                                             :view="true"
                                             data-model="raw_material"
                                             data-id="{{ $item->id }}"
@@ -224,16 +213,14 @@
                                         <strong>Микдори:</strong>
                                         <span class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</span>
                                     </p>
-                                    <p class="card-text">
-                                        <strong>Статус: </strong> {{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}
-                                    </p>
+                                    <p class="card-text"><strong>Статус: </strong> {{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</p>
                                     <div class="btn-group w-100">
                                         <x-backend.action
                                             route="raw-material-variation"
                                             :id="$item->id"
                                             :variation="$item"
                                             :addCount="true"
-                                            addCountTitle="Хомашё сонини ошириш"
+                                            addCountTitle="Хомашё микдорини ошириш"
                                             :view="true"
                                             data-model="raw_material"
                                             data-id="{{ $item->id }}"
@@ -271,7 +258,7 @@
                 <form id="addProductCountForm">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title">Маҳсулот сонини ошириш</h5>
+                        <h5 class="modal-title">Маҳсулот микдорини ошириш</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -282,11 +269,11 @@
                             <input type="text" id="product_title" class="form-control" disabled>
                         </div>
                         <div class="mb-3">
-                            <label>Ҳозирги сони:</label>
+                            <label>Ҳозирги микдори:</label>
                             <input type="text" id="product_current_count" class="form-control" disabled>
                         </div>
                         <div class="mb-3">
-                            <label>Қўшиладиган маҳсулот сони:</label>
+                            <label>Қўшиладиган маҳсулот микдори:</label>
                             <input type="number" id="product_add_count" name="add_count" class="form-control" step="1"
                                    required>
                         </div>

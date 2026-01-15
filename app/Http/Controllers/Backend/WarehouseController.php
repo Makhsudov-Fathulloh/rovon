@@ -51,9 +51,12 @@ class WarehouseController extends Controller
 
             $warehouse = Warehouse::findOrFail($warehouse_id);
 
-            $productQuery = ProductVariation::whereHas('product', function ($q) use ($warehouse_id) {$q->where('warehouse_id', $warehouse_id);});
-            $rawQuery = RawMaterialVariation::whereHas('rawMaterial', function ($q) use ($warehouse_id) {$q->where('warehouse_id', $warehouse_id);});
-
+            $productQuery = ProductVariation::whereHas('product', function ($q) use ($warehouse_id) {
+                $q->where('warehouse_id', $warehouse_id);
+            });
+            $rawQuery = RawMaterialVariation::whereHas('rawMaterial', function ($q) use ($warehouse_id) {
+                $q->where('warehouse_id', $warehouse_id);
+            });
         } elseif ($this->roleTitle === 'Moderator') {
 
             $user = Auth::user();
@@ -74,7 +77,6 @@ class WarehouseController extends Controller
             })->whereHas('rawMaterial', function ($q) use ($warehouse_id) {
                 $q->where('warehouse_id', $warehouse_id);
             });
-
         } else {
             abort(403, 'Сизда бу саҳифага кириш ҳуқуқи йўқ.');
         }
@@ -87,13 +89,17 @@ class WarehouseController extends Controller
             // 🔹 Product filtr
             if (!empty($filters['code'])) $productQuery->where('code', 'ilike', "%{$filters['code']}%");
             if (!empty($filters['title'])) $productQuery->where('title', 'ilike', "%{$filters['title']}%");
-            if (isset($filters['status']) && $filters['status'] !== '') {$productQuery->where('status', $filters['status']);}
+            if (isset($filters['status']) && $filters['status'] !== '') {
+                $productQuery->where('status', $filters['status']);
+            }
             $dateService->applyDateToFilters($productQuery, $filters);
 
             // 🔹 Raw Material filtr
             if (!empty($filters['code'])) $rawQuery->where('code', 'ilike', "%{$filters['code']}%");
             if (!empty($filters['title'])) $rawQuery->where('title', 'ilike', "%{$filters['title']}%");
-            if (isset($filters['status']) && $filters['status'] !== '') {$rawQuery->where('status', $filters['status']);}
+            if (isset($filters['status']) && $filters['status'] !== '') {
+                $rawQuery->where('status', $filters['status']);
+            }
             $dateService->applyDateToFilters($rawQuery, $filters);
         }
 
@@ -117,77 +123,77 @@ class WarehouseController extends Controller
         ));
     }
 
-//    public function list(Request $request, $warehouse_id)
-//    {
-//        $warehouse = Warehouse::findOrFail($warehouse_id);
-//
-//        // Filter borligini tekshirish
-//        $filters = $request->input('filters', []);
-//        $isFiltered = !empty($filters);
-//        $dateService = new DateFilterService();
-//
-//        // ✅ 1. Product Variations
-//        $productQuery = ProductVariation::where('warehouse_id', $warehouse_id);
-//
-//        if ($isFiltered) {
-//            if (!empty($filters['code'])) {
-//                $productQuery->where('code', 'ilike', "%{$filters['code']}%");
-//            }
-//            if (!empty($filters['title'])) {
-//                $productQuery->where('title', 'ilike', "%{$filters['title']}%");
-//            }
-//            if (isset($filters['status']) && $filters['status'] !== '') {
-//                $productQuery->where('status', $filters['status']);
-//            }
-//
-//            // 📅 Aniq sana (dd-mm-yyyy) filtrlash
-//            $dateService->applyExactDateFilters($productQuery, $filters, ['created_at']);
-//
-//            // 🗓️ Oy-yil (mm-yyyy) filtrlash
-//            $dateService->applyDateFilters($productQuery, $filters, ['created_at']);
-//        }
-//
-//        $productAllCount = (clone $productQuery)->count();
-//        $productTotalPrice = (clone $productQuery)->sum('total_price');
-//        $productVariations = $productQuery->paginate(10, ['*'], 'product_page')->withQueryString();
-//
-//
-//        // ✅ 2. Raw Material Variations
-//        $rawQuery = RawMaterialVariation::where('warehouse_id', $warehouse_id);
-//
-//        if ($isFiltered) {
-//            if (!empty($filters['code'])) {
-//                $rawQuery->where('code', 'ilike', "%{$filters['code']}%");
-//            }
-//            if (!empty($filters['title'])) {
-//                $rawQuery->where('title', 'ilike', "%{$filters['title']}%");
-//            }
-//            if (isset($filters['status']) && $filters['status'] !== '') {
-//                $rawQuery->where('status', $filters['status']);
-//            }
-//
-//            // 📅 Aniq sana (dd-mm-yyyy) filtrlash
-//            $dateService->applyExactDateFilters($rawQuery, $filters, ['created_at']);
-//
-//            // 🗓️ Oy-yil (mm-yyyy) filtrlash
-//            $dateService->applyDateFilters($rawQuery, $filters, ['created_at']);
-//        }
-//
-//        $rawAllCount = (clone $rawQuery)->count();
-//        $rawTotalPrice = (clone $rawQuery)->sum('total_price');
-//        $rawMaterialVariations = $rawQuery->paginate(10, ['*'], 'raw_page')->withQueryString();
-//
-//        return view('backend.warehouse.list', compact(
-//            'warehouse',
-//            'productVariations',
-//            'rawMaterialVariations',
-//            'productAllCount',
-//            'productTotalPrice',
-//            'rawAllCount',
-//            'rawTotalPrice',
-//            'isFiltered'
-//        ));
-//    }
+    //    public function list(Request $request, $warehouse_id)
+    //    {
+    //        $warehouse = Warehouse::findOrFail($warehouse_id);
+    //
+    //        // Filter borligini tekshirish
+    //        $filters = $request->input('filters', []);
+    //        $isFiltered = !empty($filters);
+    //        $dateService = new DateFilterService();
+    //
+    //        // ✅ 1. Product Variations
+    //        $productQuery = ProductVariation::where('warehouse_id', $warehouse_id);
+    //
+    //        if ($isFiltered) {
+    //            if (!empty($filters['code'])) {
+    //                $productQuery->where('code', 'ilike', "%{$filters['code']}%");
+    //            }
+    //            if (!empty($filters['title'])) {
+    //                $productQuery->where('title', 'ilike', "%{$filters['title']}%");
+    //            }
+    //            if (isset($filters['status']) && $filters['status'] !== '') {
+    //                $productQuery->where('status', $filters['status']);
+    //            }
+    //
+    //            // 📅 Aniq sana (dd-mm-yyyy) filtrlash
+    //            $dateService->applyExactDateFilters($productQuery, $filters, ['created_at']);
+    //
+    //            // 🗓️ Oy-yil (mm-yyyy) filtrlash
+    //            $dateService->applyDateFilters($productQuery, $filters, ['created_at']);
+    //        }
+    //
+    //        $productAllCount = (clone $productQuery)->count();
+    //        $productTotalPrice = (clone $productQuery)->sum('total_price');
+    //        $productVariations = $productQuery->paginate(10, ['*'], 'product_page')->withQueryString();
+    //
+    //
+    //        // ✅ 2. Raw Material Variations
+    //        $rawQuery = RawMaterialVariation::where('warehouse_id', $warehouse_id);
+    //
+    //        if ($isFiltered) {
+    //            if (!empty($filters['code'])) {
+    //                $rawQuery->where('code', 'ilike', "%{$filters['code']}%");
+    //            }
+    //            if (!empty($filters['title'])) {
+    //                $rawQuery->where('title', 'ilike', "%{$filters['title']}%");
+    //            }
+    //            if (isset($filters['status']) && $filters['status'] !== '') {
+    //                $rawQuery->where('status', $filters['status']);
+    //            }
+    //
+    //            // 📅 Aniq sana (dd-mm-yyyy) filtrlash
+    //            $dateService->applyExactDateFilters($rawQuery, $filters, ['created_at']);
+    //
+    //            // 🗓️ Oy-yil (mm-yyyy) filtrlash
+    //            $dateService->applyDateFilters($rawQuery, $filters, ['created_at']);
+    //        }
+    //
+    //        $rawAllCount = (clone $rawQuery)->count();
+    //        $rawTotalPrice = (clone $rawQuery)->sum('total_price');
+    //        $rawMaterialVariations = $rawQuery->paginate(10, ['*'], 'raw_page')->withQueryString();
+    //
+    //        return view('backend.warehouse.list', compact(
+    //            'warehouse',
+    //            'productVariations',
+    //            'rawMaterialVariations',
+    //            'productAllCount',
+    //            'productTotalPrice',
+    //            'rawAllCount',
+    //            'rawTotalPrice',
+    //            'isFiltered'
+    //        ));
+    //    }
 
 
     public function addCount(Request $request)
@@ -199,8 +205,8 @@ class WarehouseController extends Controller
         ]);
 
         $model = $request->model_type === 'product'
-            ? \App\Models\ProductVariation::find($request->id)
-            : \App\Models\RawMaterialVariation::find($request->id);
+            ? ProductVariation::find($request->id)
+            : RawMaterialVariation::find($request->id);
 
         if (!$model) {
             return response()->json(['success' => false, 'message' => 'Маълумот топилмади.']);
@@ -225,6 +231,7 @@ class WarehouseController extends Controller
         return view('backend.warehouse.show', compact('warehouse'));
     }
 
+
     public function create()
     {
         $organizations = Organization::pluck('title', 'id');
@@ -240,12 +247,14 @@ class WarehouseController extends Controller
             'organization_id.*' => 'exists:organization,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'type' => 'required|in:1,2,3,4',
             'status' => 'required|in:0,1',
         ]);
 
         $warehouse = Warehouse::create([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
+            'type' => $validated['type'],
             'status' => $validated['status'],
         ]);
 
@@ -262,7 +271,6 @@ class WarehouseController extends Controller
         return view('backend.warehouse.update', compact('organizations', 'warehouse'));
     }
 
-
     public function update(Request $request, Warehouse $warehouse)
     {
         $validated = $request->validate([
@@ -270,16 +278,17 @@ class WarehouseController extends Controller
             'organization_id.*' => 'exists:organization,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'type' => 'required|in:1,2,3,4',
             'status' => 'required|in:0,1',
         ]);
 
         $warehouse->update([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
+            'type' => $validated['type'],
             'status' => $validated['status'],
         ]);
 
-        // ✅ Pivotni yangilash
         $warehouse->organization()->sync($validated['organization_id']);
 
         return redirect()->route('warehouse.index')->with('success', 'Омбор янгиланди!');
