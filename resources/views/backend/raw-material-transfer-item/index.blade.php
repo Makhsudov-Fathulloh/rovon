@@ -50,7 +50,7 @@
             <div class="card-header">
                 <div class="row justify-content-start">
                     <div class="col-sm-12 col-md-auto text-start">
-
+                        <x-backend.action :back="true"/>
                     </div>
                 </div>
             </div>

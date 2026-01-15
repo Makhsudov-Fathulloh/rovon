@@ -47,6 +47,13 @@
 
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="rawMaterialTransferListFilterForm" method="GET"
                       action="{{ route('raw-material-transfer-item.list', $rawMaterialTransfer) }}">
