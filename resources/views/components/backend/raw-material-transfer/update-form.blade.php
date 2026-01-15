@@ -18,7 +18,7 @@
                     <!-- ORGANIZATION -->
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Филиал</label>
-                        <select name="organization_id" id="organization_id" class="form-select select2">
+                        <select name="organization_id" id="organization_id" class="form-select select2" disabled>
                             <option value="">Танланг...</option>
                             @foreach($organizations as $id => $title)
                                 <option value="{{ $id }}"
@@ -32,7 +32,7 @@
                     <!-- WAREHOUSE -->
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Омбор</label>
-                        <select name="warehouse_id" id="warehouse_id" class="form-select select2">
+                        <select name="warehouse_id" id="warehouse_id" class="form-select select2" disabled>
                             <option value="">Танланг...</option>
                             @foreach($warehouses as $id => $title)
                                 <option value="{{ $id }}"
@@ -47,7 +47,7 @@
                     <!-- SECTION -->
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Бўлим</label>
-                        <select name="section_id" id="section_id" class="form-select select2">
+                        <select name="section_id" id="section_id" class="form-select select2" disabled>
                             <option value="">Танланг...</option>
                             @foreach($sections as $id => $title)
                                 <option value="{{ $id }}"
@@ -62,7 +62,7 @@
                     <!-- SHIFT -->
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Смена</label>
-                        <select name="shift_id" id="shift_id" class="form-select select2">
+                        <select name="shift_id" id="shift_id" class="form-select select2" disabled>
                             <option value="">Танланг...</option>
                             @foreach($shifts as $id => $title)
                                 <option value="{{ $id }}"
@@ -74,6 +74,11 @@
                         </select>
                     </div>
                 </div>
+
+                <input type="hidden" name="organization_id" value="{{ $rawMaterialTransfer->organization_id }}">
+                <input type="hidden" name="warehouse_id" value="{{ $rawMaterialTransfer->warehouse_id }}">
+                <input type="hidden" name="section_id" value="{{ $rawMaterialTransfer->section_id }}">
+                <input type="hidden" name="shift_id" value="{{ $rawMaterialTransfer->shift_id }}">
 
                 <!-- TITLE / RECEIVER / STATUS -->
                 <div class="row">

@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Хомашёни янгилаш: ' . ucfirst($rawMaterialVariation->title) }}">
+<x-backend.layouts.main title="{!! 'Хомашёни янгилаш: ' . ucfirst($rawMaterialVariation->title) !!}">
     <div class="raw_material_variation-update">
         <x-backend.raw-material-variation.form
             :rawMaterialVariation="$rawMaterialVariation"

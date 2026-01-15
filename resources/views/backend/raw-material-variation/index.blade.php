@@ -6,8 +6,52 @@
 
 <x-backend.layouts.main title="{{ 'Хомашёлар' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 180px; /* minimal kenglik */
+            flex: 1 1 200px; /* responsive */
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+        .card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
+        .card-stats.total { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="rawMaterialVariationFilterForm" method="GET"
                       action="{{ route('raw-material-variation.index') }}">
@@ -23,7 +67,7 @@
                                 <th>{!! sortLink('price', 'Нархи') !!}</th>
                                 <th>{!! sortLink('count', 'Микдори') !!}</th>
                                 <th>{!! sortLink('total_price', 'Умумий (сўм)') !!}</th>
-                                {{--<th>{!! sortLink('type', 'Тури') !!}</th>--}}
+                                {{-- <th>{!! sortLink('type', 'Тури') !!}</th> --}}
                                 <th>{!! sortLink('status', 'Статус') !!}</th>
                                 <th>{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th></th> {{-- Search btn --}}
@@ -55,7 +99,7 @@
                                 <th><input type="text" name="filters[total_price]"
                                            value="{{ request('filters.total_price') }}"
                                            class="form-control form-control-sm w-100 filter-numeric"></th>
-                                {{--<th><input type="text" name="filters[type]" value="{{ request('filters.type') }}" class="form-control form-control-sm w-100"></th>--}}
+                                {{-- <th><input type="text" name="filters[type]" value="{{ request('filters.type') }}" class="form-control form-control-sm w-100"></th> --}}
                                 <th>
                                     <select name="filters[status]" class="form-control form-control-sm w-100">
                                         <option value="">Барчаси</option>
@@ -114,7 +158,7 @@
                                     <td class="total_price fw-bold text-info text-nowrap">
                                         {{ PriceHelper::format($rawMaterialVariation->total_price, $rawMaterialVariation->currency, false) }}
                                     </td>
-                                    {{--<td>{{ $rawMaterialVariation->type }}</td>--}}
+                                    {{-- <td>{{ $rawMaterialVariation->type }}</td> --}}
                                     <td style="width: 100px">{{ StatusService::getList()[$rawMaterialVariation->status] ?? '-' }}</td>
                                     <td>{{ $rawMaterialVariation->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>
@@ -242,47 +286,10 @@
                     </div>
                 </div>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center mt-3">
                     {{ $rawMaterialVariations->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        min-width: 180px; /* minimal kenglik */
-                        flex: 1 1 200px; /* responsive */
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-
-                    .card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-                    .card-stats.total { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="d-flex flex-wrap gap-3 mt-4">
                     <!-- UZS -->
                     <div class="card-stats uzs">

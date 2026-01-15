@@ -1,3 +1,6 @@
+{{--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">--}}
+{{--<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>--}}
+
 @if ($errors->has('general'))
     <div class="alert alert-danger">{{ $errors->first('general') }}</div>
 @endif
@@ -123,36 +126,70 @@
         let rawMaterials = @json($rawMaterials ?? []);
         let itemIndex = 0;
 
-        // ========================
         // ORGANIZATION tanlash
-        // ========================
+        // $('#organization_id').on('change', function () {
+        //     const orgId = $(this).val();
+
+        //     $('#warehouse_id').prop('disabled', !orgId);
+        //     $('#section_id').prop('disabled', !orgId);
+        //     $('#shift_id').prop('disabled', true);
+
+        //     $('#warehouse_id').html('<option value="">Омбор танланг...</option>');
+        //     $('#section_id').html('<option value="">Бўлим танланг...</option>');
+        //     $('#shift_id').html('<option value="">Аввал бўлимни танланг</option>');
+
+        //     if (orgId) {
+        //         @foreach($warehouses as $id => $title)
+        //         if ("{{ \App\Models\Warehouse::find($id)->organization_id ?? '' }}" == orgId)
+        //             $('#warehouse_id').append(`<option value="{{ $id }}">{{ $title }}</option>`);
+        //         @endforeach
+
+        //             @foreach($sections as $id => $title)
+        //         if ("{{ \App\Models\Section::find($id)->organization_id ?? '' }}" == orgId)
+        //             $('#section_id').append(`<option value="{{ $id }}">{{ $title }}</option>`);
+        //         @endforeach
+        //     }
+        // });
+
         $('#organization_id').on('change', function () {
             const orgId = $(this).val();
 
-            $('#warehouse_id').prop('disabled', !orgId);
-            $('#section_id').prop('disabled', !orgId);
-            $('#shift_id').prop('disabled', true);
-
-            $('#warehouse_id').html('<option value="">Омбор танланг...</option>');
-            $('#section_id').html('<option value="">Бўлим танланг...</option>');
-            $('#shift_id').html('<option value="">Аввал бўлимни танланг</option>');
+            // Selectlarni tozalash va kutish holatiga keltirish
+            $('#warehouse_id').prop('disabled', !orgId).html('<option value="">Юкланмоқда...</option>');
+            $('#section_id').prop('disabled', !orgId).html('<option value="">Юкланмоқда...</option>');
+            $('#shift_id').prop('disabled', true).html('<option value="">Аввал бўлимни танланг</option>');
 
             if (orgId) {
-                @foreach($warehouses as $id => $title)
-                if ("{{ \App\Models\Warehouse::find($id)->organization_id ?? '' }}" == orgId)
-                    $('#warehouse_id').append(`<option value="{{ $id }}">{{ $title }}</option>`);
-                @endforeach
+                $.ajax({
+                    url: "{{ route('raw-material-transfer.get-warehouses') }}",
+                    type: "GET",
+                    data: { organization_id: orgId },
+                    success: function (response) {
+                        // 1. Omborlarni to'ldirish
+                        let wOptions = '<option value="">Омбор танланг...</option>';
+                        $.each(response.warehouses, function (id, title) {
+                            wOptions += `<option value="${id}">${title}</option>`;
+                        });
+                        $('#warehouse_id').html(wOptions);
 
-                    @foreach($sections as $id => $title)
-                if ("{{ \App\Models\Section::find($id)->organization_id ?? '' }}" == orgId)
-                    $('#section_id').append(`<option value="{{ $id }}">{{ $title }}</option>`);
-                @endforeach
+                        // 2. Bo'limlarni to'ldirish (Endi bular ham keladi)
+                        let sOptions = '<option value="">Бўлим танланг...</option>';
+                        $.each(response.sections, function (id, title) {
+                            sOptions += `<option value="${id}">${title}</option>`;
+                        });
+                        $('#section_id').html(sOptions);
+
+                        // Select2 bo'lsa yangilab qo'yamiz
+                        $('.select2').trigger('change.select2');
+                    },
+                    error: function () {
+                        toastr.error("Маълумотларни юклашда хатолик!");
+                    }
+                });
             }
         });
 
-        // ========================
         // SECTION => SHIFTLAR
-        // ========================
         $('#section_id').on('change', function () {
             const sectionId = $(this).val();
             $('#shift_id').prop('disabled', !sectionId);
@@ -166,9 +203,7 @@
             }
         });
 
-        // ========================
         // WAREHOUSE => AJAX orqali xomashyo
-        // ========================
         $('#warehouse_id').on('change', function () {
             const warehouseId = $(this).val();
             if (!warehouseId) {
@@ -192,9 +227,7 @@
             });
         });
 
-        // ========================
         // ITEM qo‘shish
-        // ========================
         $('#addItemBtn').on('click', function () {
             if (!rawMaterials || !rawMaterials.length) {
                 alert('Аввал омборни танланг!');
@@ -283,16 +316,12 @@
             });
         }
 
-        // ========================
         // VALYUTA & KURS
-        // ========================
         const CURRENCY_UZS = @json(\App\Services\StatusService::CURRENCY_UZS);
         const CURRENCY_USD = @json(\App\Services\StatusService::CURRENCY_USD);
         const USD_RATE = {{ $usdRate ?? 0 }};
 
-        // ========================
         // Xomashyo tanlanganda
-        // ========================
         // USD: 2 xonali nuqta-decimal va minglik ajratgichi bo'shliq
         $(document).on('change', '.materialSelect', function () {
             const price = parseFloat($(this).find(':selected').data('price')) || 0;
@@ -318,16 +347,12 @@
             updateRowTotal(row);
         });
 
-        // ========================
         // Miqdor o‘zgarganda
-        // ========================
         $(document).on('input', '.qty', function () {
             updateRowTotal($(this).closest('tr'));
         });
 
-        // ========================
         // Satr summasini hisoblash
-        // ========================
         function updateRowTotal(row) {
             const qty = parseFloat(row.find('.qty').val()) || 0;
             const price = parseFloat(row.find('.price').data('price')) || 0;
@@ -341,9 +366,7 @@
             updateTotalSum();
         }
 
-        // ========================
         // Umumiy summani hisoblash
-        // ========================
         function updateTotalSum() {
             let totalSum = 0;
 
@@ -360,9 +383,8 @@
             $('#total_item_price').val(totalSum);
         }
 
-        // ========================
+
         // Xomashyolarni qayta yuklash
-        // ========================
         function rebuildMaterialOptions() {
             $('.materialSelect').each(function () {
                 const $sel = $(this);
@@ -381,9 +403,7 @@
             });
         }
 
-        // ========================
         // Qatorni o‘chirish
-        // ========================
         $(document).on('click', '.removeItem', function () {
             $(this).closest('tr').remove();
             updateTotalSum();

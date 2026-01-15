@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\RawMaterial;
-use App\Models\Search\RawMaterialSearch;
+use App\Models\Role;
 use App\Models\User;
+use App\Models\Category;
 use App\Models\Warehouse;
-use App\Services\DateFilterService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Schema;
+use App\Models\RawMaterial;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Services\StatusService;
+use App\Services\DateFilterService;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Search\RawMaterialSearch;
 
 class RawMaterialController extends Controller
 {
@@ -37,7 +39,7 @@ class RawMaterialController extends Controller
         $warehouses = Warehouse::whereHas('rawMaterial')->distinct()->pluck('title', 'id');
 
         $userIds = RawMaterial::distinct()->pluck('user_id');
-        $users = User::whereIn('id', $userIds)->where('role_id', '!=', \App\Models\Role::where('title', 'Client')->value('id'))->pluck('username', 'id');
+        $users = User::whereIn('id', $userIds)->where('role_id', '!=', Role::where('title', 'Client')->value('id'))->pluck('username', 'id');
 
         $categoryIds = RawMaterial::distinct()->pluck('category_id');
         $categories = Category::whereIn('id', $categoryIds)->pluck('title', 'id');
@@ -72,25 +74,26 @@ class RawMaterialController extends Controller
 
     public function create()
     {
-        $warehouses = Warehouse::pluck('title', 'id');
+        $warehouses = Warehouse::whereNot('type', StatusService::TYPE_PRODUCT)->pluck('title', 'id');
         $rawMaterial = new RawMaterial();
-        $categories = Category::where('type', '!=', Category::TYPE_PRODUCT)->pluck('title', 'id');
+        $categories = Category::whereNot('type', StatusService::TYPE_PRODUCT)->pluck('title', 'id');
 
-        return view('backend.raw-material.create', compact('warehouses','rawMaterial', 'categories'));
+        return view('backend.raw-material.create', compact('warehouses', 'rawMaterial', 'categories'));
     }
 
     public function store(Request $request, RawMaterial $rawMaterial)
     {
-        $request->validate([
-            'warehouse_id' => 'exists:warehouse,id',
-            'title' => 'required|string|max:100',
-            'subtitle' => 'nullable|string|max:100',
-            'description' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
-            'category_id' => 'required|exists:category,id',
-            'type' => 'nullable|string|max:255',
-            'status' => 'required|integer',
-        ],
+        $request->validate(
+            [
+                'warehouse_id' => 'exists:warehouse,id',
+                'title' => 'required|string|max:100',
+                'subtitle' => 'nullable|string|max:100',
+                'description' => 'nullable|string',
+                'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
+                'category_id' => 'required|exists:category,id',
+                'type' => 'nullable|string|max:255',
+                'status' => 'required|integer',
+            ],
             [
                 'title.required' => 'Хомашё турининг номи мажбурий.',
                 'title.string' => 'Хомашё турининг номи матн бўлиши керак.',
@@ -134,24 +137,25 @@ class RawMaterialController extends Controller
 
     public function edit(RawMaterial $rawMaterial)
     {
-        $warehouses = Warehouse::pluck('title', 'id');
-        $categories = Category::where('type', '!=', Category::TYPE_PRODUCT)->pluck('title', 'id');
+        $warehouses = Warehouse::whereNot('type', StatusService::TYPE_PRODUCT)->pluck('title', 'id');
+        $categories = Category::whereNot('type', StatusService::TYPE_PRODUCT)->pluck('title', 'id');
 
         return view('backend.raw-material.update', compact('warehouses', 'rawMaterial', 'categories'));
     }
 
     public function update(Request $request, RawMaterial $rawMaterial)
     {
-        $request->validate([
-            'warehouse_id' => 'exists:warehouse,id',
-            'title' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
-            'category_id' => 'required|exists:category,id',
-            'type' => 'nullable|string|max:255',
-            'status' => 'required|integer',
-        ],
+        $request->validate(
+            [
+                'warehouse_id' => 'exists:warehouse,id',
+                'title' => 'required|string|max:255',
+                'subtitle' => 'nullable|string|max:255',
+                'description' => 'nullable|string',
+                'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
+                'category_id' => 'required|exists:category,id',
+                'type' => 'nullable|string|max:255',
+                'status' => 'required|integer',
+            ],
             [
                 'title.required' => 'Хомашё турининг номи мажбурий.',
                 'title.string' => 'Хомашё турининг номи матн бўлиши керак.',

@@ -1,4 +1,49 @@
+@php
+    use App\Helpers\CountHelper;
+    use App\Helpers\PriceHelper;
+@endphp
+
 <x-backend.layouts.main :title="'Хомашё трансфер (' . ucfirst($rawMaterialTransfer->title) . ') элементлари.'">
+
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.uzs {
+            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
+            border-left: 5px solid #00d68f;
+        }
+
+        .card-stats.usd {
+            background: linear-gradient(135deg, #0984e3 35%, #0984e3 65%);
+            border-left: 5px solid #00a8ff;
+        }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
 
     <div class="row">
         <div class="card shadow w-100">
@@ -72,13 +117,13 @@
                                     <td class="col-id">{{ $item->id }}</td>
                                     <td>{{ optional($item->rawMaterialVariation)->title }}</td>
                                     <td class="price fw-bold text-success tex">
-                                        {{ \App\Helpers\PriceHelper::format($item->price, $item->rawMaterialVariation->currency) }}
+                                        {{ PriceHelper::format($item->price, $item->rawMaterialVariation->currency) }}
                                     </td>
                                     <td class="count fw-bold text-primary">
-                                        {{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}
+                                        {{ CountHelper::format($item->count, $item->unit) }}
                                     </td>
                                     <td class="total_price fw-bold text-info text-nowrap">
-                                        {{ \App\Helpers\PriceHelper::format($item->total_price, $item->rawMaterialVariation->currency) }}
+                                        {{ PriceHelper::format($item->total_price, $item->rawMaterialVariation->currency) }}
                                     </td>
                                     <td>{{ $item->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>
@@ -132,17 +177,17 @@
                                     <p class="card-text">
                                         <strong>{!! sortLink('price', 'Нархи:') !!}</strong>
                                         <span
-                                            class="price fw-bold text-success">{{ \App\Helpers\PriceHelper::format($item->price, $item->rawMaterialVariation->currency) }}</span>
+                                            class="price fw-bold text-success">{{ PriceHelper::format($item->price, $item->rawMaterialVariation->currency) }}</span>
                                     </p>
                                     <p class="card-text">
                                         <strong>{!! sortLink('count', 'Сони:') !!}</strong>
                                         <span
-                                            class="count fw-bold text-primary">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</span>
+                                            class="count fw-bold text-primary">{{ CountHelper::format($item->count, $item->unit) }}</span>
                                     </p>
                                     <p class="card-text">
                                         <strong>{!! sortLink('total_price', 'Умумий:') !!}</strong>
                                         <span
-                                            class="total_price fw-bold text-info">{{ \App\Helpers\PriceHelper::format($item->total_price, $item->rawMaterialVariation->currency) }}</span>
+                                            class="total_price fw-bold text-info">{{ PriceHelper::format($item->total_price, $item->rawMaterialVariation->currency) }}</span>
                                     </p>
 
                                     <div class="btn-group w-100">
@@ -163,50 +208,10 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center mt-3">
                     {{ $rawMaterialTransferItems->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                   .card-stats {
-                       border-radius: 12px;
-                       padding: 20px;
-                       color: #fff;
-                       transition: 0.3s ease;
-                       text-align: center;
-                       display: flex;
-                       justify-content: space-between;
-                       align-items: center;
-                   }
-                   .card-stats:hover {
-                       transform: translateY(-5px);
-                       box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                   }
-                  .card-stats.uzs {
-                       background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                       border-left: 5px solid #00d68f;
-                   }
-
-                   .card-stats.usd {
-                       background: linear-gradient(135deg, #0984e3 35%, #0984e3 65%);
-                       border-left: 5px solid #00a8ff;
-                    }
-
-                   .card-stats h5 {
-                       font-weight: 700;
-                       margin-bottom: 8px;
-                       font-size: 1.25rem;
-                   }
-                   .card-stats p {
-                       margin: 2px 0;
-                       font-size: 0.95rem;
-                   }
-                   .card-stats i {
-                       font-size: 2.2rem;
-                       opacity: 0.7;
-                   }
-               </style>
                <div class="row mt-4">
                    <div class="col-md-6 mb-3">
                        <div class="card-stats uzs">

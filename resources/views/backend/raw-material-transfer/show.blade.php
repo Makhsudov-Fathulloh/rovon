@@ -7,13 +7,9 @@
     </style>
 
     <div class="card">
-        <div class="card-header">
-            {{--            <h1>{{ $rawMaterialTransfer->title[app()->getLocale()] ?? $rawMaterialTransfer->title }}</h1>--}}
-        </div>
         <div class="card-body">
 
-            <x-backend.action route="raw-material" :id="$rawMaterialTransfer->id" :back="true" :edit="true"
-                              editClass="btn btn-primary sm" editLabel="Янгилаш"/>
+            <x-backend.action route="raw-material" :id="$rawMaterialTransfer->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш"/>
 
             <table class="table table-bordered mt-3">
                 <tbody>

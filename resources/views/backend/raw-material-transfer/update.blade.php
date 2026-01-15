@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="Хомашё трансфери таҳрирлаш">
+<x-backend.layouts.main title="{!! 'Хомашё трансфери таҳрирлаш: ' . ucfirst($rawMaterialTransfer->title) !!}">
     <x-backend.raw-material-transfer.update-form
         :method="'PUT'"
         :organizations="$organizations"

@@ -5,14 +5,52 @@
 
 <x-backend.layouts.main title="{{ 'Хомашё трансферлари' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.uzs {
+            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
+            border-left: 5px solid #00d68f;
+        }
+
+        .card-stats.usd {
+            background: linear-gradient(135deg, #0984e3 35%, #0984e3 65%);
+            border-left: 5px solid #00a8ff;
+        }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header">
                 <div class="row justify-content-start">
                     <div class="col-sm-12 col-md-auto text-start">
-                        <a href="{{ route('raw-material-transfer.create') }}" class="btn btn-primary w-100 w-md-auto">
-                            {{ 'Яратиш' }}
-                        </a>
+                        <x-backend.action route="raw-material-transfer" :back="true" :create="true"/>
                     </div>
                 </div>
             </div>
@@ -200,12 +238,6 @@
                                         <strong>{!! sortLink('shift_id', 'Смена:') !!} </strong>{{ optional($transfer->shift)->title }}</p>
                                     <p class="card-text">
                                         <strong>{!! sortLink('title', 'Номи:') !!} </strong>{{ $transfer->title }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('sender_id', 'Юборувчи:') !!} </strong>{{ optional($transfer->sender)->username }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('receiver_id', 'Кабулкилувчи:') !!} </strong>{{ optional($transfer->receiver)->username }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('total_item_price', 'Умумий:') !!} </strong><span class="total_item_price fw-bold text-info">{{ number_format($transfer->total_item_price, 0, '', ' ') }} сўм</span></p>
 
                                     <div class="btn-group w-100">
                                         <x-backend.action route="raw-material-transfer" listRoute="raw-material-transfer-item" :id="$transfer->id"
@@ -222,50 +254,10 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination--}}
                 <div class="d-flex justify-content-center mt-3">
                     {{ $transfers->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-                   .card-stats.uzs {
-                        background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                        border-left: 5px solid #00d68f;
-                    }
-
-                    .card-stats.usd {
-                        background: linear-gradient(135deg, #0984e3 35%, #0984e3 65%);
-                        border-left: 5px solid #00a8ff;
-                     }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="row mt-4">
                     <div class="col-md-6 mb-3">
                         <div class="card-stats uzs">

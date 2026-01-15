@@ -306,6 +306,27 @@ class RawMaterialTransferController extends Controller
     }
 
     /**
+     * AJAX orqali organization bo‘yicha warehouselarni olish
+     */
+    public function getWarehouses(Request $request)
+    {
+        $orgId = $request->organization_id;
+
+        // Many-to-Many orqali omborlar
+        $warehouses = Warehouse::whereHas('organization', function ($q) use ($orgId) {
+            $q->where('organization.id', $orgId);
+        })->pluck('title', 'id');
+
+        // Section modelidagi organization_id orqali bo'limlar
+        $sections = Section::where('organization_id', $orgId)->pluck('title', 'id');
+
+        return response()->json([
+            'warehouses' => $warehouses,
+            'sections' => $sections
+        ]);
+    }
+
+    /**
      * AJAX orqali warehouse bo‘yicha xomashyolarni olish
      */
     public function getRawMaterials(Request $request)
