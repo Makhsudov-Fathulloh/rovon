@@ -174,6 +174,7 @@ class RawMaterialVariationController extends Controller
             'price' => str_replace(' ', '', $request->price),
             'count' => str_replace(' ', '', $request->count),
             'min_count' => str_replace(' ', '', $request->min_count),
+            'unit' => $request->input('unit', 1),
         ]);
 
         $validated = $request->validate(
@@ -233,9 +234,10 @@ class RawMaterialVariationController extends Controller
         $rawMaterialVariation->min_count = $request->min_count;
         $rawMaterialVariation->unit = $request->unit;
         $rawMaterialVariation->price = $request->price;
+//        $rawMaterialVariation->currency = $request->currency;
 
         // 💰 USD bo‘lsa, kursni olish
-        if ($rawMaterialVariation->currency == 2) {
+        if ($rawMaterialVariation->currency == StatusService::CURRENCY_USD) {
             $usdRate = ExchangeRates::where('currency', 'USD')->value('rate');
             $rawMaterialVariation->rate = $usdRate;
             $rawMaterialVariation->price_uzs = $rawMaterialVariation->price * $usdRate;
@@ -250,8 +252,8 @@ class RawMaterialVariationController extends Controller
 
         $rawMaterialVariation->save();
 
-
-        return redirect()->route('raw-material-variation.list', $rawMaterial->id)->with('success', 'Хомашё яратилди!');
+        return redirect()->route('raw-material.index');
+//        return redirect()->route('raw-material-variation.list', $rawMaterial->id)->with('success', 'Хомашё яратилди!');
     }
 
 
@@ -324,6 +326,7 @@ class RawMaterialVariationController extends Controller
         $rawMaterialVariation->min_count = $request->min_count;
         $rawMaterialVariation->unit = $request->unit;
         $rawMaterialVariation->price = $request->price;
+        $rawMaterialVariation->currency = $request->currency;
 
         // 💰 USD bo‘lsa, kursni olish
         if ($rawMaterialVariation->currency == 2) {
@@ -341,7 +344,8 @@ class RawMaterialVariationController extends Controller
 
         $rawMaterialVariation->save();
 
-        return redirect()->route('raw-material-variation.list', $rawMaterialVariation->raw_material_id)->with('success', 'Хомашё янгиланди!');
+        return redirect()->route('raw-material.index');
+//        return redirect()->route('raw-material-variation.list', $rawMaterialVariation->raw_material_id)->with('success', 'Хомашё янгиланди!');
     }
 
 

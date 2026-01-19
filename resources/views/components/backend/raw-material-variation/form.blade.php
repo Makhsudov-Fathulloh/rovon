@@ -47,7 +47,7 @@
                                         <div class="col-md-8 mb-3">
                                             <label for="price" class="form-label">Нархи</label>
                                             <input type="text" step="0.01" id="price" name="price"
-                                                   class="form-control filter-numeric"
+                                                   class="form-control filter-numeric-decimal"
                                                    value="{{ old('price', \App\Helpers\PriceHelper::format($rawMaterialVariation->price, $rawMaterialVariation->currency, false) ?? '') }}">
                                             @error('price')
                                             <div class="text-danger small">{{ $message }}</div>
