@@ -194,7 +194,6 @@ class ProductVariationController extends Controller
 
     public function store(Request $request, $product_id)
     {
-
         $request->merge([
             'body_price' => str_replace(' ', '', $request->body_price) ?: 0,
             'price' => str_replace(' ', '', $request->price),
@@ -211,7 +210,7 @@ class ProductVariationController extends Controller
                 'subtitle' => 'nullable|string|max:100',
                 'description' => 'nullable|string',
                 'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
-                'body_price' => 'nullable|integer|min:0',
+                'body_price' => 'nullable|numeric|min:0',
                 'count' => 'required|numeric|min:0',
                 'min_count' => 'nullable|numeric|min:0',
                 'unit' => 'required|integer|',
@@ -265,7 +264,7 @@ class ProductVariationController extends Controller
         $productVariation->price = $request->price;
 
         // 💰 USD bo‘lsa, kursni olish
-        if ($productVariation->currency == 2) {
+        if ($productVariation->currency == StatusService::CURRENCY_USD) {
             $usdRate = ExchangeRates::where('currency', 'USD')->value('rate');
             $productVariation->rate = $usdRate;
             $productVariation->price_uzs = $productVariation->price * $usdRate;
@@ -311,7 +310,7 @@ class ProductVariationController extends Controller
                 'subtitle' => 'nullable|string|max:255',
                 'description' => 'nullable|string',
                 'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
-                'body_price' => 'nullable|integer|min:0',
+                'body_price' => 'nullable|numeric|min:0',
                 'count' => 'required|numeric|min:0',
                 'min_count' => 'nullable|numeric|min:0',
                 'unit' => 'required|integer',
@@ -361,9 +360,10 @@ class ProductVariationController extends Controller
         $productVariation->min_count = $request->min_count;
         $productVariation->unit = $request->unit;
         $productVariation->price = $request->price;
+        $productVariation->currency = $request->currency;
 
         // 💰 USD bo‘lsa, kursni olish
-        if ($productVariation->currency == 2) {
+        if ($productVariation->currency == StatusService::CURRENCY_USD) {
             $usdRate = ExchangeRates::where('currency', 'USD')->value('rate');
             $productVariation->rate = $usdRate;
             $productVariation->price_uzs = $productVariation->price * $usdRate;

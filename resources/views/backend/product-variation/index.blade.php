@@ -6,8 +6,53 @@
 
 <x-backend.layouts.main title="{{ 'Махсулотлар' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 180px; /* minimal kenglik */
+            flex: 1 1 200px; /* responsive */
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+        .card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
+        .card-stats.total-body-price { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+        .card-stats.total-price { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="productVariationFilterForm" method="GET" action="{{ route('product-variation.index') }}">
                     <div class="table-responsive d-none d-md-block">
@@ -22,8 +67,8 @@
                                 {{--@can('aodAccess')--}}
                                 {{--<th>{!! sortLink('body_price', 'Тан нархи') !!}</th>--}}
                                 {{--@endcan--}}
-                                <th>{!! sortLink('price', 'Нархи(сўм)') !!}</th>
-                                <th>{!! sortLink('count', 'Сони') !!}</th>
+                                <th>{!! sortLink('price', 'Нархи') !!}</th>
+                                <th>{!! sortLink('count', 'Миқдори') !!}</th>
                                 <th>{!! sortLink('total_price', 'Умумий(сўм)') !!}</th>
                                 {{--                                <th>{!! sortLink('top', 'Toп') !!}</th>--}}
                                 <th>{!! sortLink('status', 'Статус') !!}</th>
@@ -139,7 +184,7 @@
                                                 data-id="{{ $productVariation->id }}"
                                                 data-title="{{ $productVariation->title }}"
                                                 data-count="{{ $productVariation->count }}"
-                                                title="Маҳсулот сонини ошириш">
+                                                title="Маҳсулот миқдорини ошириш">
                                             <i class="fa fa-plus"></i> Қўшиш
                                         </button>
                                         <x-backend.action route="product-variation" :id="$productVariation->id"
@@ -195,7 +240,7 @@
                                             class="price fw-bold text-success">{{ PriceHelper::format($productVariation->price, $productVariation->currency, false) }}</span> {{ StatusService::getCurrency()[$productVariation->currency] }}
                                     </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('count', 'Сони:') !!}</strong>
+                                        <strong>{!! sortLink('count', 'Миқдори:') !!}</strong>
                                         <span
                                             class="count fw-bold text-primary">{{ CountHelper::format($productVariation->count, $productVariation->unit, false) }}</span> {{ StatusService::getTypeCount()[$productVariation->unit] }}
                                     </p>
@@ -210,7 +255,7 @@
                                     <div class="btn-group w-100">
                                         <x-backend.action route="product-variation" :id="$productVariation->id"
                                                           :variation="$productVariation"
-                                                          addCountTitle="Махсулот сонини ошириш" :addCount="true"
+                                                          addCountTitle="Махсулот миқдорини ошириш" :addCount="true"
                                                           :view="true" :edit="true" :delete="true"/>
                                     </div>
                                 </div>
@@ -229,7 +274,7 @@
                             <form id="addCountForm">
                                 @csrf
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Маҳсулот сонини ошириш.</h5>
+                                    <h5 class="modal-title">Маҳсулот миқдорини ошириш.</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
@@ -239,11 +284,11 @@
                                         <input type="text" id="variation_title" class="form-control" disabled>
                                     </div>
                                     <div class="mb-3">
-                                        <label>Ҳозирги сони:</label>
+                                        <label>Ҳозирги миқдори:</label>
                                         <input type="text" id="current_count" class="form-control" disabled>
                                     </div>
                                     <div class="mb-3">
-                                        <label>Қўшиладиган маҳсулот сони:</label>
+                                        <label>Қўшиладиган маҳсулот миқдори:</label>
                                         <input type="number" id="add_count" name="add_count" class="form-control"
                                                min="1" required>
                                     </div>
@@ -258,48 +303,10 @@
                     </div>
                 </div>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center mt-3">
                     {{ $productVariations->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        min-width: 180px; /* minimal kenglik */
-                        flex: 1 1 200px; /* responsive */
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-
-                    .card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-                    .card-stats.total-body-price { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-                    .card-stats.total-price { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="d-flex flex-wrap gap-3 mt-4">
                     <!-- UZS -->
                     <div class="card-stats uzs">
@@ -408,7 +415,7 @@
                 const typeCount = parseInt(document.querySelector('.add-count-btn[data-id="'+id+'"]').dataset.unit || 1, 10);
 
                 if (isNaN(addCount) || addCount < 1) {
-                    showCustomConfirm('Илтимос, маҳсулот сонини киритинг!', 'warning');
+                    showCustomConfirm('Илтимос, маҳсулот миқдорини киритинг!', 'warning');
                     return;
                 }
 

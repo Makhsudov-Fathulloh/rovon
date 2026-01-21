@@ -54,7 +54,7 @@
                     <td><span class="fw-bold text-success">{{ \App\Helpers\PriceHelper::format($productVariation->price, $productVariation->currency, false) }}</span> {{ \App\Services\StatusService::getCurrency()[$productVariation->currency] }}</td>
                 </tr>
                 <tr>
-                    <th>Сони</th>
+                    <th>Миқдори</th>
                     <td><span class="fw-bold text-primary">{{ \App\Helpers\CountHelper::format($productVariation->count, $productVariation->unit, false) }}</span> {{ \App\Services\StatusService::getTypeCount()[$productVariation->unit] }}</td>
                 </tr>
                  <tr>
@@ -63,7 +63,7 @@
                 </tr>
                 <tr>
                     <th>Умумий</th>
-                    <td><span class="fw-bold text-info">{{ \App\Helpers\PriceHelper::format($productVariation->total_price, $productVariation->currency, false) }}</span> {{ \App\Services\StatusService::getCurrency()[$productVariation->currency] }}</td>
+                    <td><span class="fw-bold text-info">{{ number_format($productVariation->total_price, 0, '', ' ') }}</span> сўм</td>
                 </tr>
                 {{--<tr>--}}
                 {{--<th>Toп</th>--}}

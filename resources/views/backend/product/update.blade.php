@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Моделни янгилаш: ' . ucfirst($product->title) }}">
+<x-backend.layouts.main title="{!! 'Моделни янгилаш: ' . ucfirst($product->title) !!}">
     <div class="product-update">
         <x-backend.product.form
             :warehouses="$warehouses"

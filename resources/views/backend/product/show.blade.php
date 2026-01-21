@@ -24,13 +24,18 @@
                             <img style="width: 300px; object-fit: contain"
                                  src="{{ asset('storage/' . $product->file->path) }}" alt="{{ $product->title }}">
                         @endif
-                        {{--{!! $product->file ? '<img style="width: 300px; object-fit: contain" src="' . asset('storage/' . $product->file->path) . '" alt="' . e($product->title) . '">'--}}
-                        {{--: 'no image' !!}--}}
+                        {{--{!! $product->file ? '<img style="width: 300px; object-fit: contain" src="' . asset('storage/' . $product->file->path) . '" alt="' . e($product->title) . '">' : 'no image' !!}--}}
                     </td>
                 </tr>
                 <tr>
                     <th>Id</th>
                     <td>{{ $product->id }}</td>
+                </tr>
+                <tr>
+                    <th>Филиал</th>
+                    <td>
+                        <span class="badge bg-info">{{ $product->warehouse->organization->pluck('title')->join(', ') }}</span>
+                    </td>
                 </tr>
                 <tr>
                     <th>Омбор</th>
@@ -40,7 +45,9 @@
                     <th>Номи</th>
                     <td>{{ $product->title }}</td>
                 </tr>
-                {{--<tr><th>Subtitle</th> <td>{{ $product->subtitle}}</td></tr>--}}
+                {{-- <tr>
+                    <th>Subtitle</th> <td>{{ $product->subtitle}}</td>
+                </tr> --}}
                 <tr>
                     <th>Тавсифи</th>
                     <td>{!! $product->description !!}</td>
@@ -53,7 +60,9 @@
                     <th>Категория</th>
                     <td>{{ $product->category->title }}</td>
                 </tr>
-                {{--<tr><th>Тури</th><td>{{ $product->type }}</td></tr>--}}
+                {{-- <tr>
+                    <th>Тури</th><td>{{ $rawMaterial->type }}</td>
+                </tr> --}}
                 <tr>
                     <th>Статус</th>
                     <td>{{ \App\Services\StatusService::getList()[$product->status] }}</td>

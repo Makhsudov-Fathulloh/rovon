@@ -4,11 +4,48 @@
 
 <x-backend.layouts.main title="{{ 'Махсулотлар' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.count {
+            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
+            border-left: 5px solid #00d68f;
+        }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header">
                 <div class="row justify-content-start">
-
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
                 </div>
             </div>
             <div class="table-responsive card-body">
@@ -86,8 +123,7 @@
                                 @endif
 
                                 <th>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i
-                                            class="fa fa-search"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i class="fa fa-search"></i></button>
                                 </th>
                             </tr>
                             </thead>
@@ -147,15 +183,12 @@
                                             class="count fw-bold text-primary">{{ CountHelper::format($product->old_count, $product->productVariation->unit) }}</span>
                                     </p>
                                      <p class="card-text">
-                                        <strong>{!! sortLink('added_count', 'Олдинги') !!} </strong><span
+                                        <strong>{!! sortLink('added_count', 'Қўшилди') !!} </strong><span
                                             class="count fw-bold text-success">{{ CountHelper::format($product->added_count, $product->productVariation->unit) }}</span>
                                     </p>
                                      <p class="card-text">
-                                        <strong>{!! sortLink('new_count', 'Олдинги') !!} </strong><span
+                                        <strong>{!! sortLink('new_count', 'Жами') !!} </strong><span
                                             class="count fw-bold text-info">{{ CountHelper::format($product->new_count, $product->productVariation->unit) }}</span>
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at_exact', 'Яратилди:') !!} </strong> {{ $product->created_at?->format('Y-m-d H:i') }}
                                     </p>
                                     <div class="btn-group w-100">
                                         <x-backend.action route="product-variation" :id="optional($product->productVariation)->id" :view="true"/>
@@ -169,45 +202,10 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center">
                     {{ $productLogs->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-                    .card-stats.count {
-                        background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                        border-left: 5px solid #00d68f;
-                    }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="row mt-4">
                     <div class="col-md-12 mb-3">
                         <div class="card-stats count">

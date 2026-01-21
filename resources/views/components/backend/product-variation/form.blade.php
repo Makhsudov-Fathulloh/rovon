@@ -43,26 +43,28 @@
                                             </textarea>
                                     </div>
 
-                                    {{--@if (auth()->user()->role->title === 'Админ')--}}
-                                    {{--<div class="mb-3">--}}
-                                    {{--<label for="body_price" class="form-label">Тан нархи</label>--}}
-                                    {{--<input type="text" step="0.01" id="body_price" name="body_price" class="form-control filter-numeric"--}}
-                                    {{--value="{{ old('body_price', $productVariation->body_price ?? '') }}">--}}
-                                    {{--</div>--}}
-                                    {{--@endif--}}
-
                                     <div class="row">
-                                        <div class="col-md-8 mb-3">
-                                            <label for="price" class="form-label">Нархи</label>
+                                        <div class="col-md-5 mb-3">
+                                            <label for="body_price" class="form-label">Тан нархи</label>
+                                            <input type="text" step="0.01" id="body_price" name="body_price"
+                                                   class="form-control filter-numeric-decimal"
+                                                   value="{{ old('body_price', \App\Helpers\PriceHelper::format($productVariation->body_price, $productVariation->currency, false) ?? '') }}">
+                                            @error('body_price')
+                                            <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-5 mb-3">
+                                            <label for="price" class="form-label">Сотиш нархи</label>
                                             <input type="text" step="0.01" id="price" name="price"
-                                                   class="form-control filter-numeric"
+                                                   class="form-control filter-numeric-decimal"
                                                    value="{{ old('price', \App\Helpers\PriceHelper::format($productVariation->price, $productVariation->currency, false) ?? '') }}">
                                             @error('price')
                                             <div class="text-danger small">{{ $message }}</div>
                                             @enderror
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-2 mb-3">
                                             <label for="currency" class="form-label">Валюта</label>
                                             <select name="currency" id="currency" class="form-control">
                                                 @foreach (\App\Services\StatusService::getCurrency() as $key => $label)
@@ -80,9 +82,9 @@
 
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="count" class="form-label">Сони</label>
+                                            <label for="count" class="form-label">Микдори</label>
                                             <input type="text" id="count" name="count"
-                                                   class="form-control filter-numeric"
+                                                   class="form-control filter-numeric-decimal"
                                                    value="{{ old('count', \App\Helpers\CountHelper::format($productVariation->count, $productVariation->unit, false) ?? '') }}">
                                             @error('count')
                                             <div class="text-danger small">{{ $message }}</div>
@@ -108,7 +110,7 @@
                                             @enderror
                                         </div>
                                         <div class="col-md-2 mb-3">
-                                            <label for="unit" class="form-label">Тури</label>
+                                            <label for="unit" class="form-label">Ўлчов бирлик</label>
                                             <select name="unit" id="unit" class="form-control" disabled>
                                                 @foreach (\App\Services\StatusService::getTypeCount() as $key => $label)
                                                     <option

@@ -9,6 +9,7 @@ use App\Models\Search\ProductSearch;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\DateFilterService;
+use App\Services\StatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
@@ -94,9 +95,9 @@ class ProductController extends Controller
 
     public function create()
     {
-        $warehouses = Warehouse::pluck('title', 'id');
         $product = new Product();
-        $categories = Category::where('type', Category::TYPE_PRODUCT)->pluck('title', 'id');
+        $warehouses = Warehouse::whereIn('type', [StatusService::TYPE_ALL, StatusService::TYPE_PRODUCT])->pluck('title', 'id');
+        $categories = Category::whereIn('type', [StatusService::TYPE_ALL, StatusService::TYPE_PRODUCT])->pluck('title', 'id');
 
         return view('backend.product.create', compact('warehouses', 'product', 'categories'));
     }
@@ -157,8 +158,8 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $warehouses = Warehouse::pluck('title', 'id');
-        $categories = Category::where('type', Category::TYPE_PRODUCT)->pluck('title', 'id');
+        $warehouses = Warehouse::whereIn('type', [StatusService::TYPE_ALL, StatusService::TYPE_PRODUCT])->pluck('title', 'id');
+        $categories = Category::whereIn('type', [StatusService::TYPE_ALL, StatusService::TYPE_PRODUCT])->pluck('title', 'id');
 
         return view('backend.product.update', compact('warehouses', 'product', 'categories'));
     }
