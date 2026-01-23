@@ -1,17 +1,74 @@
 <x-backend.layouts.main title="Навбатдаги буюртмалар">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 180px; /* minimal kenglik */
+            flex: 1 1 200px; /* responsive */
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-stats.new { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+        .card-stats.inprogress { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
+        .card-stats.done { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+        .card-stats.canceled { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
+    <style>
+        .custom-badge {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-left: 7.25rem !important;
+            padding-right: 7.25rem !important;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .custom-badge {
+                padding-left: 2rem;
+                padding-right: 2rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header">
                 <div class="row justify-content-start">
                     <div class="col-sm-12 col-md-auto text-start">
-                        <a href="{{ route('pre-order.create') }}" class="btn btn-primary w-100 w-md-auto">
-                            + Янги буюртма
-                        </a>
+                        <x-backend.action route="pre-order" :back="true" :create="true" createLabel="+ Янги буюртма"/>
                     </div>
                 </div>
             </div>
-
             <div class="card-body table-responsive">
                 <form id="preOrderFilterForm" method="GET" action="{{ route('pre-order.index') }}">
                     <div class="table-responsive d-none d-md-block">
@@ -27,7 +84,6 @@
                                 <th>{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th></th>
                             </tr>
-
                             {{-- Filter Inputs --}}
                             <tr>
                                 <th><input type="text" name="filters[id]" value="{{ request('filters.id') }}"
@@ -160,10 +216,6 @@
                                             {{ \App\Models\PreOrder::getStatusList()[$order->status] ?? '-' }}
                                         </span>
                                     </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at', 'Яратилди:') !!} </strong>{{ $order->created_at?->format('Y-m-d H:i') }}
-                                    </p>
-
                                     <div class="d-flex gap-1">
                                         <x-backend.action route="pre-order" listRoute="pre-order-item" subRoute="items"
                                                           :list="true" :id="$order->id" :view="true" :edit="true"
@@ -182,50 +234,13 @@
                             <p class="text-center text-muted py-4">Маълумот топилмади</p>
                         @endforelse
                     </div>
+                    {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center">
                     {{ $pre_orders->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        min-width: 180px; /* minimal kenglik */
-                        flex: 1 1 200px; /* responsive */
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-
-                    .card-stats.new { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.inprogress { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-                    .card-stats.done { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-                    .card-stats.canceled { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="d-flex flex-wrap gap-3 mt-4">
                     <!-- Count -->
                     <div class="card-stats new">
@@ -272,7 +287,6 @@
                     </div>
                 </div>
 
-
             </div>
         </div>
     </div>
@@ -294,28 +308,6 @@
             });
         });
     </script>
-
-    <style>
-        .custom-badge {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding-left: 7.25rem !important;
-            padding-right: 7.25rem !important;
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-align: center;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 768px) {
-            .custom-badge {
-                padding-left: 2rem;
-                padding-right: 2rem;
-                font-size: 0.75rem;
-            }
-        }
-    </style>
 
     <!-- Complete button JS -->
     <script>

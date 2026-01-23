@@ -7,7 +7,6 @@
     </style>
 
     <div class="card">
-        <div class="card-header"></div>
         <div class="card-body">
             <x-backend.action route="pre-order-item" :id="$preOrderItem->id" :back="true" editClass="btn btn-primary sm"/>
             <table class="table table-bordered mt-3">

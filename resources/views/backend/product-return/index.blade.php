@@ -6,7 +6,7 @@
                 <div class="row justify-content-start">
                     <div class="col-sm-12 col-md-auto text-start">
                         @if(!$todayReport || $todayReport->isClose())
-                            <x-backend.action route="cash-report" :report="true" :todayReport="$todayReport"/>
+                            <x-backend.action route="cash-report" :back="true" :report="true" :todayReport="$todayReport"/>
                         @elseif($todayReport->isOpen())
                             <x-backend.action route="product-return" :back="true" :create="true" createLabel="Қайтариш"/>
                         @endif
@@ -101,7 +101,7 @@
                                         <x-backend.action
                                             route="product-return" listRoute="product-return-item" :id="$return->id"
                                             subRoute="items"
-                                            :list="true" :view="true" :edit="true" :delete="true"
+                                            :list="true" :view="true" :delete="true"
                                             listTitle="Қайтиш маҳсулотларни кўриш"
                                             viewClass="btn btn-secondary btn-sm"
                                         />
@@ -143,7 +143,7 @@
                                         <x-backend.action
                                             route="product-return" listRoute="product-return-item" :id="$return->id"
                                             subRoute="items"
-                                            :list="true" :view="true" :edit="true" :delete="true"
+                                            :list="true" :view="true" :delete="true"
                                             listTitle="Қайтиш маҳсулотларни кўриш"
                                             viewClass="btn btn-secondary btn-sm"
                                         />

@@ -7,7 +7,6 @@
     </style>
 
     <div class="card">
-        <div class="card-header"></div>
         <div class="card-body">
 
             <x-backend.action route="pre-order" :id="$pre_order->id" :back="true" editClass="btn btn-primary sm" editLabel="Янгилаш" class="custom-btn"/>

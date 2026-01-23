@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Қайтишни янгилаш: ' . ucfirst($productReturn->title) }}">
+<x-backend.layouts.main title="{!! 'Қайтишни янгилаш: ' . ucfirst($productReturn->title) !!}">
     <div class="product-return-update">
         <x-backend.product-return.form
             :method="'PUT'"

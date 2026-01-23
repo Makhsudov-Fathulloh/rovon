@@ -117,7 +117,7 @@
         @method($method)
     @endif
 
-      <div class="container-fluid py-2">
+    <div class="container-fluid py-2">
 
         <div class="mb-2">
             <x-backend.action :back="true"/>
@@ -131,86 +131,117 @@
                         <div class="table-responsive">
                             <table class="table align-middle mb-0">
                                 <thead class="table-light">
-                                    <tr class="text-center">
-                                        <th class="ps-4" style="width: 45%;">Махсулот</th>
-                                        <th style="width: 15%;">Миқдор</th>
-                                        <th style="width: 15%;">Нарх</th>
-                                        <th class="text-end" style="width: 20%;">Жами</th>
-                                        <th class="text-center" style="width: 5%;"></th>
-                                    </tr>
+                                <tr class="text-center">
+                                    <th class="ps-4" style="width: 45%;">Махсулот</th>
+                                    <th style="width: 15%;">Миқдор</th>
+                                    <th style="width: 15%;">Нарх</th>
+                                    <th class="text-end" style="width: 20%;">Жами</th>
+                                    <th class="text-center" style="width: 5%;"></th>
+                                </tr>
                                 </thead>
                                 <tbody id="items-wrapper">
-                                    @php
-                                        // 1. Agar validatsiyadan xato qaytsa (old)
-                                        // 2. Agar tahrirlash bo'lsa (productReturn->items)
-                                        // 3. Agar yangi yaratish bo'lsa (bo'sh massiv)
-                                        $items = old('items');
+                                @php
+                                    // 1. Agar validatsiyadan xato qaytsa (old)
+                                    // 2. Agar tahrirlash bo'lsa (productReturn->items)
+                                    // 3. Agar yangi yaratish bo'lsa (bo'sh massiv)
+                                    $items = old('items');
 
-                                        if (!$items) {
-                                            if (isset($productReturn) && $productReturn->items->count() > 0) {
-                                                $items = $productReturn->items->map(function($item) {
-                                                    return [
-                                                        'product_variation_id' => $item->product_variation_id,
-                                                        'count' => $item->count,
-                                                        'price' => $item->price,
-                                                    ];
-                                                })->toArray();
-                                            } else {
-                                                $items = [[]]; // Default bitta bo'sh qator
-                                            }
+                                    if (!$items) {
+                                        if (isset($productReturn) && $productReturn->items->count() > 0) {
+                                            $items = $productReturn->items->map(function($item) {
+                                                return [
+                                                    'product_variation_id' => $item->product_variation_id,
+                                                    'count' => $item->count,
+                                                    'price' => $item->price,
+                                                ];
+                                            })->toArray();
+                                        } else {
+                                            $items = [[]]; // Default bitta bo'sh qator
                                         }
-                                    @endphp
+                                    }
+                                @endphp
 
-                                    @foreach($items as $i => $item)
-                                        <tr class="item-row">
-                                            <td class="ps-4" data-label="Махсулот">
-                                                <select name="items[{{ $i }}][product_variation_id]"
-                                                        class="form-select variation-select" required>
-                                                    <option value="">Махсулотни танланг</option>
-                                                    @foreach($variations as $v)
-                                                        <option value="{{ $v->id }}"
+                                @foreach($items as $i => $item)
+                                    <tr class="item-row">
+                                        <td class="ps-4" data-label="Махсулот">
+                                            <select name="items[{{ $i }}][product_variation_id]"
+                                                    class="form-select variation-select" required>
+                                                <option value="">Махсулотни танланг</option>
+                                                @foreach($variations as $v)
+                                                    <option value="{{ $v->id }}"
                                                             data-price="{{ $v->price }}"
                                                             data-rate="{{ $v->rate }}"
-                                                            {{ (isset($item['product_variation_id']) && $item['product_variation_id'] == $v->id) ? 'selected' : '' }}>
-                                                            {{ $v->title }} — {{ $v->product->title }}
-                                                            ({{ number_format($v->price, 0, '', ' ') }} сўм)
-                                                            [{{ \App\Helpers\CountHelper::format($v->count, $v->unit) }}]
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-                                            <td data-label="Миқдор">
-                                                <input type="number" name="items[{{ $i }}][count]"
-                                                    step="0.001" class="form-control border-0 bg-light count"
-                                                    placeholder="0.00" value="{{ $item['count'] ?? '' }}" required>
-                                            </td>
-                                            <td data-label="Нарх">
-                                                <input type="number" name="items[{{ $i }}][price]"
-                                                    class="form-control border-0 bg-light price"
-                                                    value="{{ $item['price'] ?? '' }}" placeholder="0" required>
-                                            </td>
-                                            <td class="text-end fw-bold text-dark pe-3" data-label="Жами">
-                                                <span class="row-total text-secondary">0</span>
-                                            </td>
-                                            <td class="text-center pe-4 remove-row-cell">
-                                                <button type="button" class="btn text-danger remove-row p-0">
-                                                    ❌
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                                        {{ (isset($item['product_variation_id']) && $item['product_variation_id'] == $v->id) ? 'selected' : '' }}>
+                                                        {{ $v->title }} — {{ $v->product->title }}
+                                                        ({{ number_format($v->price, 0, '', ' ') }} сўм)
+                                                        [{{ \App\Helpers\CountHelper::format($v->count, $v->unit) }}]
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td data-label="Миқдор">
+                                            <input type="number" name="items[{{ $i }}][count]"
+                                                   step="0.001" class="form-control border-0 bg-light count"
+                                                   placeholder="0.00" value="{{ $item['count'] ?? '' }}" required>
+                                        </td>
+                                        <td data-label="Нарх">
+                                            <input type="number" name="items[{{ $i }}][price]"
+                                                   class="form-control border-0 bg-light price"
+                                                   value="{{ $item['price'] ?? '' }}" placeholder="0" required>
+                                        </td>
+                                        <td class="text-end fw-bold text-dark pe-3" data-label="Жами">
+                                            <span class="row-total text-secondary">0</span>
+                                        </td>
+                                        <td class="text-center pe-4 remove-row-cell">
+                                            <button type="button" class="btn text-danger remove-row p-0">
+                                                ❌
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                      <div class="card-header bg-white py-3 border-bottom-0">
+                    <div class="card-header bg-white py-3 border-bottom-0">
                         <div class="d-flex justify-content-between align-items-center">
                             <button type="button" class="btn btn-primary btn-sm px-3" id="add-row">
                                 <i class="bi bi-plus-lg"></i> + Маҳсулот қўшиш
                             </button>
                             <div class="mb-3">
                                 <h2 class="fw-bold text-primary mb-0" id="grand-total">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="type" value="{{ \App\Models\ExpenseAndIncome::TYPE_DEBT }}">
+
+                    <div class="row card-header">
+                        <div class="col-md-8" id="debt-user-wrapper" style="display:none;">
+                            <div class="mb-3">
+                                <label for="user_id">Қарздор</label>
+                                <select name="user_id" id="user_id" class="form-control filter-select2" data-placeholder="Қарздорни танланг">
+                                    <option value=""></option>
+                                    {{-- AJAX orqali yuklanadi --}}
+                                </select>
+                                @error('user_id')
+                                <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="currency">Валюта</label>
+                                <select name="currency" id="currency" class="form-control">
+                                    @foreach (\App\Services\StatusService::getCurrency() as $key => $label)
+                                        <option value="{{ $key }}"
+                                            {{ old('currency', $productReturn->currency ?? 'UZS') == $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -222,6 +253,7 @@
                             </button>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -312,14 +344,14 @@
                         <select name="items[${index}][product_variation_id]" class="form-select variation-select" required>
                             <option value="">Qidirish...</option>
                             @foreach($variations as $v)
-                                <option value="{{ $v->id }}" data-price="{{ $v->price }}" data-rate="{{ $v->rate }}">
+            <option value="{{ $v->id }}" data-price="{{ $v->price }}" data-rate="{{ $v->rate }}">
                                     {{ $v->title }} — {{ $v->product->title }} ({{ number_format($v->price, 0, '', ' ') }} сўм) [{{ \App\Helpers\CountHelper::format($v->count, $v->unit) }}]
                                 </option>
                             @endforeach
-                        </select>
-                    </td>
-                    <td>
-                        <input type="number" name="items[${index}][count]" step="0.001" class="form-control border-0 bg-light count" placeholder="0.00" required>
+            </select>
+        </td>
+        <td>
+            <input type="number" name="items[${index}][count]" step="0.001" class="form-control border-0 bg-light count" placeholder="0.00" required>
                     </td>
                     <td>
                         <input type="number" name="items[${index}][price]" class="form-control border-0 bg-light price" placeholder="0">
@@ -351,6 +383,38 @@
                 recalc();
             } else {
                 alert("Kamida bitta mahsulot bo'lishi lozim.");
+            }
+        });
+    });
+</script>
+
+<script>
+    function loadUsersByCurrency(currency, selectedUserId = null) {
+        const type = $('input[name="type"]').val(); // type DEBT bo'lishi kerak
+
+        $.get('{{ route('expense-and-income.users-by-currency') }}', {currency, type}, function(res) {
+            $('#user_id').html(res.options);
+
+            // Agar avval tanlangan user bo‘lsa — uni selectda belgilaymiz
+            if (selectedUserId) {
+                $('#user_id').val(selectedUserId).trigger('change');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        const type = parseInt($('input[name="type"]').val());
+        const initialCurrency = $('#currency').val();
+        const selectedUserId = '{{ old('user_id', $productReturn->user_id ?? '') }}';
+
+        if (type === {{ \App\Models\ExpenseAndIncome::TYPE_DEBT }}) {
+            $('#debt-user-wrapper').show();
+            loadUsersByCurrency(initialCurrency, selectedUserId);
+        }
+
+        $('#currency').change(function () {
+            if (type === {{ \App\Models\ExpenseAndIncome::TYPE_DEBT }}) {
+                loadUsersByCurrency($(this).val(), selectedUserId);
             }
         });
     });

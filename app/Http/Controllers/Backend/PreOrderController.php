@@ -136,8 +136,8 @@ class PreOrderController extends Controller
 
         // After save
         $pre_order->load(['user', 'customer', 'preOrderItems']);
-
         $message = TelegramHelper::preOrderMessage($pre_order);
+
         TelegramHelper::notifyPreOrder($message);
 
         return redirect()->route('pre-order.index')->with('success', 'Навбатдаги буюртма яратилди!');

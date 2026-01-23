@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Навбатдаги буюртани янгилаш: ' . ucfirst(optional($pre_order->user)->username) }}">
+<x-backend.layouts.main title="{!! 'Навбатдаги буюртани янгилаш: ' . ucfirst(optional($pre_order->user)->username) !!}">
 <div class="pre-order-update">
         <x-backend.pre-order.form
             :method="'PUT'"

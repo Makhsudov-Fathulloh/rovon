@@ -1,7 +1,49 @@
 <x-backend.layouts.main title="{{ 'Навбатдаги буюртма ( ' . $order->user->username . ' ) тури:' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.count {
+            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
+            border-left: 5px solid #00d68f;
+        }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="preOrderItemListFilterForm" method="GET" action="{{ route('pre-order-item.list', $order) }}">
                     <div class="table-responsive d-none d-md-block">
@@ -96,9 +138,6 @@
                                         <strong>{!! sortLink('count', 'Сони:') !!} </strong> <span
                                             class="fw-bold text-primary">{{ number_format($item->count, 0, '', ' ') }} та</span>
                                     </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at', 'Яратилди:') !!} </strong> {{ $item->created_at?->format('Y-m-d H:i') }}
-                                    </p>
                                     <div class="btn-group w-100">
                                         <x-backend.action route="pre-order-item" :id="$item->id" :view="true" :delete="true"/>
                                     </div>
@@ -111,45 +150,10 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center">
                     {{ $orderItems->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                   .card-stats {
-                       border-radius: 12px;
-                       padding: 20px;
-                       color: #fff;
-                       transition: 0.3s ease;
-                       text-align: center;
-                       display: flex;
-                       justify-content: space-between;
-                       align-items: center;
-                   }
-                   .card-stats:hover {
-                       transform: translateY(-5px);
-                       box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                   }
-                  .card-stats.count {
-                       background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                       border-left: 5px solid #00d68f;
-                   }
-
-                   .card-stats h5 {
-                       font-weight: 700;
-                       margin-bottom: 8px;
-                       font-size: 1.25rem;
-                   }
-                   .card-stats p {
-                       margin: 2px 0;
-                       font-size: 0.95rem;
-                   }
-                   .card-stats i {
-                       font-size: 2.2rem;
-                       opacity: 0.7;
-                   }
-               </style>
                <div class="row mt-4">
                    <div class="col-md-6 mb-3">
                        <div class="card-stats count">
