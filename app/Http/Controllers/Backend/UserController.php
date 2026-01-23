@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Http\Controllers\Controller;
-use App\Models\ExchangeRates;
 use App\Models\ExpenseAndIncome;
 use App\Models\File;
-use App\Models\Order;
 use App\Models\Role;
-use App\Models\Search\OrderSearch;
-use App\Models\Search\ShiftOutputWorkerSearch;
-use App\Models\Search\UserSearch;
+use App\Models\User;
+use App\Models\Order;
 use App\Models\Shift;
 use App\Models\Stage;
-use App\Models\User;
-use App\Services\DateFilterService;
+use App\Models\UserDebt;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Services\ExportService;
 use App\Services\StatusService;
-use Illuminate\Http\Request;
+use App\Models\Search\UserSearch;
+use App\Models\Search\OrderSearch;
+use App\Services\DateFilterService;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Search\ShiftOutputWorkerSearch;
 
 class UserController extends Controller
 {
@@ -56,30 +57,29 @@ class UserController extends Controller
 
         // Filterlangan user ID larni olish
         $filteredIds = $query->pluck('user.id');
-
         $userCount = $filteredIds->count();
 
         // Summalar
-        $debtUzs = \App\Models\UserDebt::whereIn('user_id', $filteredIds)
-            ->where('currency', \App\Services\StatusService::CURRENCY_UZS)
+        $totalDebtUzs = UserDebt::whereIn('user_id', $filteredIds)
+            ->where('currency', StatusService::CURRENCY_UZS)
             ->sum('amount');
 
-        $debtUsd = \App\Models\UserDebt::whereIn('user_id', $filteredIds)
-            ->where('currency', \App\Services\StatusService::CURRENCY_USD)
+        $totalDebtUsd = UserDebt::whereIn('user_id', $filteredIds)
+            ->where('currency', StatusService::CURRENCY_USD)
             ->sum('amount');
         } else {
             $userCount = User::where('role_id', $roleId)->count();
 
-            $debtUzs = \App\Models\UserDebt::whereHas('user', function ($q) use ($roleId) {
+            $totalDebtUzs = UserDebt::whereHas('user', function ($q) use ($roleId) {
                     $q->where('role_id', $roleId);
                 })
-                ->where('currency', \App\Services\StatusService::CURRENCY_UZS)
+                ->where('currency', StatusService::CURRENCY_UZS)
                 ->sum('amount');
 
-            $debtUsd = \App\Models\UserDebt::whereHas('user', function ($q) use ($roleId) {
+            $totalDebtUsd = UserDebt::whereHas('user', function ($q) use ($roleId) {
                     $q->where('role_id', $roleId);
                 })
-                ->where('currency', \App\Services\StatusService::CURRENCY_USD)
+                ->where('currency', StatusService::CURRENCY_USD)
                 ->sum('amount');
         }
 
@@ -90,8 +90,8 @@ class UserController extends Controller
             'clients',
             'isFiltered',
             'userCount',
-            'debtUzs',
-            'debtUsd',
+            'totalDebtUzs',
+            'totalDebtUsd',
         ));
     }
 
@@ -117,43 +117,40 @@ class UserController extends Controller
             }
         }
 
-        $staffs = User::whereNotIn('role_id', [$clientId, $developerId])
-            ->orderBy('id')
-            ->pluck('username', 'id');
-
+        $staffs = User::whereNotIn('role_id', [$clientId, $developerId])->orderBy('id')->pluck('username', 'id');
         $roles = Role::whereNotIn('title', ['Client', 'Developer'])->pluck('title', 'id');
-
+        $staffId = Role::whereNotIn('title', ['Developer', 'Client'])->pluck('id');
         $isFiltered = count($request->get('filters', [])) > 0;
 
-            if ($isFiltered) {
-             // Filterlangan user ID larni olish
-             $filteredIds = $query->pluck('user.id');
+        if ($isFiltered) {
+            // Filterlangan user ID larni olish
+            $filteredIds = $query->pluck('user.id');
 
-             $staffCount = $filteredIds->count();
+            $staffCount = $filteredIds->count();
 
-             // Summalar
-             $debtUzs = \App\Models\UserDebt::whereIn('user_id', $filteredIds)
-                 ->where('currency', \App\Services\StatusService::CURRENCY_UZS)
-                 ->sum('amount');
+            // Summalar
+            $totalDebtUzs = UserDebt::whereIn('user_id', $filteredIds)
+                ->where('currency', StatusService::CURRENCY_UZS)
+                ->sum('amount');
 
-             $debtUsd = \App\Models\UserDebt::whereIn('user_id', $filteredIds)
-                 ->where('currency', \App\Services\StatusService::CURRENCY_USD)
-                 ->sum('amount');
-           }  else {
-                $staffCount = User::where('role_id', $clientId)->count();
+            $totalDebtUsd = UserDebt::whereIn('user_id', $filteredIds)
+                ->where('currency', StatusService::CURRENCY_USD)
+                ->sum('amount');
+        } else {
+            $staffCount = User::whereIn('role_id', $staffId)->count();
 
-                $debtUzs = \App\Models\UserDebt::whereHas('user', function ($q) use ($clientId) {
-                        $q->where('role_id', $clientId);
-                    })
-                    ->where('currency', \App\Services\StatusService::CURRENCY_UZS)
-                    ->sum('amount');
+            $totalDebtUzs = UserDebt::whereHas('user', function ($q) use ($staffId) {
+                $q->whereIn('role_id', $staffId);
+            })
+                ->where('currency', StatusService::CURRENCY_UZS)
+                ->sum('amount');
 
-                $debtUsd = \App\Models\UserDebt::whereHas('user', function ($q) use ($clientId) {
-                        $q->where('role_id', $clientId);
-                    })
-                    ->where('currency', \App\Services\StatusService::CURRENCY_USD)
-                    ->sum('amount');
-            }
+            $totalDebtUsd = UserDebt::whereHas('user', function ($q) use ($staffId) {
+                $q->whereIn('role_id', $staffId);
+            })
+                ->where('currency', StatusService::CURRENCY_USD)
+                ->sum('amount');
+        }
 
         $users = $query->with('userDebt')->orderByDesc('created_at')->paginate(20)->withQueryString();
 
@@ -163,8 +160,8 @@ class UserController extends Controller
             'roles',
             'isFiltered',
             'staffCount',
-            'debtUzs',
-            'debtUsd',
+            'totalDebtUzs',
+            'totalDebtUsd',
         ));
     }
 
@@ -209,20 +206,16 @@ class UserController extends Controller
             $orderCountUzs = (clone $statsQuery)->where('currency', StatusService::CURRENCY_UZS)->whereYear('created_at', now()->year)->count();
             $orderTotalPriceUzs = (clone $statsQuery)->where('currency', StatusService::CURRENCY_UZS)->whereYear('created_at', now()->year)->sum('total_price');
             $orderAmountPaidUzs = (clone $statsQuery)->where('currency', StatusService::CURRENCY_UZS)->whereYear('created_at', now()->year)->sum('total_amount_paid');
-
-            $remainingDebtUzs = (clone $statsQuery)->where('currency', StatusService::CURRENCY_UZS)->whereYear('created_at', now()->year)->sum('remaining_debt');
-            $paidDebtUzs = ExpenseAndIncome::where('user_id', $user->id)->where('type', ExpenseAndIncome::TYPE_DEBT)->where('currency', StatusService::CURRENCY_UZS)->whereYear('created_at', now()->year)->sum('amount');
-            $orderRemainingDebtUzs = max(0, $remainingDebtUzs - $paidDebtUzs);
+            $remainingDebtUzs = $debts->firstWhere('currency', StatusService::CURRENCY_UZS)['total_amount'] ?? 0;
 
             $orderCountUsd = (clone $statsQuery)->where('currency', StatusService::CURRENCY_USD)->whereYear('created_at', now()->year)->count();
             $orderTotalPriceUsd = (clone $statsQuery)->where('currency', StatusService::CURRENCY_USD)->whereYear('created_at', now()->year)->sum('total_price');
             $orderAmountPaidUsd = (clone $statsQuery)->where('currency', StatusService::CURRENCY_USD)->whereYear('created_at', now()->year)->sum('total_amount_paid');
+            $remainingDebtUsd = $debts->firstWhere('currency', StatusService::CURRENCY_USD)['total_amount'] ?? 0;
 
-            $remainingDebtUsd = (clone $statsQuery)->where('currency', StatusService::CURRENCY_USD)->whereYear('created_at', now()->year)->sum('remaining_debt');
-            $paidDebtUsd = ExpenseAndIncome::where('user_id', $user->id)->where('type', ExpenseAndIncome::TYPE_DEBT)->where('currency', StatusService::CURRENCY_USD)->whereYear('created_at', now()->year)->sum('amount');
-            $orderRemainingDebtUsd = max(0, $remainingDebtUsd - $paidDebtUsd);
+            $exportQuery = clone $query;
+            $exportOrders = $exportQuery->pluck('id')->toArray();
 
-            // Pagination
             $orders = $query->paginate(20)->withQueryString();
 
             return view('backend.user.show', compact(
@@ -235,9 +228,10 @@ class UserController extends Controller
                 'orderTotalPriceUsd',
                 'orderAmountPaidUzs',
                 'orderAmountPaidUsd',
-                'orderRemainingDebtUzs',
-                'orderRemainingDebtUsd',
-                'debts'
+                'remainingDebtUzs',
+                'remainingDebtUsd',
+                'debts',
+                'exportOrders'
             ));
         }
 
@@ -277,7 +271,7 @@ class UserController extends Controller
             if ($isFiltered) {
                 // === 🔹 Kun bo‘yicha filter ===
                 if (!empty($filters['created_at'])) {
-                    $date = \Carbon\Carbon::parse($filters['created_at']);
+                    $date = Carbon::parse($filters['created_at']);
 
                     $filteredQuery = (clone $query)->whereDate('created_at', $date->format('Y-m-d'));
 
@@ -287,7 +281,7 @@ class UserController extends Controller
 
                     // === 🔹 Oy bo‘yicha filter ===
                 } elseif (!empty($filters['created_at'])) {
-                    $date = \Carbon\Carbon::createFromFormat('m-Y', $filters['created_at']);
+                    $date = Carbon::createFromFormat('m-Y', $filters['created_at']);
 
                     $filteredQuery = (clone $query)
                         ->whereYear('created_at', $date->year)
@@ -297,20 +291,21 @@ class UserController extends Controller
                     $totalDefectAmount = $filteredQuery->sum('defect_amount');
                     $totalPrice = $filteredQuery->sum('price');
 
-                    // === 🔹 Boshqa filterlar bo‘lsa ===
                 } else {
                     $totalStageCount = $query->sum('stage_count');
                     $totalDefectAmount = $query->sum('defect_amount');
                     $totalPrice = $query->sum('price');
                 }
             } else {
-                // === 🔹 Default — joriy oy boshidan hozirgacha ===
                 $filteredQuery = (clone $query)->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month);
 
                 $totalStageCount = $filteredQuery->sum('stage_count');
                 $totalDefectAmount = $filteredQuery->sum('defect_amount');
                 $totalPrice = $filteredQuery->sum('price');
             }
+
+            $exportQuery = clone $query;
+            $exportShiftOutputWorkers = $exportQuery->pluck('id')->toArray();
 
             $shiftOutputWorkers = $query->with('user.userDebt')->paginate(20)->withQueryString();
 
@@ -322,7 +317,8 @@ class UserController extends Controller
                 'totalStageCount',
                 'totalDefectAmount',
                 'totalPrice',
-                'debts'
+                'debts',
+                'exportShiftOutputWorkers',
             ));
         }
 
@@ -354,7 +350,7 @@ class UserController extends Controller
                 $isFiltered = count($filters) > 0;
 
                 $filterDate = $filters['created_at'] ?? null;
-                $date = $filterDate ? \Carbon\Carbon::parse($filterDate) : now();
+                $date = $filterDate ? Carbon::parse($filterDate) : now();
 
                 $shifts = Shift::whereHas('shiftOutputs.shiftOutputWorkers', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
@@ -427,21 +423,21 @@ class UserController extends Controller
 
         $request->validate(
             [
-                'first_name'       => 'nullable|string|max:100',
-                'last_name'        => 'nullable|string|max:100',
-                'username'         => 'required|string|max:64|unique:user,username',
-                'address'          => 'nullable|string',
-                'password_hash'    => 'nullable|string|min:6',
-                'email'            => 'nullable|email',
-                'photo'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-                'phone'            => ['nullable', 'regex:/^\+998\s?\(\d{2}\)\s?\d{3}\s?\d{2}\s?\d{2}$/'],
+                'first_name'     => 'nullable|string|max:100',
+                'last_name'      => 'nullable|string|max:100',
+                'username'       => 'required|string|max:64|unique:user,username',
+                'address'        => 'nullable|string',
+                'password_hash'  => 'nullable|string|min:6',
+                'email'          => 'nullable|email',
+                'photo'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'phone' => ['nullable', 'regex:/^\+998\s?\(\d{2}\)\s?\d{3}\s?\d{2}\s?\d{2}$/'],
                 'telegram_chat_id' => 'nullable|integer',
-                'currency'         => 'nullable|in:' . implode(',', [StatusService::CURRENCY_UZS, StatusService::CURRENCY_USD]),
-                'debt'             => 'nullable|numeric|min:0',
-                'role_id'          => 'nullable|integer|exists:role,id',
-                'status'           => 'nullable|in:-1,0,1',
-                'token'            => 'nullable|string',
-                'auth_key'         => 'nullable|string',
+                'currency'       => 'nullable|in:' . implode(',', [StatusService::CURRENCY_UZS, StatusService::CURRENCY_USD]),
+                'debt'           => 'nullable|numeric|min:0',
+                'role_id'        => 'nullable|integer|exists:role,id',
+                'status'         => 'nullable|in:-1,0,1',
+                'token'          => 'nullable|string',
+                'auth_key'       => 'nullable|string',
             ],
             [
                 'username.required' => 'Фойдаланувчи номи мажбурий.',
@@ -485,9 +481,10 @@ class UserController extends Controller
         // 🔹 Qarzdorlik bo‘lsa — userDebt yaratiladi
         if ($request->debt > 0) {
             $user->userDebt()->create([
-                'user_id' => $request->debt,
+                'user_id' => $user->id,
                 'amount' => $request->debt,
                 'currency' => $request->currency,
+                'source' => UserDebt::SOURCE_MANUAL,
             ]);
         }
 
@@ -626,54 +623,24 @@ class UserController extends Controller
         // 🔹 1. UZS debt
         if ($request->filled('debt_uzs')) {
             $debtUzs = (float) str_replace(' ', '', $request->debt_uzs);
-            $userDebtUzs = $user->userDebt()->where('currency', StatusService::CURRENCY_UZS)->first();
-
-            if ($userDebtUzs) {
-                // mavjud qarzni kamaytirish mumkin emas
-                if ($debtUzs < $userDebtUzs->amount) {
-                    return back()->withErrors(['debt_uzs' => 'Сўмдаги қарзни камайтириб бўлмайди!'])->withInput();
-                }
-
-                // oshirish kerak bo‘lsa yangilaymiz
-                if ($debtUzs > $userDebtUzs->amount) {
-                    $userDebtUzs->update(['amount' => $debtUzs]);
-                }
-            } else {
-                // UZS bo‘yicha yangi qarz yaratiladi
-                if ($debtUzs > 0) {
-                    $user->userDebt()->create([
-                        'amount' => $debtUzs,
-                        'currency' => StatusService::CURRENCY_UZS,
-                        'user_id' => $user->id,
-                    ]);
-                }
+            if ($debtUzs > 0) {
+                $userDebtUzs = $user->userDebt()->firstOrNew(['currency' => StatusService::CURRENCY_UZS]);
+                $userDebtUzs->amount = ($userDebtUzs->amount ?? 0) + $debtUzs;
+                $userDebtUzs->user_id = $user->id;
+                $userDebtUzs->source = UserDebt::SOURCE_MANUAL;
+                $userDebtUzs->save();
             }
         }
 
         // 🔹 2. USD debt
         if ($request->filled('debt_usd')) {
             $debtUsd = (float) str_replace(' ', '', $request->debt_usd);
-            $userDebtUsd = $user->userDebt()->where('currency', StatusService::CURRENCY_USD)->first();
-
-            if ($userDebtUsd) {
-                // mavjud qarzni kamaytirish mumkin emas
-                if ($debtUsd < $userDebtUsd->amount) {
-                    return back()->withErrors(['debt_usd' => 'Доллардаги қарзни камайтириб бўлмайди!'])->withInput();
-                }
-
-                // oshirish kerak bo‘lsa yangilaymiz
-                if ($debtUsd > $userDebtUsd->amount) {
-                    $userDebtUsd->update(['amount' => $debtUsd]);
-                }
-            } else {
-                // USD bo‘yicha yangi qarz yaratiladi
-                if ($debtUsd > 0) {
-                    $user->userDebt()->create([
-                        'amount' => $debtUsd,
-                        'currency' => StatusService::CURRENCY_USD,
-                        'user_id' => $user->id,
-                    ]);
-                }
+            if ($debtUsd > 0) {
+                $userDebtUsd = $user->userDebt()->firstOrNew(['currency' => StatusService::CURRENCY_USD]);
+                $userDebtUsd->amount = ($userDebtUsd->amount ?? 0) + $debtUsd;
+                $userDebtUsd->user_id = $user->id;
+                $userDebtUsd->source = UserDebt::SOURCE_MANUAL;
+                $userDebtUsd->save();
             }
         }
 

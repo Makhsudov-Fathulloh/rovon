@@ -6,15 +6,50 @@
 
 <x-backend.layouts.main title="{{ 'Ҳодимлар' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 180px; /* minimal kenglik */
+            flex: 1 1 200px; /* responsive */
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-stats.client { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+        .card-stats.uzs { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
+        .card-stats.usd { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header">
                 @can('hasAccess')
                     <div class="row justify-content-start">
                         <div class="col-sm-12 col-md-auto text-start">
-                            <a href="{{ route('user.create') }}" class="btn btn-primary w-100 w-md-auto">
-                                {{ 'Яратиш' }}
-                            </a>
+                            <x-backend.action route="user" :back="true" :create="true"/>
                         </div>
                     </div>
                 @endcan
@@ -246,47 +281,10 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center">
                     {{ $users->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        min-width: 180px; /* minimal kenglik */
-                        flex: 1 1 200px; /* responsive */
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-
-                    .card-stats.client { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.uzs { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-                    .card-stats.usd { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="d-flex flex-wrap gap-3 mt-4">
                     <!-- Client -->
                     <div class="card-stats client">
@@ -302,8 +300,8 @@
                     <!-- UZS -->
                     <div class="card-stats uzs">
                         <div class="w-100">
-                           <p>Қарздорлик(сўм)</strong></p>
-                            <h5>{{ number_format($debtUzs, 0, '', ' ') }} сўм</h5>
+                           <p>Қарздорлик(сўм)</p>
+                            <h5>{{ number_format($totalDebtUzs, 0, '', ' ') }} сўм</h5>
                         </div>
                         <div>
                             <i class="bi bi-currency-exchange"></i>
@@ -314,7 +312,7 @@
                     <div class="card-stats usd">
                         <div class="w-100">
                             <p>Қарздорлик($)</p>
-                            <h5>{{ number_format($debtUsd, 2, '.', ' ') }} $</h5>
+                            <h5>{{ number_format($totalDebtUsd, 2, '.', ' ') }} $</h5>
                         </div>
                         <div>
                             <i class="bi bi-currency-euro"></i>

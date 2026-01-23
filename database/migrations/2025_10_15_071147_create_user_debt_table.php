@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\UserDebt;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,6 +15,7 @@ return new class extends Migration
             $table->foreignId('order_id')->nullable()->constrained('order')->cascadeOnDelete();
             $table->decimal('amount', 16, 3);
             $table->string('currency', 3);
+            $table->tinyInteger('source')->default(UserDebt::SOURCE_ORDER);
             $table->timestamps();
         });
     }

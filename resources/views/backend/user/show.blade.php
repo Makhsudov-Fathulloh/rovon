@@ -2,6 +2,7 @@
     use App\Services\StatusService;
     use App\Models\Order;
     use App\Helpers\PriceHelper;
+    use App\Models\ShiftOutputWorker;
 
     switch ($user->role->title) {
         case 'Client':
@@ -55,12 +56,14 @@
                 </tr>
                 <tr>
                     <th>Фойдаланувчи</th>
-                    <td>{{ $user->username ?? ' ' }}</td>
+                    <td>{{ $user->username }}</td>
                 </tr>
-                <tr>
-                    <th>E-mail</th>
-                    <td>{{ $user->email ?? ' ' }}</td>
-                </tr>
+                @if($user->telegram_chat_id)
+                    <tr>
+                        <th>E-mail</th>
+                        <td>{{ $user->email }}</td>
+                    </tr>
+                @endif
                 <tr>
                     <th>Телефон</th>
                     <td>{{ $user->phone }}</td>
@@ -69,12 +72,12 @@
                     <th>Даража</th>
                     <td>{{ $user->role->title }}</td>
                 </tr>
-                @can('hasAccess')
-                <tr>
-                    <th>Telegram ID</th>
-                    <td class="text-info fw-bold">{{ $user->telegram_chat_id }}</td>
-                </tr>
-                @endcan
+                @if($user->telegram_chat_id)
+                    <tr>
+                        <th>Telegram ID</th>
+                        <td class="text-info fw-bold">{{ $user->telegram_chat_id }}</td>
+                    </tr>
+                @endif
                 <tr>
                     <th>Статус</th>
                     <td>{{ StatusService::getList()[$user->status] }}</td>
@@ -121,8 +124,8 @@
                                 <th>{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th>
                                     <x-backend.export
-                                        :model="\App\Models\Order::class"
-                                        :where="['user_id' => $orders->pluck('user_id')->toArray()]"
+                                        :model="Order::class"
+                                        :where="['id' => $exportOrders]"
                                         :columns="[
                                             'id' => 'ID',
                                             'user.username' => 'Мижоз',
@@ -136,11 +139,11 @@
                                             'Буюртмалар сони:' => number_format($orderCountUzs, 0, '', ' ') . ' та (сўм)' . ' • ' . number_format($orderCountUsd, 2, '.', ' ') . ' та ($)',
                                             'Умумий сумма:'     => number_format($orderTotalPriceUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderTotalPriceUsd, 2, '.', ' ') . ' $',
                                             'Тўланган сумма:'    => number_format($orderAmountPaidUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderAmountPaidUsd, 2, '.', ' ') . ' $',
-                                            'Умумий қарздорлик:'    => number_format($orderRemainingDebtUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderRemainingDebtUsd, 2, '.', ' ') . ' $',
+                                            'Умумий қарздорлик:'    => number_format($remainingDebtUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($remainingDebtUsd, 2, '.', ' ') . ' $',
                                         ]"
                                         :header="[
                                             'title' => 'Rovon textile',
-                                            'subtitle' => 'Смена ҳисоботи',
+                                            'subtitle' => 'Савдо ҳисоботи',
                                             'date' => now()->format('d.m.Y'),
                                             'logo_left' => 'images/logo-text-.png',
                                             'logo_right' => 'images/logo-text-.png',
@@ -183,14 +186,14 @@
                                     </select>
                                 </th>
                                 <th>
-                                  <div class="d-flex">
-                                      <input type="date" name="filters[created_from]"
-                                             value="{{ request('filters.created_from') }}"
-                                             class="form-control form-control-sm me-1" placeholder="From">
-                                      <input type="date" name="filters[created_to]"
-                                             value="{{ request('filters.created_to') }}"
-                                             class="form-control form-control-sm" placeholder="To">
-                                  </div>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
                                 </th>
                                 <th>
                                     <button type="submit" class="btn btn-sm btn-primary w-100"><i
@@ -242,12 +245,40 @@
                     {{-- Mobile version start --}}
                     <div class="d-md-none">
                         <div class="d-flex mb-2">
-                           <input type="date" name="filters[created_from]"
-                                  value="{{ request('filters.created_from') }}"
-                                  class="form-control form-control-sm me-1" placeholder="From">
-                           <input type="date" name="filters[created_to]"
-                                  value="{{ request('filters.created_to') }}"
-                                  class="form-control form-control-sm" placeholder="To">
+                            <div class="mt-1">
+                                <x-backend.export
+                                    :model="Order::class"
+                                    :where="['id' => $exportOrders]"
+                                    :columns="[
+                                            'id' => 'ID',
+                                            'user.username' => 'Мижоз',
+                                            'total_price:price_format' => 'Умумий нарх',
+                                            'total_amount_paid:price_format' => 'Тўланган сумма',
+                                            'remaining_debt:price_format' => 'Қолган қарз',
+                                            'seller.username' => 'Сотувчи',
+                                            'created_at:datetime' => 'Яратилди',
+                                        ]"
+                                    :totals="[
+                                            'Буюртмалар сони:' => number_format($orderCountUzs, 0, '', ' ') . ' та (сўм)' . ' • ' . number_format($orderCountUsd, 2, '.', ' ') . ' та ($)',
+                                            'Умумий сумма:'     => number_format($orderTotalPriceUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderTotalPriceUsd, 2, '.', ' ') . ' $',
+                                            'Тўланган сумма:'    => number_format($orderAmountPaidUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderAmountPaidUsd, 2, '.', ' ') . ' $',
+                                            'Умумий қарздорлик:'    => number_format($remainingDebtUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($remainingDebtUsd, 2, '.', ' ') . ' $',
+                                        ]"
+                                    :header="[
+                                            'title' => 'Rovon textile',
+                                            'subtitle' => 'Савдо ҳисоботи',
+                                            'date' => now()->format('d.m.Y'),
+                                            'logo_left' => 'images/logo-text-.png',
+                                            'logo_right' => 'images/logo-text-.png',
+                                        ]"
+                                />
+                            </div>
+                            <input type="date" name="filters[created_from]"
+                                   value="{{ request('filters.created_from') }}"
+                                   class="form-control form-control-sm me-1" placeholder="From">
+                            <input type="date" name="filters[created_to]"
+                                   value="{{ request('filters.created_to') }}"
+                                   class="form-control form-control-sm" placeholder="To">
                             <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
                                 <i class="fa fa-search"></i>
                             </button>
@@ -324,25 +355,43 @@
                         min-width: 180px; /* minimal kenglik */
                         flex: 1 1 200px; /* responsive */
                     }
+
                     .card-stats:hover {
                         transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+                        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
                     }
 
-                    .card-stats.count { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.total { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-                    .card-stats.paid { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-                    .card-stats.debt { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
+                    .card-stats.count {
+                        background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%);
+                        border-left: 5px solid #00d68f;
+                    }
+
+                    .card-stats.total {
+                        background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%);
+                        border-left: 5px solid #00a8ff;
+                    }
+
+                    .card-stats.paid {
+                        background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%);
+                        border-left: 5px solid #8e76ff;
+                    }
+
+                    .card-stats.debt {
+                        background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%);
+                        border-left: 5px solid #ff6b81;
+                    }
 
                     .card-stats h5 {
                         font-weight: 700;
                         margin-bottom: 8px;
                         font-size: 1.25rem;
                     }
+
                     .card-stats p {
                         margin: 2px 0;
                         font-size: 0.95rem;
                     }
+
                     .card-stats i {
                         font-size: 2.2rem;
                         opacity: 0.7;
@@ -354,8 +403,8 @@
                         <div class="w-100">
                             <p>Буюртмалар сони:</p>
                             <h5>
-                              {{ number_format($orderCountUzs, 0, '', ' ') }} та<br>
-                              {{ number_format($orderCountUsd, 0, '', ' ') }} та
+                                {{ number_format($orderCountUzs, 0, '', ' ') }} та<br>
+                                {{ number_format($orderCountUsd, 0, '', ' ') }} та
                             </h5>
                         </div>
                         <div>
@@ -368,8 +417,8 @@
                         <div class="w-100">
                             <p>Умумий сумма:</p>
                             <h5>
-                              {{ number_format($orderTotalPriceUzs, 0, '', ' ') }} сўм<br>
-                              {{ number_format($orderTotalPriceUsd, 2, '.', ' ') }} $
+                                {{ number_format($orderTotalPriceUzs, 0, '', ' ') }} сўм<br>
+                                {{ number_format($orderTotalPriceUsd, 2, '.', ' ') }} $
                             </h5>
                         </div>
                         <div>
@@ -382,8 +431,8 @@
                         <div class="w-100">
                             <p>Тўланган сумма:</p>
                             <h5>
-                              {{ number_format($orderAmountPaidUzs, 0, '', ' ') }} сўм<br>
-                              {{ number_format($orderAmountPaidUsd, 2, '.', ' ') }} $
+                                {{ number_format($orderAmountPaidUzs, 0, '', ' ') }} сўм<br>
+                                {{ number_format($orderAmountPaidUsd, 2, '.', ' ') }} $
                             </h5>
                         </div>
                         <div>
@@ -396,8 +445,8 @@
                         <div class="w-100">
                             <p>Умумий қарздорлик:</p>
                             <h5>
-                              {{ number_format($orderRemainingDebtUzs, 0, '', ' ') }} сўм<br>
-                              {{ number_format($orderRemainingDebtUsd, 2, '.', ' ') }} $
+                                {{ number_format($remainingDebtUzs, 0, '', ' ') }} сўм<br>
+                                {{ number_format($remainingDebtUsd, 2, '.', ' ') }} $
                             </h5>
                         </div>
                         <div>
@@ -405,8 +454,6 @@
                         </div>
                     </div>
                 </div>
-
-
             @endif
 
             {{-- Agar Worker bo‘lsa --}}
@@ -427,10 +474,11 @@
                                 <th class="col-date">{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th>
                                     <x-backend.export
-                                        :model="\App\Models\ShiftOutputWorker::class"
-                                        :where="['shift_output_id' => $shiftOutputWorkers->pluck('shift_output_id')->toArray()]"
+                                        :model="ShiftOutputWorker::class"
+                                        :where="['id' => $exportShiftOutputWorkers]"
                                         :columns="[
                                             'id' => 'ID',
+                                            'user.username' => 'Ходим',
                                             'shiftOutput.shift.title' => 'Смена',
                                             'shiftOutput.stage.title' => 'Маҳсулот',
                                             'stage_count' => 'Миқдори',
@@ -441,10 +489,10 @@
                                         :totals="[
                                             'Жами маҳсулот:' => number_format($totalStageCount, 0, '', ' ') . ' та',
                                             'Жами брак:'     => number_format($totalDefectAmount, 3, '.', ' ') . ' кг',
-                                            'Жами сумма:'    => number_format($totalPrice, 2, '.', ' ') . ' сўм',
+                                            'Жами сумма:'    => number_format($totalPrice, 0, '', ' ') . ' сўм',
                                         ]"
                                         :header="[
-                                            'title' => config('app.name'),
+                                            'title' => 'Rovon textile',
                                             'subtitle' => 'Смена ҳисоботи',
                                             'date' => now()->format('d.m.Y'),
                                             'logo_left' => 'images/logo-text-.png',
@@ -489,16 +537,16 @@
                                            class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
                                 <th><input type="text" name="filters[price]" value="{{ request('filters.price') }}"
                                            class="form-control form-control-sm w-100 filter-numeric"></th>
-                               <th>
-                                 <div class="d-flex">
-                                     <input type="date" name="filters[created_from]"
-                                            value="{{ request('filters.created_from') }}"
-                                            class="form-control form-control-sm me-1" placeholder="From">
-                                     <input type="date" name="filters[created_to]"
-                                            value="{{ request('filters.created_to') }}"
-                                            class="form-control form-control-sm" placeholder="To">
-                                 </div>
-                               </th>
+                                <th>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
+                                </th>
 
                                 @if(session('date_format_errors'))
                                     <div class="alert alert-danger mt-2">
@@ -527,11 +575,7 @@
                                     <td class="fw-bold text-info">{{ number_format($s->price, 0, '', ' ') }}</td>
                                     <td>{{ $s->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>
-                                        <x-backend.action
-                                            route="shift-output-worker"
-                                            :id="$s->id"
-                                            :view="true"
-                                        />
+                                        <x-backend.action route="shift-output-worker" :id="$s->id" :view="true"/>
                                     </td>
                                 </tr>
                             @empty
@@ -547,11 +591,12 @@
                     <div class="d-md-none">
                         <div class="d-flex mb-2">
                             <div class="mt-1">
-                              <x-backend.export
-                                  :model="\App\Models\ShiftOutputWorker::class"
-                                  :where="['shift_output_id' => $shiftOutputWorkers->pluck('shift_output_id')->toArray()]"
-                                  :columns="[
+                                <x-backend.export
+                                    :model="ShiftOutputWorker::class"
+                                    :where="['id' => $exportShiftOutputWorkers]"
+                                    :columns="[
                                       'id' => 'ID',
+                                      'user.username' => 'Ходим',
                                       'shiftOutput.shift.title' => 'Смена',
                                       'shiftOutput.stage.title' => 'Маҳсулот',
                                       'stage_count' => 'Миқдори',
@@ -559,19 +604,19 @@
                                       'price' => 'Нархи',
                                       'created_at:datetime' => 'Яратилди',
                                   ]"
-                                  :totals="[
+                                    :totals="[
                                       'Жами маҳсулот:' => number_format($totalStageCount, 0, '', ' ') . ' та',
                                       'Жами брак:'     => number_format($totalDefectAmount, 3, '.', ' ') . ' кг',
-                                      'Жами сумма:'    => number_format($totalPrice, 2, '.', ' ') . ' сўм',
+                                      'Жами сумма:'    => number_format($totalPrice, 0, '', ' ') . ' сўм',
                                   ]"
-                                  :header="[
+                                    :header="[
                                       'title' => config('app.name'),
                                       'subtitle' => 'Смена ҳисоботи',
                                       'date' => now()->format('d.m.Y'),
                                       'logo_left' => 'images/logo-text-.png',
                                       'logo_right' => 'images/logo-text-.png',
                                   ]"
-                              />
+                                />
                             </div>
                             <select name="filters[stage_id]"
                                     class="form-control form-control-sm w-100">
@@ -629,24 +674,38 @@
                         min-width: 180px; /* minimal kenglik */
                         flex: 1 1 200px; /* responsive */
                     }
+
                     .card-stats:hover {
                         transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+                        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
                     }
 
-                    .card-stats.product { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.defect { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-                    .card-stats.total { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+                    .card-stats.product {
+                        background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%);
+                        border-left: 5px solid #00d68f;
+                    }
+
+                    .card-stats.defect {
+                        background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%);
+                        border-left: 5px solid #00a8ff;
+                    }
+
+                    .card-stats.total {
+                        background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%);
+                        border-left: 5px solid #8e76ff;
+                    }
 
                     .card-stats h5 {
                         font-weight: 700;
                         margin-bottom: 8px;
                         font-size: 1.25rem;
                     }
+
                     .card-stats p {
                         margin: 2px 0;
                         font-size: 0.95rem;
                     }
+
                     .card-stats i {
                         font-size: 2.2rem;
                         opacity: 0.7;
@@ -656,7 +715,7 @@
                     <!-- Product -->
                     <div class="card-stats product">
                         <div class="w-100">
-                           <p>Жами маҳсулот:</p>
+                            <p>Жами маҳсулот:</p>
                             <h5>{{ number_format($totalStageCount, 0, '', ' ') }} та</h5>
                         </div>
                         <div>
@@ -667,7 +726,7 @@
                     <!-- Defect -->
                     <div class="card-stats defect">
                         <div class="w-100">
-                           <p>Жами брак:</strong></p>
+                            <p>Жами брак:</p>
                             <h5>{{ number_format($totalDefectAmount, 3, '.', ' ') }} кг</h5>
                         </div>
                         <div>

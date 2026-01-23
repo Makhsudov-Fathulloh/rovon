@@ -15,11 +15,6 @@ class User extends Authenticatable
 
     protected $table = 'user';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'first_name',
         'last_name',
@@ -37,11 +32,6 @@ class User extends Authenticatable
         'auth_key',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password_hash',
         'remember_token',
@@ -49,11 +39,6 @@ class User extends Authenticatable
         'auth_key',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password_hash' => 'hashed',

@@ -9,6 +9,9 @@ class UserDebt extends Model
 {
     use HasFactory;
 
+    public const SOURCE_ORDER  = 1;
+    public const SOURCE_MANUAL = 2;
+
     protected $table = 'user_debt';
 
     protected $fillable = [
@@ -16,15 +19,11 @@ class UserDebt extends Model
         'order_id',
         'amount',
         'currency',
+        'source',
     ];
 
-    /**
-     * Foydalanuvchiga bog‘lanish
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 }
-
-
