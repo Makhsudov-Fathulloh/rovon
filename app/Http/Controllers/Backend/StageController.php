@@ -10,6 +10,7 @@ use App\Models\Section;
 use App\Models\Search\StageSearch;
 use App\Models\Stage;
 use App\Services\DateFilterService;
+use App\Services\StatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -74,13 +75,26 @@ class StageController extends Controller
 
     public function getPreStages($sectionId)
     {
-        $section = Section::find($sectionId);
+        //     $section = Section::find($sectionId);
 
-        if (!$section || !$section->previous_id) {
-            return collect(); // Oldingi section mavjud bo'lmasa, bo'sh kolleksiya qaytaradi
-        }
+        //     if (!$section || !$section->previous_id) {
+        //         return collect(); // Oldingi section mavjud bo'lmasa, bo'sh kolleksiya qaytaradi
+        //     }
 
-        return Stage::where('section_id', $section->previous_id)->orderBy('id')->get(['id', 'title']);
+        //     return Stage::where('section_id', $section->previous_id)->orderBy('id')->get(['id', 'title']);
+
+        $stages = Stage::with('preStages')->get();
+
+        // JSON formatda preStages id larini jo‘natish
+        $data = $stages->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'title' => $s->title,
+                'pre_stage_ids' => $s->preStages->pluck('id')->toArray(),
+            ];
+        });
+
+        return response()->json($data);
     }
 
 
@@ -88,10 +102,15 @@ class StageController extends Controller
     {
         $organizations = Organization::pluck('title', 'id');
         $rawMaterialVariations = RawMaterialVariation::whereHas('rawMaterial.category', function ($q) {
-            $q->where('type', Category::TYPE_RAW_MATERIAL);
+            $q->whereIn('type', [
+                StatusService::TYPE_RAW_MATERIAL,
+                StatusService::TYPE_ALL
+            ]);
         })->get();
 
-        return view('backend.stage.create', compact('organizations', 'rawMaterialVariations'));
+        $stage = new Stage();
+
+        return view('backend.stage.create', compact('organizations', 'rawMaterialVariations', 'stage'));
     }
 
     public function store(Request $request)
@@ -103,10 +122,12 @@ class StageController extends Controller
         $request->validate([
             'organization_id' => 'required|exists:organization,id',
             'section_id' => 'required|exists:section,id',
-            'pre_stage_id' => 'nullable|exists:stage,id',
+            'pre_stage_ids' => 'nullable|array',
+            'pre_stage_ids.*' => 'exists:stage,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'defect_type' => 'required|in:1,2',
         ], [
             'organization_id.required' => 'Филиални танлаш мажбурий.',
             'section_id.required' => 'Бўлимни танлаш мажбурий.',
@@ -116,11 +137,13 @@ class StageController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            $stage = Stage::create($request->only(['section_id', 'pre_stage_id', 'title', 'description', 'price', 'status']));
+            $stage = Stage::create($request->only(['section_id', 'title', 'description', 'price', 'defect_type', 'status']));
 
             foreach ($request->stage_materials ?? [] as $materialData) {
                 $stage->stageMaterials()->create($materialData);
             }
+
+            $stage->preStages()->sync($request->pre_stage_ids ?? []);
         });
 
         return redirect()->route('stage.index')->with('success', 'Бўлим махсулоти яратилди!');
@@ -132,7 +155,10 @@ class StageController extends Controller
         $organizations = Organization::pluck('title', 'id');
         $sections = Section::all();
         $rawMaterialVariations = RawMaterialVariation::whereHas('rawMaterial.category', function ($q) {
-            $q->where('type', Category::TYPE_RAW_MATERIAL);
+            $q->whereIn('type', [
+                StatusService::TYPE_RAW_MATERIAL,
+                StatusService::TYPE_ALL
+            ]);
         })->get();
 
         return view('backend.stage.update', compact('stage', 'organizations', 'sections', 'rawMaterialVariations'));
@@ -147,10 +173,12 @@ class StageController extends Controller
         $request->validate([
             'organization_id' => 'required|exists:organization,id',
             'section_id' => 'required|exists:section,id',
-            'pre_stage_id' => 'nullable|exists:stage,id',
+            'pre_stage_ids' => 'nullable|array',
+            'pre_stage_ids.*' => 'exists:stage,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'defect_type' => 'required|in:1,2',
         ], [
             'organization_id.required' => 'Филиални танлаш мажбурий.',
             'section_id.required' => 'Бўлимни танлаш мажбурий.',
@@ -161,15 +189,15 @@ class StageController extends Controller
 
 
         DB::transaction(function () use ($request, $stage) {
-            $stage->update($request->only(['section_id', 'pre_stage_id', 'title', 'description', 'price', 'status']));
+            $stage->update($request->only(['section_id', 'title', 'description', 'price', 'defect_type', 'status']));
 
-            // eski StageMateriallarni o'chirib tashlaymiz
             $stage->stageMaterials()->delete();
 
-            // yangi StageMateriallarni qo'shamiz
             foreach ($request->stage_materials ?? [] as $materialData) {
                 $stage->stageMaterials()->create($materialData);
             }
+
+            $stage->preStages()->sync($request->pre_stage_ids ?? []);
         });
 
         return redirect()->route('stage.index')->with('success', 'Бўлим махсулоти янгиланди!');

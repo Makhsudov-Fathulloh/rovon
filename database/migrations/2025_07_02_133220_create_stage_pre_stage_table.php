@@ -8,15 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('stage', function (Blueprint $table) {
+        Schema::create('stage_pre_stage', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('section_id')->constrained('section')->cascadeOnDelete();
-            $table->string('title'); // 1-bo'lim", 2-bo'lim
-            $table->text('description')->nullable();
-            $table->decimal('price', 15, 2);
-            $table->tinyInteger('defect_type');
-            $table->tinyInteger('status');
-            $table->timestamps();
+            $table->foreignId('stage_id')->constrained('stage')->cascadeOnDelete();
+            $table->foreignId('pre_stage_id')->constrained('stage')->cascadeOnDelete();
+            // $table->unique(['stage_id', 'pre_stage_id']);
         });
     }
 
@@ -24,6 +20,7 @@ return new class extends Migration
     {
         Schema::table('stage', function (Blueprint $table) {
             $table->dropForeign(['section_id']);
+            $table->dropForeign(['pre_stage_id']);
         });
 
         Schema::dropIfExists('stage');

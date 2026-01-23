@@ -15,6 +15,8 @@ return new class extends Migration
             $table->decimal('count', 15, 3);
             $table->tinyInteger('unit');
             $table->timestamps();
+
+            $table->unique(['stage_id', 'raw_material_variation_id']);
         });
     }
 

@@ -4,6 +4,7 @@
             :method="'POST'"
             :organizations="$organizations"
             :rawMaterialVariations="$rawMaterialVariations"
+            :stage="$stage"
             :action="route('stage.store')"
         />
     </div>

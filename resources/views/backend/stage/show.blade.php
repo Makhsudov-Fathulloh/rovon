@@ -7,9 +7,6 @@
     </style>
 
     <div class="card">
-        <div class="card-header">
-            {{--            <h1>{{ $section->title[app()->getLocale()] ?? $section->title }}</h1>--}}
-        </div>
         <div class="card-body">
 
             <x-backend.action route="stage" :id="$stage->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш" deleteLabel="Ўчириш"/>
@@ -22,7 +19,9 @@
                 </tr>
                 <tr>
                     <th>Филиал</th>
-                    <td>{{ $stage->section->organization->title }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ $stage->section->organization->title }}</span>
+                    </td>
                 </tr>
                 <tr>
                     <th>Номи</th>
@@ -32,17 +31,19 @@
                     <th>Тавсифи</th>
                     <td>{!! $stage->description !!}</td>
                 </tr>
-                <tr>
-                    <th>Таркиби</th>
-                    <td>
-                        @foreach($stage->stageMaterials as $material)
-                            <span class="badge bg-info">{{ $material->rawMaterialVariation->code . ' (' . $material->rawMaterialVariation->title . ')' }}</span>
-                        @endforeach
-                    </td>
-                </tr>
+                @if($stage->stageMaterials->isNotEmpty())
+                    <tr>
+                        <th>Таркиби</th>
+                        <td>
+                            @foreach($stage->stageMaterials as $material)
+                                <span class="badge bg-info">{{ $material->rawMaterialVariation->code . ' (' . $material->rawMaterialVariation->title . ')' }}</span>
+                            @endforeach
+                        </td>
+                    </tr>
+                @endif
                 <tr>
                     <th>Нархи</th>
-                    <td class="text-success fw-bold">{{ $stage->price }} сўм</td>
+                    <td class="text-success fw-bold">{{ number_format($stage->price, 0, '', ' ') }} сўм</td>
                 </tr>
                 <tr>
                     <th>Статус</th>

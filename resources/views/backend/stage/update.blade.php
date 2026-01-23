@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Бўлим махсулотини янгилаш: ' . ucfirst($stage->title) }}">
+<x-backend.layouts.main title="{!! 'Бўлим махсулотини янгилаш: ' . ucfirst($stage->title) !!}">
     <div class="stage-update">
         <x-backend.stage.form
             :stage="$stage"
