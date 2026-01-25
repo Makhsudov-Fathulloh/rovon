@@ -85,6 +85,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::post('raw-material-variation/{variation}/add-count', [RawMaterialVariationController::class, 'addCount'])->name('raw-material-variation.add-count');
     Route::resource('raw-material-variation', RawMaterialVariationController::class)->middleware('role:Admin,Manager,Moderator,Developer');
 
+    Route::get('/raw-material-transfer/get-warehouses', [RawMaterialTransferController::class, 'getWarehouses'])->name('raw-material-transfer.get-warehouses');
     Route::get('/raw-material-transfer/raw-materials', [RawMaterialTransferController::class, 'getRawMaterials'])->name('raw-material-transfer.raw-materials');
     Route::resource('raw-material-transfer', RawMaterialTransferController::class)->middleware('role:Admin,Manager,Moderator,Developer');
     Route::get('/raw-material-transfer/{warehouse_id}/elements', [RawMaterialTransferItemController::class, 'list'])->name('raw-material-transfer-item.list')->middleware('role:Admin,Manager,Moderator,Developer');

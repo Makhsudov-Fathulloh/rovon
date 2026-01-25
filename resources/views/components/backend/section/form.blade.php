@@ -11,7 +11,7 @@
                     <div class="card-body">
                         <div class="tab-content" style="margin: 0">
                             <div class="tab-pane fade show active">
-                                <div class="pt-4">
+                                <div class="pt-2">
 
                                     <div class="mb-3">
                                         <label for="title" class="form-label">Номи</label>

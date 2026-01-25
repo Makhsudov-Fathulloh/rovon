@@ -2,10 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\CashReport;
-
 class StatusService
 {
+    const TYPE_ALL = 1;
+    const TYPE_SPARE_PART = 2;
+    const TYPE_RAW_MATERIAL = 3;
+    const TYPE_PRODUCT = 4;
+
+    const DEFECT_RAW_MATERIAL = 1;
+    const DEFECT_PREVIOUS_STAGE = 2;
+
     const STATUS_DELETED  = -1;
     const STATUS_INACTIVE = 0;
     const STATUS_ACTIVE = 1;
@@ -17,6 +23,17 @@ class StatusService
 
     const CURRENCY_UZS = 1;
     const CURRENCY_USD = 2;
+
+
+    public static function getType()
+    {
+        return [
+            self::TYPE_ALL => 'Умумий',
+            self::TYPE_SPARE_PART => 'Эхтиёт қисм',
+            self::TYPE_RAW_MATERIAL => 'Хомашё',
+            self::TYPE_PRODUCT => 'Тайёр маҳсулот',
+        ];
+    }
 
     public static function getList()
     {

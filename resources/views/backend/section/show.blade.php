@@ -7,12 +7,9 @@
     </style>
 
     <div class="card">
-        <div class="card-header">
-            {{--            <h1>{{ $section->title[app()->getLocale()] ?? $section->title }}</h1>--}}
-        </div>
         <div class="card-body">
 
-            <x-backend.action route="product" :id="$section->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш" deleteLabel="Ўчириш"/>
+            <x-backend.action route="section" :id="$section->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш" deleteLabel="Ўчириш"/>
 
             <table class="table table-bordered mt-3">
                 <tbody>
@@ -21,16 +18,18 @@
                     <td>{{ $section->id }}</td>
                 </tr>
                 <tr>
+                    <th>Филиал</th>
+                    <td>
+                        <span class="badge bg-info">{{ $section->organization->title }}</span>
+                    </td>
+                </tr>
+                <tr>
                     <th>Номи</th>
                     <td>{{ $section->title }}</td>
                 </tr>
                 <tr>
                     <th>Тавсифи</th>
                     <td>{!! $section->description !!}</td>
-                </tr>
-                <tr>
-                    <th>Ҳодим</th>
-                    <td>{{ $section->organization->tilte }}</td>
                 </tr>
                 <tr>
                     <th>Яратилди</th>

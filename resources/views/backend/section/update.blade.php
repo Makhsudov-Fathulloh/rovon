@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Бўлимни янгилаш: ' . ucfirst($section->title) }}">
+<x-backend.layouts.main title="{!! 'Бўлимни янгилаш: ' . ucfirst($section->title) !!}">
     <div class="section-update">
         <x-backend.section.form
             :organizations="$organizations"

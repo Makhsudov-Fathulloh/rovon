@@ -466,7 +466,7 @@ Breadcrumbs::for('pre-order-item.list', function (BreadcrumbTrail $trail, $order
 });
 Breadcrumbs::for('pre-order-item.show', function (BreadcrumbTrail $trail, $orderItem) {
     $trail->parent('pre-order-item.index');
-    $trail->push($orderItem->title, route('pre-order-item.show', $orderItem));
+    $trail->push($orderItem->preOrder->title, route('pre-order-item.show', $orderItem));
 });
 Breadcrumbs::for('pre-order-item.create.custom', function (BreadcrumbTrail $trail, $order_id) {
     $trail->parent('dashboard');

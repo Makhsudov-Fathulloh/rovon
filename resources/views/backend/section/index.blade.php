@@ -1,13 +1,147 @@
 <x-backend.layouts.main title="{{ 'Бўлимлар' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.count {
+            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
+            border-left: 5px solid #00d68f;
+        }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+    <style>
+        /* Kanban umumiy stil */
+        .kanban-org {
+            margin-bottom: 24px;
+        }
+
+        .org-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .kanban {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .kanban-col {
+            padding: 8px;
+            border-radius: 6px;
+            color: #fff;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            transition: 0.3s ease;
+        }
+        .kanban-col:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+
+        .kanban-card {
+            background:#fff;
+            padding:6px;
+            margin-bottom:6px;
+            border-radius:4px;
+            box-shadow:0 1px 3px rgba(0,0,0,.1);
+            color: #000;
+            transition: 0.3s ease;
+        }
+        .kanban-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .badge {
+            float:right;
+            background:#0984e3;
+            color:#fff;
+            font-weight: bold;
+            padding:2px 6px;
+        }
+
+        .section-color-1 { background: linear-gradient(135deg,#00b894 30%,#2ecc71 90%); }
+        .section-color-2 { background: linear-gradient(135deg,#0984e3 30%,#0984e3 90%); }
+        .section-color-3 { background: linear-gradient(135deg,#6c5ce7 30%,#5a4fd4 90%); }
+        .section-color-4 { background: linear-gradient(135deg,#fd79a8 30%,#e84393 90%); }
+        .section-color-5 { background: linear-gradient(135deg,#fdcb6e 30%,#f6b93b 90%); }
+        .section-color-6 { background: linear-gradient(135deg,#e17055 30%,#d35400 90%); }
+        .section-color-7 { background: linear-gradient(135deg,#00cec9 30%,#00bcd4 90%); }
+        .section-color-8 { background: linear-gradient(135deg,#636e72 30%,#2d3436 90%); }
+        .section-color-9 { background: linear-gradient(135deg,#fab1a0 30%,#e17055 90%); }
+        .section-color-10{ background: linear-gradient(135deg,#81ecec 30%,#00cec9 90%); }
+
+        /* Card-stats hover efekti (avvalgi sizniki) */
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.count {
+            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
+            border-left: 5px solid #00d68f;
+        }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header">
                 <div class="row justify-content-start">
                     <div class="col-sm-12 col-md-auto text-start">
-                        <a href="{{ route('section.create') }}" class="btn btn-primary w-100 w-md-auto">
-                            {{ 'Яратиш' }}
-                        </a>
+                        <x-backend.action route="section" :back="true" :create="true"/>
                     </div>
                 </div>
             </div>
@@ -138,48 +272,12 @@
                         @endforelse
                     </div>
                     {{-- Mobile version end --}}
-
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex justify-content-center">
                     {{ $sections->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-                    .card-stats.count {
-                        background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                        border-left: 5px solid #00d68f;
-                    }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="row mt-4">
                     <div class="col-md-12 mb-3">
                         <div class="card-stats count">
@@ -194,107 +292,6 @@
                     </div>
                 </div>
 
-                <style>
-                    /* Kanban umumiy stil */
-                    .kanban-org {
-                        margin-bottom: 24px;
-                    }
-
-                    .org-title {
-                        font-size: 1.2rem;
-                        font-weight: 600;
-                        margin-bottom: 12px;
-                        text-align: center;
-                    }
-
-                    .kanban {
-                        display: flex;
-                        gap: 12px;
-                        width: 100%;
-                    }
-
-                    .kanban-col {
-                        padding: 8px;
-                        border-radius: 6px;
-                        color: #fff;
-                        flex-grow: 1;
-                        display: flex;
-                        flex-direction: column;
-                        text-align: center;
-                        transition: 0.3s ease;
-                    }
-                    .kanban-col:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.2);
-                    }
-
-                    .kanban-card {
-                        background:#fff;
-                        padding:6px;
-                        margin-bottom:6px;
-                        border-radius:4px;
-                        box-shadow:0 1px 3px rgba(0,0,0,.1);
-                        color: #000;
-                        transition: 0.3s ease;
-                    }
-                    .kanban-card:hover {
-                        transform: translateY(-3px);
-                        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-                    }
-
-                    .badge {
-                        float:right;
-                        background:#0984e3;
-                        color:#fff;
-                        font-weight: bold;
-                        padding:2px 6px;
-                    }
-
-                    .section-color-1 { background: linear-gradient(135deg,#00b894 30%,#2ecc71 90%); }
-                    .section-color-2 { background: linear-gradient(135deg,#0984e3 30%,#0984e3 90%); }
-                    .section-color-3 { background: linear-gradient(135deg,#6c5ce7 30%,#5a4fd4 90%); }
-                    .section-color-4 { background: linear-gradient(135deg,#fd79a8 30%,#e84393 90%); }
-                    .section-color-5 { background: linear-gradient(135deg,#fdcb6e 30%,#f6b93b 90%); }
-                    .section-color-6 { background: linear-gradient(135deg,#e17055 30%,#d35400 90%); }
-                    .section-color-7 { background: linear-gradient(135deg,#00cec9 30%,#00bcd4 90%); }
-                    .section-color-8 { background: linear-gradient(135deg,#636e72 30%,#2d3436 90%); }
-                    .section-color-9 { background: linear-gradient(135deg,#fab1a0 30%,#e17055 90%); }
-                    .section-color-10{ background: linear-gradient(135deg,#81ecec 30%,#00cec9 90%); }
-
-                    /* Card-stats hover efekti (avvalgi sizniki) */
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-                    .card-stats.count {
-                        background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                        border-left: 5px solid #00d68f;
-                    }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 @foreach($orgSection as $organization)
                     <div class="kanban-org">
                         <div class="org-title">{{ $organization->title }}</div>
