@@ -88,7 +88,7 @@ class ShiftController extends Controller
         }
 
         $titles = Shift::where('section_id', $section_id)->selectRaw('MIN(id) as id, title')->groupBy('title')->orderBy('title')->pluck('title', 'id');
-        $users = User::whereHas('shift', function ($q) use ($section_id) {
+        $users = User::whereHas('shifts', function ($q) use ($section_id) {
             $q->where('shift.section_id', $section_id);
         })->orderBy('username')->pluck('username', 'id');
 
@@ -123,9 +123,8 @@ class ShiftController extends Controller
     {
         $organizations = Organization::pluck('title', 'id');
         $sections = Section::all();
-
-        $shift = null;
-
+        $shift = new Shift();
+        
         // // Barcha "Worker" rolidagi foydalanuvchilar
         // $allUsers = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();
         // // Create uchun: allUsers ichidan faqat hali bir smenaga biriktirilmaganlar
@@ -176,6 +175,7 @@ class ShiftController extends Controller
     {
         $organizations = Organization::pluck('title', 'id');
         $sections = Section::all();
+        $shift->load('users');
 
         // // Barcha "Ходим" rolidagi foydalanuvchilar
         // $allUsers = User::where('role_id', Role::where('title', 'Worker')->value('id'))->get();

@@ -9,8 +9,7 @@
     <div class="card">
         <div class="card-body">
 
-            <x-backend.action route="product" :id="$shift->id" :back="true" :edit="true" editClass="btn btn-primary sm"
-                              editLabel="Янгилаш" deleteLabel="Ўчириш"/>
+            <x-backend.action route="shift" :id="$shift->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш" deleteLabel="Ўчириш"/>
 
             <table class="table table-bordered mt-3">
                 <tbody>
@@ -20,7 +19,9 @@
                 </tr>
                 <tr>
                     <th>Филиал</th>
-                    <td>{{ $shift->section->organization->title }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ $shift->section->organization->title }}</span>
+                    </td>
                 </tr>
                 <tr>
                     <th>Бўлим</th>

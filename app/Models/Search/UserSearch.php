@@ -72,8 +72,27 @@ class UserSearch
         }
 
         if (isset($filters['debt']) && $filters['debt'] !== '') {
-            $filters['debt'] = preg_replace('/\D/', '', $filters['debt']);
-            $query->where('debt', (int) $filters['debt']);
+            $amount = (int) preg_replace('/\D/', '', $filters['debt']);
+
+            if ($amount === 0) {
+                $query->where(function ($q) {
+                    // 1. Umuman user_debt jadvalida recordi yo'qlar
+                    $q->whereDoesntHave('userDebt')
+                        // 2. YOKI recordi bor, lekin summasi 0 bo'lganlar
+                        ->orWhereHas('userDebt', function ($sub) {
+                            $sub->select('user_id')
+                                ->groupBy('user_id')
+                                ->havingRaw('SUM(amount) = 0');
+                        });
+                });
+            } else {
+                // Qarzi aynan kiritilgan summaga teng bo'lganlar (har qanday valyutada)
+                $query->whereHas('userDebt', function ($sub) use ($amount) {
+                    $sub->select('user_id')
+                        ->groupBy('user_id', 'currency') // Har bir valyuta bo'yicha alohida tekshirish
+                        ->havingRaw('SUM(amount) = ?', [$amount]);
+                });
+            }
         }
 
         // Sanadan-sanagacha filter

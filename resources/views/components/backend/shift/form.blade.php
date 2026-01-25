@@ -40,37 +40,15 @@
                                     @enderror
                                 </div>
 
-                                {{--                                <div class="col-md-12 mb-3">--}}
-                                {{--                                    <label for="user_id"><strong>Ходимлар</strong></label>--}}
-                                {{--                                    @php--}}
-                                {{--                                        // Agar $shift bo'lsa users pluck qilamiz, bo'lmasa bo'sh array--}}
-                                {{--                                        $selectedUsers = $shift && $shift->user ? $shift->user->pluck('id')->toArray() : [];--}}
-                                {{--                                        // Agar old input bo'lsa ustiga yozamiz--}}
-                                {{--                                        $selectedUsers = old('user_id', $selectedUsers);--}}
-                                {{--                                    @endphp--}}
-                                {{--                                    <select name="user_id[]" id="user_id" class="form-control worker-select2" required multiple>--}}
-                                {{--                                        @foreach($users as $user)--}}
-                                {{--                                            <option value="{{ $user->id }}" {{ in_array($user->id, $selectedUsers) ? 'selected' : '' }}>--}}
-                                {{--                                                {{ $user->username }}--}}
-                                {{--                                            </option>--}}
-                                {{--                                        @endforeach--}}
-                                {{--                                    </select>--}}
-                                {{--                                    @error('user_id')--}}
-                                {{--                                    <div class="text-danger small">{{ $message }}</div>--}}
-                                {{--                                    @enderror--}}
-                                {{--                                </div>--}}
-
                                 <div class="col-md-12 mb-3">
                                     <label for="user_id"><strong>Ходимлар</strong></label>
                                     @php
-                                        $selectedUsers = $shift && $shift->user ? $shift->user->pluck('id')->toArray() : [];
-                                        $selectedUsers = old('user_id', $selectedUsers);
+                                        $selectedUsers = old('user_id', ($shift->exists ? $shift->users->pluck('id')->toArray() : []));
                                     @endphp
-                                    <select name="user_id[]" id="user_id" class="form-control worker-select2" required
-                                            multiple>
+                                    <select name="user_id[]" id="user_id" class="form-control worker-select2" required multiple>
                                         @foreach($users as $user)
-                                            <option
-                                                value="{{ $user->id }}" {{ in_array($user->id, $selectedUsers) ? 'selected' : '' }}>
+                                            <option value="{{ $user->id }}"
+                                                {{ in_array($user->id, $selectedUsers) ? 'selected' : '' }}>
                                                 {{ $user->username }}
                                             </option>
                                         @endforeach
@@ -79,7 +57,6 @@
                                     <div class="text-danger small">{{ $message }}</div>
                                     @enderror
                                 </div>
-
 
                                 <div class="mb-3">
                                     <label for="title" class="form-label">Номи</label>

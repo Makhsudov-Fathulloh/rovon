@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Бўлимни янгилаш: ' . ucfirst($shift->title) }}">
+<x-backend.layouts.main title="{!! 'Бўлимни янгилаш: ' . ucfirst($shift->title) !!}">
     <div class="shift-update">
         <x-backend.shift.form
             :shift="$shift"
