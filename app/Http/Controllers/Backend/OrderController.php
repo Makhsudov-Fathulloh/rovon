@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Models\Role;
-use App\Models\User;
-use App\Models\Order;
-use App\Models\UserDebt;
-use App\Models\OrderItem;
+use App\Http\Controllers\Controller;
 use App\Models\CashReport;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Models\ExchangeRates;
+use App\Models\ExpenseAndIncome;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\ProductVariation;
 use App\Models\ProfitAndLoss;
+use App\Models\Role;
+use App\Models\Search\OrderSearch;
+use App\Models\User;
+use App\Models\UserDebt;
+use App\Services\DateFilterService;
 use App\Helpers\TelegramHelper;
 use App\Services\StatusService;
-use App\Models\ExpenseAndIncome;
-use App\Models\ProductVariation;
-use App\Models\Search\OrderSearch;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\DateFilterService;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -44,12 +44,7 @@ class OrderController extends Controller
         }
 
         $userIds = Order::distinct()->pluck('user_id');
-        // $users = User::whereIn('id', $userIds)->where('role_id', Role::where('title', 'Client')->value('id'))->pluck('username', 'id');
-        $users = User::when(!empty($userIds), function ($q) use ($userIds) {
-            $q->whereIn('id', $userIds);
-        })
-            ->whereNotIn('role_id', Role::whereIn('title', ['Developer', 'Admin'])->pluck('id'))
-            ->pluck('username', 'id');
+        $users = User::whereIn('id', $userIds)->where('role_id', Role::where('title', 'Client')->value('id'))->pluck('username', 'id');
         $sellers = User::whereIn('id', Order::pluck('seller_id'))->orderBy('username')->pluck('username', 'id');
         $todayReport = CashReport::today()->first();
 
@@ -68,6 +63,7 @@ class OrderController extends Controller
             $orderTotalPriceUzs = (clone $filteredUzsOrders)->sum('total_price');
             $orderAmountPaidUzs = (clone $filteredUzsOrders)->sum('total_amount_paid');
             $orderRemainingDebtUzs = (clone $filteredUzsOrders)->sum('remaining_debt');
+
             $filteredDebtUzs = ExpenseAndIncome::where('type', ExpenseAndIncome::TYPE_DEBT)->where('currency', StatusService::CURRENCY_UZS)->whereYear('created_at', now()->year);
 
             if (!empty($filters['user_id'])) {
@@ -99,14 +95,16 @@ class OrderController extends Controller
             $orderCountUzs = $uzsOrders->count();
             $orderTotalPriceUzs = $uzsOrders->sum('total_price');
             $orderAmountPaidUzs = $uzsOrders->sum('total_amount_paid') + $totalDebtPaidUzs;
-            $orderRemainingDebtUzs = $uzsOrders->sum('remaining_debt') - $totalDebtPaidUzs;
+            // $orderRemainingDebtUzs = $uzsOrders->sum('remaining_debt') - $totalDebtPaidUzs;
+            $orderRemainingDebtUzs = UserDebt::where('currency', StatusService::CURRENCY_UZS)->sum('amount');
 
             $totalDebtPaidUsd = ExpenseAndIncome::where('type', ExpenseAndIncome::TYPE_DEBT)->where('currency', StatusService::CURRENCY_USD)->whereYear('created_at', now()->year)->sum('amount');
             $usdOrders = Order::where('currency', StatusService::CURRENCY_USD)->whereYear('created_at', now()->year);
             $orderCountUsd = $usdOrders->count();
             $orderTotalPriceUsd = $usdOrders->sum('total_price');
             $orderAmountPaidUsd = $usdOrders->sum('total_amount_paid') + $totalDebtPaidUsd;
-            $orderRemainingDebtUsd = $usdOrders->sum('remaining_debt') - $totalDebtPaidUsd;
+            // $orderRemainingDebtUsd = $usdOrders->sum('remaining_debt') - $totalDebtPaidUsd;
+            $orderRemainingDebtUsd = UserDebt::where('currency', StatusService::CURRENCY_USD)->sum('amount');
         }
 
         $orders = $query->paginate(20)->withQueryString();
@@ -141,12 +139,23 @@ class OrderController extends Controller
             return $check;
         }
 
-        $users = User::whereNotIn('role_id', Role::whereIn('title', ['Developer', 'Admin'])->pluck('id'))->get();
+        $users = User::where('role_id', Role::where('title', 'Client')->value('id'))->get();
         $clientRoleId = Role::where('title', 'Client')->value('id');
 
         $variations = ProductVariation::with('product:id,title')
             ->where('count', '>', 0)
-            ->get(['id', 'product_id', 'code', 'title', 'price', 'count', 'unit']);
+            ->get(['id', 'product_id', 'code', 'title', 'price', 'currency', 'count', 'unit']);
+
+        $usdRate = ExchangeRates::where('currency', 'USD')->value('rate');
+
+        // Narxlarni UZS ga konvertatsiya qilish
+        $variations->transform(function ($variation) use ($usdRate) {
+            if ($variation->currency === StatusService::CURRENCY_USD) {
+                $variation->price = $variation->price * $usdRate;
+                $variation->currency = StatusService::CURRENCY_UZS;
+            }
+            return $variation;
+        });
 
         $defaultUserId = User::where('username', 'Стандарт клиент')->value('id') ?? null;
 
@@ -293,43 +302,73 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'amount' => $order->remaining_debt,
                     'currency' => $order->currency,
+                    'source' => UserDebt::SOURCE_ORDER,
                 ]);
             }
 
             // 🔹 OrderItems va Profit/Loss yozuvlari
+            $usdRate = ExchangeRates::where('currency', 'USD')->value('rate');
+
+            if (!$usdRate || $usdRate <= 0) {
+                throw new \Exception('USD kurs topilmadi');
+            }
+
             foreach ($orderItems as $item) {
+
                 $item['order_id'] = $order->id;
                 $orderItem = OrderItem::create($item);
 
                 $productVariation = ProductVariation::find($item['product_variation_id']);
-                $originalPrice = $productVariation->body_price; // UZS bo‘yicha
 
-                $soldPriceBase = round($item['price'] * $exchangeRate, 2);
-                $difference = $soldPriceBase - $originalPrice;
+                /*
+                |--------------------------------------------------------------------------
+                | ORIGINAL PRICE → UZS
+                |--------------------------------------------------------------------------
+                */
+                $originalPriceUZS = $productVariation->body_price;
+
+                if ($productVariation->currency == StatusService::CURRENCY_USD) {
+                    $originalPriceUZS *= $usdRate;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | SOLD PRICE → UZS
+                |--------------------------------------------------------------------------
+                */
+                if ($order->currency == StatusService::CURRENCY_USD) {
+                    // Sotish USD da → UZS ga o‘tkazamiz
+                    $soldPriceUZS = $item['price'] * $usdRate;
+                } else {
+                    // Sotish UZS da
+                    $soldPriceUZS = $item['price'];
+                }
+
+                $difference = $soldPriceUZS - $originalPriceUZS;
 
                 if ($difference > 0) {   // 🟢 Foyda
                     ProfitAndLoss::create([
                         'product_variation_id' => $item['product_variation_id'],
-                        'order_item_id' => $orderItem->id,
-                        'original_price' => $originalPrice,
-                        'sold_price' => $soldPriceBase,
-                        'profit_amount' => $difference,
-                        'loss_amount' => 0,
-                        'count' => $item['quantity'],
-                        'type' => ProfitAndLoss::TYPE_PROFIT,
-                        'total_amount' => $difference * $item['quantity'],
+                        'order_item_id'        => $orderItem->id,
+                        'original_price'       => $originalPriceUZS,
+                        'sold_price'           => $soldPriceUZS,
+                        'profit_amount'        => $difference,
+                        'loss_amount'          => 0,
+                        'count'                => $item['quantity'],
+                        'type'                 => ProfitAndLoss::TYPE_PROFIT,
+                        'total_amount'         => $difference * $item['quantity'],
                     ]);
                 } elseif ($difference < 0) {   // 🔴 Zarar
                     ProfitAndLoss::create([
                         'product_variation_id' => $item['product_variation_id'],
-                        'order_item_id' => $orderItem->id,
-                        'original_price' => $originalPrice,
-                        'sold_price' => $soldPriceBase,
-                        'profit_amount' => 0,
-                        'loss_amount' => abs($difference),
-                        'count' => $item['quantity'],
-                        'type' => ProfitAndLoss::TYPE_LOSS,
-                        'total_amount' => abs($difference) * $item['quantity'],
+                        'order_item_id'        => $orderItem->id,
+                        'original_price'       => $originalPriceUZS,
+                        'sold_price'           => $soldPriceUZS,
+                        'profit_amount'        => 0,
+                        'loss_amount'          => abs($difference),
+                        'count'                => $item['quantity'],
+                        'type'                 => ProfitAndLoss::TYPE_LOSS,
+                        'total_amount'         => abs($difference) * $item['quantity'],
                     ]);
                 }
             }
@@ -355,12 +394,23 @@ class OrderController extends Controller
             return $check;
         }
 
-        $users = User::whereNotIn('role_id', Role::whereIn('title', ['Developer', 'Admin'])->pluck('id'))->get();
+        $users = User::where('role_id', Role::where('title', 'Client')->value('id'))->get();
         $clientRoleId = Role::where('title', 'Client')->value('id');
 
         $variations = ProductVariation::with('product:id,title')
             ->where('count', '>', 0)
-            ->get(['id', 'product_id', 'code', 'title', 'price', 'count', 'unit']);
+            ->get(['id', 'product_id', 'code', 'title', 'price', 'currency', 'count', 'unit']);
+
+        $usdRate = ExchangeRates::where('currency', 'USD')->value('rate');
+
+        // Narxlarni UZS ga konvertatsiya qilish
+        $variations->transform(function ($variation) use ($usdRate) {
+            if ($variation->currency === StatusService::CURRENCY_USD) {
+                $variation->price = $variation->price * $usdRate;
+                $variation->currency = StatusService::CURRENCY_UZS;
+            }
+            return $variation;
+        });
 
         $order->load('orderItems.productVariation.product');
 
@@ -383,7 +433,8 @@ class OrderController extends Controller
             'variations' => $variations,
             'currentCurrency' => $currentCurrency,
             'currencyLabel' => $currentCurrency == StatusService::CURRENCY_USD ? '$' : 'сўм',
-            'oldItems' => old('items', $order->orderItems ?? [['product_variation_id' => '', 'quantity' => 1, 'price' => '']]),
+            // 'oldItems' => old('items', $order->orderItems ?? [['product_variation_id' => '', 'quantity' => 1, 'price' => '']]),
+            'oldItems' => old('items', $order->orderItems->toArray() ?? [['product_variation_id' => '', 'quantity' => 1, 'price' => '']]),
             'totalPriceValue' => old('total_price', $format($order->total_price)),
             'totalPaidValue' => old('total_amount_paid', $format($order->total_amount_paid)),
             'remainingDebtValue' => old('remaining_debt', $format($order->remaining_debt)),
@@ -508,59 +559,86 @@ class OrderController extends Controller
             ]);
 
             // 🔹 Foydalanuvchi qarzi
-            // 🔹 Foydalanuvchi qarzi
-            $userDebt = UserDebt::where('order_id', $order->id)->first();
+            // $userDebt = UserDebt::where('order_id', $order->id)->first();
 
-            if ($userDebt) {
-                // Eski qarz mavjud bo‘lsa — yangilaymiz
-                $userDebt->update([
-                    'amount' => $order->remaining_debt,
-                    'currency' => $order->currency,
-                ]);
-            } else {
-                // Yangi order uchun qarz yozilmagan bo‘lsa — yaratamiz
-                UserDebt::create([
-                    'user_id' => $order->user_id,
-                    'order_id' => $order->id,
-                    'amount' => $order->remaining_debt,
-                    'currency' => $order->currency,
-                ]);
-            }
+            // if ($userDebt) {
+            //     // Eski qarz mavjud bo‘lsa — yangilaymiz
+            //     $userDebt->update([
+            //         'amount' => $order->remaining_debt,
+            //         'currency' => $order->currency,
+            //     ]);
+            // } else {
+            //     // Yangi order uchun qarz yozilmagan bo‘lsa — yaratamiz
+            //     if ($order->remaining_debt > 0) {
+            //         UserDebt::create([
+            //             'user_id' => $order->user_id,
+            //             'order_id' => $order->id,
+            //             'amount' => $order->remaining_debt,
+            //             'currency' => $order->currency,
+            //         ]);
+            //     }
+            // }
 
             // 🔹 OrderItems va Profit/Loss
+            $usdRate = ExchangeRates::where('currency', 'USD')->value('rate');
+
+            if (!$usdRate || $usdRate <= 0) {
+                throw new \Exception('USD kurs topilmadi');
+            }
+
             foreach ($orderItems as $item) {
+
+                // 🔹 OrderItem yaratish
                 $item['order_id'] = $order->id;
                 $orderItem = OrderItem::create($item);
 
-                $productVariation = ProductVariation::find($item['product_variation_id']);
-                $originalPrice = $productVariation->body_price; // UZS
+                $productVariation = ProductVariation::findOrFail($item['product_variation_id']);
 
-                $soldPriceBase = round($item['price'] * $exchangeRate, 2);
-                $difference = $soldPriceBase - $originalPrice;
+                /*
+                |--------------------------------------------------------------------------
+                | ORIGINAL PRICE → UZS
+                |--------------------------------------------------------------------------
+                */
+                $originalPriceUZS = $productVariation->body_price;
+
+                if ($productVariation->currency == StatusService::CURRENCY_USD) {
+                    $originalPriceUZS *= $usdRate;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | SOLD PRICE → UZS
+                |--------------------------------------------------------------------------
+                */
+                $soldPriceUZS = $order->currency == StatusService::CURRENCY_USD
+                    ? $item['price'] * $usdRate
+                    : $item['price'];
+
+                $difference = $soldPriceUZS - $originalPriceUZS;
 
                 if ($difference > 0) {   // 🟢 Foyda
                     ProfitAndLoss::create([
                         'product_variation_id' => $item['product_variation_id'],
-                        'order_item_id' => $orderItem->id,
-                        'original_price' => $originalPrice,
-                        'sold_price' => $soldPriceBase,
-                        'profit_amount' => $difference,
-                        'loss_amount' => 0,
-                        'count' => $item['quantity'],
-                        'type' => ProfitAndLoss::TYPE_PROFIT,
-                        'total_amount' => $difference * $item['quantity'],
+                        'order_item_id'        => $orderItem->id,
+                        'original_price'       => $originalPriceUZS,
+                        'sold_price'           => $soldPriceUZS,
+                        'profit_amount'        => $difference,
+                        'loss_amount'          => 0,
+                        'count'                => $item['quantity'],
+                        'type'                 => ProfitAndLoss::TYPE_PROFIT,
+                        'total_amount'         => $difference * $item['quantity'],
                     ]);
                 } elseif ($difference < 0) {   // 🔴 Zarar
                     ProfitAndLoss::create([
                         'product_variation_id' => $item['product_variation_id'],
-                        'order_item_id' => $orderItem->id,
-                        'original_price' => $originalPrice,
-                        'sold_price' => $soldPriceBase,
-                        'profit_amount' => 0,
-                        'loss_amount' => abs($difference),
-                        'count' => $item['quantity'],
-                        'type' => ProfitAndLoss::TYPE_LOSS,
-                        'total_amount' => abs($difference) * $item['quantity'],
+                        'order_item_id'        => $orderItem->id,
+                        'original_price'       => $originalPriceUZS,
+                        'sold_price'           => $soldPriceUZS,
+                        'profit_amount'        => 0,
+                        'loss_amount'          => abs($difference),
+                        'count'                => $item['quantity'],
+                        'type'                 => ProfitAndLoss::TYPE_LOSS,
+                        'total_amount'         => abs($difference) * $item['quantity'],
                     ]);
                 }
             }
@@ -593,28 +671,8 @@ class OrderController extends Controller
             }
 
             // 2. Buyurtma va uning elementlarini o'chirish
-            $userId = $order->user_id;
-            $currency = $order->currency;
-
             OrderItem::where('order_id', $order->id)->delete();
             $order->delete();
-
-            // 3. Foydalanuvchi qarzini qaytadan hisoblash (RECALCULATE)
-            // Bu eng xavfsiz usul: hamma buyurtmalar qarzi yig'iladi
-            if ($userId) {
-                $totalRemainingDebt = \App\Models\Order::where('user_id', $userId)
-                    ->where('currency', $currency)
-                    ->sum('remaining_debt');
-
-                $userDebt = \App\Models\UserDebt::where('user_id', $userId)
-                    ->where('currency', $currency)
-                    ->first();
-
-                if ($userDebt) {
-                    $userDebt->amount = $totalRemainingDebt;
-                    $userDebt->save();
-                }
-            }
 
             DB::commit();
 

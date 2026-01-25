@@ -7,9 +7,6 @@
     </style>
 
     <div class="card">
-        <div class="card-header">
-{{--            <h1>{{ $expenseAndIncome->title[app()->getLocale()] ?? $expenseAndIncome->title }}</h1>--}}
-        </div>
         <div class="card-body">
 
             <x-backend.action route="expense-and-income" :id="$expenseAndIncome->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш"/>

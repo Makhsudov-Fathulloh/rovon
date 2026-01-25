@@ -37,11 +37,11 @@ class ProfitAndLossController extends Controller
             ->pluck('title', 'id'); // [id => title]
 
         // ProfitAndLoss ichidagi barcha order_item_id lar
-//        $orderItemIds = ProfitAndLoss::distinct()->pluck('order_item_id');
-//        $orderItems = OrderItem::query()
-//            ->whereIn('order_item.id', $orderItemIds)
-//            ->join('product_variation', 'product_variation.id', '=', 'order_item.product_variation_id')
-//            ->pluck('product_variation.title', 'order_item.id');
+        // $orderItemIds = ProfitAndLoss::distinct()->pluck('order_item_id');
+        // $orderItems = OrderItem::query()
+        //      ->whereIn('order_item.id', $orderItemIds)
+        //      ->join('product_variation', 'product_variation.id', '=', 'order_item.product_variation_id')
+        //      ->pluck('product_variation.title', 'order_item.id');
 
         $data = ProfitAndLoss::calculateTotals($request);
 
@@ -50,7 +50,7 @@ class ProfitAndLossController extends Controller
         return view('backend.profit-and-loss.index', compact(
             'profitAndLosses',
             'productVariations',
-//            'orderItems',
+            // 'orderItems',
             'data',
         ));
     }

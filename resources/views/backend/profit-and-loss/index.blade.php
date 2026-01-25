@@ -1,11 +1,19 @@
 @php
     use App\Models\ProfitAndLoss;
+    use App\Helpers\CountHelper;
 @endphp
 
 <x-backend.layouts.main title="{{ 'Фойда ва зарар савдолар' }}">
 
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="profitAndLossFilterForm" method="GET" action="{{ route('profit-and-loss.index') }}">
                     <div class="table-responsive d-none d-md-block">
@@ -15,13 +23,13 @@
                                 <th class="col-id">{!! sortLink('id', 'Id') !!}</th>
                                 <th>{!! sortLink('order_item_id', 'Буюртма элементи') !!}</th>
                                 <th>{!! sortLink('product_variation_id', 'Маҳсулот') !!}</th>
-                                <th>{!! sortLink('original_price', 'Асл нарх(сўм) ') !!}</th>
-                                <th>{!! sortLink('sold_price', 'Сотилган нарх(сўм) ') !!}</th>
-                                <th>{!! sortLink('profit_amount', 'Фойда(сўм) ') !!}</th>
-                                <th>{!! sortLink('loss_amount', 'Зарар(сўм) ') !!}</th>
+                                <th>{!! sortLink('original_price', 'Асл нарх') !!}</th>
+                                <th>{!! sortLink('sold_price', 'Сотилган нарх') !!}</th>
+                                <th>{!! sortLink('profit_amount', 'Фойда') !!}</th>
+                                <th>{!! sortLink('loss_amount', 'Зарар') !!}</th>
                                 <th>{!! sortLink('count', 'Миқдори') !!}</th>
                                 <th>{!! sortLink('type', 'Тури') !!}</th>
-                                <th>{!! sortLink('total_amount', 'Умумий(сўм) ') !!}</th>
+                                <th>{!! sortLink('total_amount', 'Умумий') !!}</th>
                                 <th>{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th></th> {{-- Search btn --}}
                             </tr>
@@ -59,7 +67,7 @@
                                     <select name="filters[type]" class="form-control form-control-sm w-100">
                                         <option value="">Барчаси</option>
                                         @foreach(ProfitAndLoss::getTypeList() as $key => $label)
-                                        {{--<option value="{{ $key }}" {{ (string) request('filters.type') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>--}}
+                                            {{--                                            <option value="{{ $key }}" {{ (string) request('filters.type') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>--}}
                                             <option value="{{ $key }}" {{ (string) request('filters.type') === (string) $key ? 'selected' : '' }}>
                                                 {{ $label }} {{ $key == ProfitAndLoss::TYPE_PROFIT ? 'Фойда' : 'Зарар' }}
                                             </option>
@@ -69,16 +77,16 @@
                                 <th><input type="text" name="filters[total_amount]"
                                            value="{{ request('filters.total_amount') }}"
                                            class="form-control form-control-sm w-100 filter-numeric"></th>
-                               <th>
-                                 <div class="d-flex">
-                                     <input type="date" name="filters[created_from]"
-                                            value="{{ request('filters.created_from') }}"
-                                            class="form-control form-control-sm me-1" placeholder="From">
-                                     <input type="date" name="filters[created_to]"
-                                            value="{{ request('filters.created_to') }}"
-                                            class="form-control form-control-sm" placeholder="To">
-                                 </div>
-                               </th>
+                                <th>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
+                                </th>
 
                                 @if(session('date_format_errors'))
                                     <div class="alert alert-danger mt-2">
@@ -101,12 +109,12 @@
                                 <tr class="text-center" id="row-{{ $profitAndLoss->id }}">
                                     <td class="col-id">{{ $profitAndLoss->id }}</td>
                                     <td>{{ $profitAndLoss->order_item_id }}</td>
-                                    <td>{{ $profitAndLoss->orderItem->productVariation->title }}</td>
+                                    <td>{{ $profitAndLoss->variation->title }}</td>
                                     <td>{{ number_format($profitAndLoss->original_price, 0, '', ' ') }}</td>
                                     <td>{{ number_format($profitAndLoss->sold_price, 0, '', ' ') }}</td>
                                     <td class="text-success fw-bold">{{ number_format($profitAndLoss->profit_amount, 0, '', ' ') }}</td>
                                     <td class="text-danger fw-bold">{{ number_format($profitAndLoss->loss_amount, 0, '', ' ') }}</td>
-                                    <td>{{ number_format($profitAndLoss->count, 0, '', ' ') }}</td>
+                                    <td class="count fw-bold text-primary">{{ number_format($profitAndLoss->count, 0, '', ' ') }}</td>
                                     <td style="text-align: center; width: 100px">{{ ProfitAndLoss::getTypeList()[$profitAndLoss->type] }}</td>
                                     <td>{{ number_format($profitAndLoss->total_amount, 0, '', ' ') }}</td>
                                     <td>{{ $profitAndLoss->created_at?->format('Y-m-d H:i') }}</td>
@@ -149,28 +157,25 @@
                                         <strong>{!! sortLink('product_variation_id', 'Маҳсулот:') !!} </strong>{{ $profitAndLoss->variation->title }}
                                     </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('original_price', 'Асл нарх:') !!} </strong>{{ number_format($profitAndLoss->original_price , 0, '', ' ')}} сўм
+                                        <strong>{!! sortLink('original_price', 'Асл нарх:') !!} </strong>{{ $profitAndLoss->original_price }}
                                     </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('sold_price', 'Сотилган нарх:') !!} </strong>{{ number_format($profitAndLoss->sold_price, 0, '', ' ') }} сўм
+                                        <strong>{!! sortLink('sold_price', 'Сотилган нарх:') !!} </strong>{{ $profitAndLoss->sold_price }}
                                     </p>
                                     <p class="card-text">
                                         <strong>{!! sortLink('profit_amount', 'Фойда:') !!} </strong><strong
-                                            style="color: green">{{ number_format($profitAndLoss->profit_amount, 0, '', ' ') }}</strong> сўм</p>
+                                            style="color: green">{{ $profitAndLoss->profit_amount }}</strong></p>
                                     <p class="card-text">
                                         <strong>{!! sortLink('loss_amount', 'Зарар:') !!} </strong><strong
-                                            style="color: red">{{ number_format($profitAndLoss->loss_amount, 0, '', ' ') }}</strong> сўм</p>
+                                            style="color: red">{{ $profitAndLoss->loss_amount }}</strong></p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('count', 'Миқдори:') !!} </strong>{{ number_format($profitAndLoss->count, 0, '', ' ') }} та
+                                        <strong>{!! sortLink('count', 'Миқдори:') !!} </strong>{{ $profitAndLoss->count }}
                                     </p>
                                     <p class="card-text">
                                         <strong>{!! sortLink('type', 'Тури:') !!} </strong>{{ ProfitAndLoss::getTypeList()[$profitAndLoss->type] }}
                                     </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('total_amount', 'Умумий:') !!} </strong>{{ number_format($profitAndLoss->total_amount, 0, '', ' ') }} сўм
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at', 'Яратилди:') !!} </strong> {{ $profitAndLoss->created_at?->format('Y-m-d H:i') }}
+                                        <strong>{!! sortLink('total_amount', 'Умумий:') !!} </strong>{{ $profitAndLoss->total_amount }}
                                     </p>
                                     <div class="btn-group w-100">
                                         <x-backend.action route="profit-and-loss" :id="$profitAndLoss->id" :view="true"/>
@@ -184,7 +189,6 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex mt-3 justify-content-center">
                     {{ $profitAndLosses->links('pagination::bootstrap-4') }}
                 </div>

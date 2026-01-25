@@ -16,10 +16,12 @@ class ExpenseAndIncome extends Model
     const TYPE_DEBT  = 1;
     const TYPE_INCOME  = 2;
     const TYPE_EXPENSE  = 3;
+    const TYPE_RETURN = 4;
 
     const TYPE_PAYMENT_CASH  = 1;
     const TYPE_PAYMENT_TRANSFER  = 2;
     const TYPE_PAYMENT_BANK  = 3;
+    const TYPE_PAYMENT_DEBT_RETURN  = 4;
 
 
     protected $fillable = [
@@ -43,6 +45,7 @@ class ExpenseAndIncome extends Model
             self::TYPE_DEBT => '🟢',
             self::TYPE_INCOME => '🔵',
             self::TYPE_EXPENSE => '🔴',
+            self::TYPE_RETURN => '🔄',
         ];
     }
 
@@ -50,8 +53,9 @@ class ExpenseAndIncome extends Model
     {
         return [
             self::TYPE_PAYMENT_CASH     => '🟢',
-            self::TYPE_PAYMENT_TRANSFER => '🟡',
+            self::TYPE_PAYMENT_TRANSFER => '🟠',
             self::TYPE_PAYMENT_BANK     => '🟣',
+            self::TYPE_PAYMENT_DEBT_RETURN => '🔄',
         ];
     }
 

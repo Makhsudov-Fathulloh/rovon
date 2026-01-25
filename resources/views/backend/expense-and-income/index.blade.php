@@ -64,6 +64,8 @@
                                                     Ўтказма
                                                 @elseif($key == ExpenseAndIncome::TYPE_PAYMENT_BANK)
                                                     Ҳисоб рақам
+                                                @elseif($key == ExpenseAndIncome::TYPE_PAYMENT_DEBT_RETURN)
+                                                    Қарздан айриш
                                                 @endif
                                             </option>
                                         @endforeach
@@ -85,6 +87,8 @@
                                                     Харажат
                                                 @elseif($key == ExpenseAndIncome::TYPE_DEBT)
                                                     Қарзни сўндириш
+                                                @elseif($key == ExpenseAndIncome::TYPE_RETURN)
+                                                    Қайтим
                                                 @endif
                                             </option>
                                         @endforeach
@@ -195,18 +199,18 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
+                {{-- Pagination --}}])
                 <div class="d-flex mt-3 justify-content-center">
                     {{ $expenseAndIncomes->links('pagination::bootstrap-4') }}
                 </div>
                 @can('hasAccess')
+                    @include('partials.backend._stats_payment_block', ['data' => $payment, 'prefix' => 'Payment', 'title' => 'Касса (Нақд тўлов)'])
+                    {{--@include('partials.backend._stats_block', ['data' => $amount, 'prefix' => 'AmountPaid', 'title' => 'Касса (Нақд тўлов)'])--}}
+                    @include('partials.backend._stats_block', ['data' => $order, 'prefix' => 'Order', 'title' => 'Буюртмалар'])
                     @include('partials.backend._stats_block', ['data' => $expense, 'prefix' => 'Expense', 'title' => 'Харажат'])
                     @include('partials.backend._stats_block', ['data' => $income, 'prefix' => 'Income', 'title' => 'Кирим'])
                     @include('partials.backend._stats_block', ['data' => $debt, 'prefix' => 'Debt', 'title' => 'Қарз сўндириш'])
-                    @include('partials.backend._stats_block', ['data' => $order, 'prefix' => 'Order', 'title' => 'Буюртмалар'])
-                    {{--@include('partials.backend._stats_block', ['data' => $amount, 'prefix' => 'AmountPaid', 'title' => 'Касса (Нақд тўлов)'])--}}
-                    @include('partials.backend._stats_payment_block', ['data' => $payment, 'prefix' => 'Payment', 'title' => 'Касса (Нақд тўлов)'])
-                    @include('partials.backend._stats_block', ['data' => $remaining, 'prefix' => 'RemainingDebt', 'title' => 'Қарздорлик'])
+                    @include('partials.backend._stats_block', ['data' => $remaining, 'prefix' => 'RemainingDebt', 'title' => 'Қарздорлик'
                 @endcan
 
                 <div class="card-header d-flex justify-content-end align-items-center">

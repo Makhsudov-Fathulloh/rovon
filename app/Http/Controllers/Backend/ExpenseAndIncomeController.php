@@ -151,9 +151,9 @@ class ExpenseAndIncomeController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'type_payment' => 'required|in:1,2,3',
+            'type_payment' => 'required|in:1,2,3,4',
             'amount' => 'required|numeric|min:0',
-            'type' => 'required|in:' . implode(',', [ExpenseAndIncome::TYPE_DEBT, ExpenseAndIncome::TYPE_INCOME, ExpenseAndIncome::TYPE_EXPENSE]),
+            'type' => 'required|in:' . implode(',', [ExpenseAndIncome::TYPE_DEBT, ExpenseAndIncome::TYPE_INCOME, ExpenseAndIncome::TYPE_EXPENSE, ExpenseAndIncome::TYPE_RETURN]),
             'user_id' => ['nullable', 'required_if:type,' . ExpenseAndIncome::TYPE_DEBT, 'exists:user,id'],
             'currency' => 'required|in:' . implode(',', [StatusService::CURRENCY_UZS, StatusService::CURRENCY_USD]),
         ], [
@@ -279,9 +279,9 @@ class ExpenseAndIncomeController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'type_payment' => 'required|in:1,2,3',
+            'type_payment' => 'required|in:1,2,3,4',
             'amount' => 'required|numeric|min:0',
-            'type' => 'required|in:' . implode(',', [ExpenseAndIncome::TYPE_DEBT, ExpenseAndIncome::TYPE_INCOME, ExpenseAndIncome::TYPE_EXPENSE]),
+            'type' => 'required|in:' . implode(',', [ExpenseAndIncome::TYPE_DEBT, ExpenseAndIncome::TYPE_INCOME, ExpenseAndIncome::TYPE_EXPENSE, ExpenseAndIncome::TYPE_RETURN]),
             'user_id' => ['nullable', 'required_if:type,' . ExpenseAndIncome::TYPE_DEBT, 'exists:user,id'],
             'currency' => 'required|in:' . implode(',', [StatusService::CURRENCY_UZS, StatusService::CURRENCY_USD]),
         ], [

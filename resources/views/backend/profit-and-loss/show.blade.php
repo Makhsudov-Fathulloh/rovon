@@ -7,9 +7,6 @@
     </style>
 
     <div class="card">
-        <div class="card-header">
-{{--            <h1>{{ $profitAndLoss->variation->title[app()->getLocale()] ?? $profitAndLoss->variation->title }}</h1>--}}
-        </div>
         <div class="card-body">
 
             <x-backend.action route="order" :id="$profitAndLoss->orderItem->order->id" :back="true"/>
