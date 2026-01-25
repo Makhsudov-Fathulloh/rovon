@@ -50,21 +50,52 @@ class Order extends Model
         });
 
         static::updating(function ($order) {
-            if ($order->isDirty('remaining_debt')) {
-
-                $oldDebt = $order->getOriginal('remaining_debt');
-                $newDebt = $order->remaining_debt;
-                $diff = $newDebt - $oldDebt;
-
-                $userDebt = $order->user->userDebt()
-                    ->where('currency', $order->currency)
-                    ->first();
-
-                if ($userDebt) {
-                    $userDebt->amount += $diff; // kamaytirish yoki oshirish
-                    $userDebt->save();
-                }
+            if (!$order->isDirty('remaining_debt')) {
+                return;
             }
+
+            $oldDebt = (float) $order->getOriginal('remaining_debt');
+            $newDebt = (float) $order->remaining_debt;
+            $diff = $newDebt - $oldDebt;
+
+            if ($diff == 0) {
+                return;
+            }
+
+            $userDebt = UserDebt::where('user_id', $order->user_id)
+                ->where('order_id', $order->id)
+                ->where('currency', $order->currency)
+                ->first();
+
+            // 🔹 QARZ PAYDO BO‘LDI, LEKIN YO‘Q
+            if (!$userDebt && $diff > 0) {
+                UserDebt::create([
+                    'user_id' => $order->user_id,
+                    'order_id' => $order->id,
+                    'amount' => $diff,
+                    'currency' => $order->currency,
+                    'source' => UserDebt::SOURCE_ORDER,
+                ]);
+                return;
+            }
+
+            if (!$userDebt) {
+                return;
+            }
+
+            $newAmount = $userDebt->amount + $diff;
+
+            if ($newAmount <= 0) {
+                $userDebt->delete();
+            } else {
+                $userDebt->update(['amount' => $newAmount]);
+            }
+        });
+
+        static::deleting(function ($order) {
+            UserDebt::where('order_id', $order->id)
+                ->where('source', UserDebt::SOURCE_ORDER)
+                ->delete();
         });
     }
 
@@ -148,6 +179,7 @@ class Order extends Model
             self::TOP_ACTIVE => 'TOP',
         ];
     }
+
 
     public static function calculatePaymentTotals($periods, $currencies)
     {

@@ -54,6 +54,7 @@
     }
 </style>
 
+
 <form id="order-form" action="{{ $action }}" method="POST">
     @csrf
     @if ($method === 'PUT')
@@ -82,11 +83,12 @@
                                 </option>
                             @endforeach
                         </select>
-                         <button type="button"
-                            class="btn btn-success d-inline-flex align-items-center justify-content-center"
-                            style="height: 28px; white-space: nowrap; padding: 0 10px; font-size: 14px;"
-                            data-bs-toggle="modal"
-                            data-bs-target="#createClientModal">
+
+                        <button type="button"
+                                class="btn btn-success d-inline-flex align-items-center justify-content-center"
+                                style="height: 28px; white-space: nowrap; padding: 0 10px; font-size: 14px;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#createClientModal">
                             <i class="fas fa-plus me-1" style="font-size: 10px;"></i> Клиент
                         </button>
                     </div>
@@ -132,7 +134,7 @@
                                     if ($currentCurrency == StatusService::CURRENCY_UZS) {
                                         $priceValue = number_format($item->price ?? 0, 0, '', ' ');
                                     } else {
-                                        $priceValue = number_format($item->price ?? 0, 3, '.', ' ');
+                                        $priceValue = number_format($item->price ?? 0, 2, '.', ' ');
                                     }
                                 }
                             }
@@ -146,7 +148,7 @@
                                     @foreach($variations as $variation)
                                         <option value="{{ $variation->id }}" data-price="{{ $variation->price }}"
                                             {{ (int)$variationId === (int)$variation->id ? 'selected' : '' }}>
-                                            {{ $variation->code }} — {{ $variation->product->title }} → {{ $variation->title }}
+                                            {!! $variation->title !!} — {!! $variation->product->title !!}
                                             ({{ number_format($variation->price, 0, '', ' ') }} сўм)
                                             [{{ \App\Helpers\CountHelper::format($variation->count, $variation->unit) }}]
                                         </option>
@@ -155,7 +157,7 @@
                             </div>
 
                             <div class="col-md-2">
-                                <input type="text" name="items[{{ $i }}][quantity]" class="form-control filter-numeric"
+                                <input type="text" name="items[{{ $i }}][quantity]" class="form-control filter-numeric-decimal"
                                        placeholder="Сони"
                                        value="{{ old("items.$i.quantity", is_array($item) ? ($item['quantity'] ?? 1) : ($item->quantity ?? 1)) }}"
                                        oninput="calculateTotal()" required>
@@ -181,7 +183,7 @@
                     @endforeach
                 </div>
 
-                <button type="button" class="btn btn-sm btn-success mb-4" onclick="addItem()">+ Қўшиш</button>
+                <button type="button" class="btn btn-sm btn-secondary mb-4" onclick="addItem()">+ Қўшиш</button>
 
                 <div class="mb-3">
                     <div class="mb-2 debt-switch d-flex align-items-center gap-2">
@@ -237,7 +239,7 @@
                            value="{{ $remainingDebtValue }}" readonly>
                 </div>
 
-                <button type="submit" class="btn btn-info">
+                <button type="submit" class="btn btn-primary">
                     {{ Route::currentRouteName() == 'order.edit' ? 'Янгилаш' : 'Сақлаш' }}
                 </button>
             </div>
@@ -247,7 +249,7 @@
 
 <div class="modal fade" id="createClientModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content" style="border-radius: 0.5rem">
             <div class="modal-header">
                 <h5>Клиент яратиш</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -285,10 +287,10 @@
         let optionsHtml = `<option value="">Маҳсулотни танланг</option>`;
 
         @foreach($variations as $variation)
-                optionsHtml += `<option value="{{ $variation->id }}" data-price="{{ $variation->price }}"
+            optionsHtml += `<option value="{{ $variation->id }}" data-price="{{ $variation->price }}"
             {{--    ${selectedIds.includes('{{ $variation->id }}') ? 'display' : ''}>--}}
-                {{ $variation->code }} — {{ $variation->product->title }} → {{ $variation->title }}
-            ({{ number_format($variation->price, 0, '', ' ') }} сўм)
+        {!! $variation->title !!} — {!! $variation->product->title !!}
+        ({{ number_format($variation->price, 0, '', ' ') }} сўм)
             [{{ \App\Helpers\CountHelper::format($variation->count, $variation->unit) }}]
             </option>`;
         @endforeach
@@ -302,7 +304,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <input type="text" name="items[${itemIndex}][quantity]" class="form-control filter-numeric"
+                <input type="text" name="items[${itemIndex}][quantity]" class="form-control filter-numeric-decimal"
                        placeholder="Сони" value="1" oninput="calculateTotal()" required>
             </div>
             <div class="col-md-3">
@@ -367,16 +369,18 @@
             @foreach($variations as $variation)
             allOptions.push({
                 id: '{{ $variation->id }}',
-                code: '{{ $variation->code }}',
+                // code: '{{ $variation->code }}',
                 title: '{{ $variation->product->title }} → {{ $variation->title }}',
                 price: '{{ $variation->price }}',
-                text: `{{ $variation->code }} — {{ $variation->product->title }} → {{ $variation->title }}
+                text: `{!! $variation->title !!} — {!! $variation->product->title !!}
                 ({{ number_format($variation->price, 0, '', ' ') }} сўм)
-                @if ($variation->unit == StatusService::UNIT_PSC)
+                    @if ($variation->unit == StatusService::UNIT_PSC)
                 [{{ number_format($variation->count, 0, '', ' ') }} та]
-                @else
+                    @elseIf ($variation->unit == StatusService::UNIT_KG)
                 [{{ number_format($variation->count, 3, '.', ' ') }} кг]
-                @endif`
+                    @elseIf ($variation->unit == StatusService::UNIT_METER)
+                [{{ number_format($variation->count, 2, '.', ' ') }} метр]
+                    @endif`
             });
             @endforeach
 
@@ -649,7 +653,7 @@
 
 <script>
     $('#order-form').on('submit', function (e) {
-    const totalPaid =
+        const totalPaid =
             getNumericValue('#cash_paid') +
             getNumericValue('#card_paid') +
             getNumericValue('#transfer_paid') +
@@ -659,8 +663,8 @@
 
         if (totalPaid <= 0 && !confirmed) {
             e.preventDefault();
-                showCustomAlert('Тўлов 0. Қарздорликни белгилан!', 'info');
-                return false;
+            showCustomAlert('Тўлов 0. Қарздорликни белгилан!', 'info');
+            return false;
         }
     });
 

@@ -7,7 +7,6 @@
     </style>
 
     <div class="card">
-        <div class="card-header"></div>
         <div class="card-body">
 
             <x-backend.action route="order" :id="$order->id" :back="true" :edit="true" :delete="true"

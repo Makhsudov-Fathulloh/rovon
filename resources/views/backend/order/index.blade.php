@@ -1,5 +1,43 @@
 <x-backend.layouts.main title="{{ 'Буюртмалар' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 180px; /* minimal kenglik */
+            flex: 1 1 200px; /* responsive */
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-stats.count { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+        .card-stats.total { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
+        .card-stats.paid { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+        .card-stats.debt { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
+
+        .card-stats h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        .card-stats p {
+            margin: 2px 0;
+            font-size: 0.95rem;
+        }
+        .card-stats i {
+            font-size: 2.2rem;
+            opacity: 0.7;
+        }
+    </style>
+
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header">
@@ -27,6 +65,8 @@
                                 <th>{!! sortLink('remaining_debt', 'Қарздорлик') !!}</th>
                                 <th class="col-title">{!! sortLink('seller_id', 'Сотувчи') !!}</th>
                                 <th class="col-date">{!! sortLink('created_at', 'Яратилди') !!}</th>
+                                {{--                                <th>{!! sortLink('updated_at_exact', 'Янгиланди(сана)') !!}</th>--}}
+                                {{--                                <th>{!! sortLink('updated_at', 'Янгиланди') !!}</th>--}}
                                 <th></th> {{-- Search btn --}}
                             </tr>
                             {{-- Filter Inputs --}}
@@ -75,14 +115,14 @@
                                     </select>
                                 </th>
                                 <th>
-                                  <div class="d-flex">
-                                      <input type="date" name="filters[created_from]"
-                                             value="{{ request('filters.created_from') }}"
-                                             class="form-control form-control-sm me-1" placeholder="From">
-                                      <input type="date" name="filters[created_to]"
-                                             value="{{ request('filters.created_to') }}"
-                                             class="form-control form-control-sm" placeholder="To">
-                                  </div>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
                                 </th>
 
                                 @if(session('date_format_errors'))
@@ -214,43 +254,6 @@
                     {{ $orders->links('pagination::bootstrap-4') }}
                 </div>
 
-                <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        min-width: 180px; /* minimal kenglik */
-                        flex: 1 1 200px; /* responsive */
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-
-                    .card-stats.count { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.total { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-                    .card-stats.paid { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-                    .card-stats.debt { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
                 <div class="d-flex flex-wrap gap-3 mt-4">
                     <!-- Count -->
                     <div class="card-stats count">
@@ -267,9 +270,9 @@
                     <!-- Total -->
                     <div class="card-stats total">
                         <div class="w-100">
-                          <p>Умумий сумма:<strong></strong></p>
-                          <h5>{{ number_format($orderTotalPriceUzs, 0, '', ' ') }} сўм</h5>
-                          <h5>{{ number_format($orderTotalPriceUsd, 2, '.', ' ') }} $</h5>
+                            <p>Умумий сумма:<strong></strong></p>
+                            <h5>{{ number_format($orderTotalPriceUzs, 0, '', ' ') }} сўм</h5>
+                            <h5>{{ number_format($orderTotalPriceUsd, 2, '.', ' ') }} $</h5>
                         </div>
                         <div>
                             <i class="bi bi-currency-exchange"></i>
@@ -279,9 +282,9 @@
                     <!-- Paid -->
                     <div class="card-stats paid">
                         <div class="w-100">
-                          <p>Тўланган сумма:<strong></strong></p>
-                          <h5>{{ number_format($orderAmountPaidUzs, 0, '', ' ') }} сўм</h5>
-                          <h5>{{ number_format($orderAmountPaidUsd, 2, '.', ' ') }} $</h5>
+                            <p>Тўланган сумма:<strong></strong></p>
+                            <h5>{{ number_format($orderAmountPaidUzs, 0, '', ' ') }} сўм</h5>
+                            <h5>{{ number_format($orderAmountPaidUsd, 2, '.', ' ') }} $</h5>
                         </div>
                         <div>
                             <i class="bi bi-currency-euro"></i>
@@ -291,9 +294,9 @@
                     <!-- Debt -->
                     <div class="card-stats debt">
                         <div class="w-100">
-                          <p>Умумий қарздорлик:<strong></strong></p>
-                          <h5>{{ number_format($orderRemainingDebtUzs, 0, '', ' ') }} сўм</h5>
-                          <h5>{{ number_format($orderRemainingDebtUsd, 2, '.', ' ') }} $</h5>
+                            <p>Умумий қарздорлик:<strong></strong></p>
+                            <h5>{{ number_format($orderRemainingDebtUzs, 0, '', ' ') }} сўм</h5>
+                            <h5>{{ number_format($orderRemainingDebtUsd, 2, '.', ' ') }} $</h5>
                         </div>
                         <div>
                             <i class="bi bi-currency-pound"></i>

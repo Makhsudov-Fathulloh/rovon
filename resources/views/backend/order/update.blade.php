@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртма янгилаш: ' . ucfirst($order->user->username) }}">
+<x-backend.layouts.main title="{!! 'Буюртма янгилаш: ' . ucfirst($order->user->username) !!}">
     <div class="order-update">
         <x-backend.order.form
             :users="$users"
