@@ -2,12 +2,19 @@
 
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="shiftOutputFilterForm" method="GET" action="{{ route('shift-output.index') }}">
                     <div class="table-responsive d-none d-md-block">
                         <table class="table table-bordered table-hover">
                             <thead>
-                            <tr>
+                            <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'ID') !!}</th>
                                 <th>{!! sortLink('organization_title', 'Филиал') !!}</th>
                                 <th>{!! sortLink('section_title', 'Бўлим') !!}</th>
@@ -56,7 +63,7 @@
                                     </select>
                                 </th>
                                 <th>
-{{--                                    <select name="filters[stage_id_desktop]" class="form-control form-control-sm filter-select2 w-100">--}}
+                                    {{-- <select name="filters[stage_id_desktop]" class="form-control form-control-sm filter-select2 w-100"> --}}
                                     <select name="filters[stage_id]" class="form-control form-control-sm filter-select2 w-100">
                                         <option value="">Барчаси</option>
                                         @foreach($stages as $id => $title)
@@ -129,7 +136,7 @@
                     {{-- Mobile version start --}}
                     <div class="d-md-none">
                         <div class="d-flex mb-2">
-{{--                            <select name="filters[stage_id_mobile]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг">--}}
+                            {{-- <select name="filters[stage_id_mobile]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг"> --}}
                             <select name="filters[stage_id]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг">
                                 <option value="">Барчаси</option>
                                 @foreach($stages as $id => $title)
@@ -158,9 +165,8 @@
                                     <p class="card-text">
                                         <strong>{!! sortLink('stage_count', 'Микдори:') !!}</strong><span class="text-success fw-bold">{{ number_format($shiftOutput->stage_count, 0, '', ' ') }} та</span></p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('defect_amount', 'Брак:') !!}</strong><span class="text-danger fw-bold">{{ $shiftOutput->defect_amount }} кг</span></p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at_exact', 'Яратилди:') !!}</strong> {{ $shiftOutput->created_at?->format('Y-m-d H:i') }}</p>
+                                        <strong>{!! sortLink('defect_amount', 'Брак:') !!}</strong><span class="text-danger fw-bold">{{ $shiftOutput->defect_amount }} кг</span>
+                                    </p>
                                     <x-backend.action
                                         route="shift-output" listRoute="shift-output-worker" :id="$shiftOutput->id"
                                         :list="true" :view="true" :edit="true" :delete="true"
@@ -177,17 +183,47 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex mt-3 justify-content-center">
                     {{ $shiftOutputs->links('pagination::bootstrap-4') }}
                 </div>
 
-                <h3 class="text-center mt-3 mb-3">Махсулотлар</h3>
+                @php
+                    $exportWhere = $stageIds->isEmpty()
+                        ? []
+                        : ['id' => $stageIds->toArray()];
+                @endphp
+
+                <h3 class="text-center mt-3 mb-3">
+                    Махсулотлар
+                    <x-backend.export
+                        :model="\App\Models\Stage::class"
+                        :where="$exportWhere"
+                        :columns="[
+                            'index' => '№',
+                            'full_title' => 'Маҳсулот номи',
+                            'monthly_count' => 'Ойлик ҳажм',
+                            'monthly_defect' => 'Ойлик брак',
+                        ]"
+                        :totals="[
+                            'Жами маҳсулот:' => number_format(collect($productStatistics)->sum('monthly_product'), 0, '', ' ') . ' дона',
+                            'Жами брак (Хомашё):' => number_format(collect($productStatistics)->sum('monthly_defect_raw'), 3, '.', ' ') . ' кг',
+                            'Жами брак (Олдинги босқич):' => number_format(collect($productStatistics)->sum('monthly_defect_prev'), 0, '', ' ') . ' дона',
+                        ]"
+                        :header="[
+                            'title' => 'Rovon textile',
+                            'subtitle' => 'Маҳсулотлар бўйичa ойлик ҳисобот',
+                            'date' => now()->format('d.m.Y'),
+                            'logo_left' => 'images/logo-text-.png',
+                            'logo_right' => 'images/logo-text-.png',
+                        ]"
+                    />
+                </h3>
+
                 @foreach($productStatistics as $statistics)
                     <div class="row text-center">
                         <div class="col-md-3 alert alert-info">
                             <div class="h-100 d-flex justify-content-center align-items-center">
-                                <span class="fw-bold">{{ $statistics['title'] }}</span>
+                                <span class="fw-bold">{{ $statistics['title'] . ' (' . $statistics['section_title'] . ')' }}</span>
                             </div>
                         </div>
                         <div class="col-md-3 alert alert-warning">

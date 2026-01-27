@@ -6,6 +6,7 @@
             :shift="$shiftOutput->shift"
             :shiftOutput="$shiftOutput"
             :stage="$stage"
+            :stages="$stages"
             :workers="$workers"
             :oldInputs="$oldInputs"
             :workerDefects="$workerDefects"

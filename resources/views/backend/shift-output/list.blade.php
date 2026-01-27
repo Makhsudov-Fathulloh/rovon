@@ -1,13 +1,20 @@
-<x-backend.layouts.main title="{{ 'Смена ( ' . $shift->title . ' ) маҳсулотлари:' }}">
+<x-backend.layouts.main title="{!! 'Смена ( ' . $shift->title . ' ) маҳсулотлари:' !!}">
 
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="shiftOutputListFilterForm" method="GET" action="{{ route('shift-output.list', $shift->id) }}">
                     <div class="table-responsive d-none d-md-block">
                         <table class="table table-bordered table-hover">
                             <thead>
-                            <tr>
+                            <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'ID') !!}</th>
                                 <th>{!! sortLink('shift_id', 'Смена') !!}</th>
                                 <th>{!! sortLink('stage_id', 'Махсулот') !!}</th>
@@ -131,7 +138,6 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex mt-3 justify-content-center">
                     {{ $outputs->links('pagination::bootstrap-4') }}
                 </div>
@@ -141,7 +147,7 @@
                     <div class="row text-center">
                         <div class="col-md-3 alert alert-info">
                             <div class="h-100 d-flex justify-content-center align-items-center">
-                                <span class="fw-bold">{{ $statistics['title'] }}</span>
+                                <span class="fw-bold">{{ $statistics['title'] . ' (' . $statistics['section_title'] . ')' }}</span>
                             </div>
                         </div>
                         <div class="col-md-3 alert alert-warning">

@@ -104,8 +104,29 @@
                         <tr>
                             <th class="sticky-col col-id">#</th>
                             <th class="sticky-col col-worker">Ходимлар</th>
-                            <th class="stage-header">{{ $stage->title }}</th>
-                            <th style="background-color: #fff0f0; color: var(--accent-red);">Брак (кг)</th>
+                            @foreach($stages as $stage)
+                                <th class="stage-header">
+                                    <div style="margin-bottom: 5px;">{{ $stage->title }}</div>
+                                    <select name="source_stage_id" class="form-control">
+                                         @php
+                                            $prevSection = $stage->section->prevSection;
+                                            $prevStage = $prevSection?->stages()->where('status', \App\Services\StatusService::STATUS_ACTIVE)->first();
+                                        @endphp
+
+                                        <option value="{{ $prevStage?->id ?? '' }}">
+                                            Стандарт: ({{ $prevStage?->title ?? 'Йўқ' }})
+                                        </option>
+
+                                        @foreach($stage->preStages as $pre)
+                                            <option value="{{ $pre->id }}"
+                                                {{ $shiftOutput->source_stage_id == $pre->id ? 'selected' : '' }}>
+                                                {{ $pre->title }} дан олиш
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </th>
+                            @endforeach
+                            <th style="background-color: #fff0f0; color: var(--accent-red);">Умумий брак (кг/дона)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -193,4 +214,3 @@
         calculateTotals();
     });
 </script>
-

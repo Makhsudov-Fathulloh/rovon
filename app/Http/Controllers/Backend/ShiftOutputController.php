@@ -59,7 +59,14 @@ class ShiftOutputController extends Controller
         $organizations = Organization::orderBy('title')->pluck('title', 'id');
         $sections      = Section::orderBy('title')->pluck('title', 'id');
         $shifts        = Shift::whereHas('shiftOutputs')->pluck('title', 'id');
-        $stages    = Stage::whereHas('shiftOutputs')->pluck('title', 'id');
+        $stages = Stage::whereHas('shiftOutputs')
+            ->with('section')
+            ->get()
+            ->mapWithKeys(function ($stage) {
+                return [
+                    $stage->id => $stage->title . ' (' . ($stage->section?->title ?? '-') . ')'
+                ];
+            });
 
         // Date filter
         $filters = $request->get('filters', []);
@@ -87,10 +94,18 @@ class ShiftOutputController extends Controller
 
                 return [
                     'title' => $stage->title,
+                    'section_title' => $stage->section?->title,
                     'daily_product'   => $outputs->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('stage_count'),
                     'daily_defect'    => $outputs->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('defect_amount'),
                     'monthly_product' => $outputs->whereBetween('created_at', [$monthlyFrom, $monthlyTo])->sum('stage_count'),
                     'monthly_defect'  => $outputs->whereBetween('created_at', [$monthlyFrom, $monthlyTo])->sum('defect_amount'),
+
+                    'monthly_defect_raw' => ($stage->defect_type === StatusService::DEFECT_RAW_MATERIAL)
+                        ? $outputs->sum('defect_amount') : 0,
+
+                    'monthly_defect_prev' => ($stage->defect_type === StatusService::DEFECT_PREVIOUS_STAGE)
+                        ? $outputs->sum('defect_amount') : 0,
+
                     'yearly_product'  => $outputs->whereBetween('created_at', [$yearlyFrom, $yearlyTo])->sum('stage_count'),
                     'yearly_defect'   => $outputs->whereBetween('created_at', [$yearlyFrom, $yearlyTo])->sum('defect_amount'),
                 ];
@@ -104,6 +119,7 @@ class ShiftOutputController extends Controller
             'stages',
             'organizations',
             'sections',
+            'stageIds',
             'productStatistics'
         ));
     }
@@ -173,6 +189,7 @@ class ShiftOutputController extends Controller
 
                 return [
                     'title' => $stage->title,
+                    'section_title' => $stage->section?->title,
                     'daily_product'   => $outputs->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('stage_count'),
                     'daily_defect'    => $outputs->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('defect_amount'),
                     'monthly_product' => $outputs->whereBetween('created_at', [$monthlyFrom, $monthlyTo])->sum('stage_count'),
@@ -203,9 +220,9 @@ class ShiftOutputController extends Controller
     {
         $sections = Section::where('status', StatusService::STATUS_ACTIVE)->orderBy('id', 'asc')->get();
         $shifts = Shift::where('section_id', $shift->section_id)->orderBy('id', 'asc')->get();
-        $stages = Stage::where('section_id', $shift->section_id)->where('status', StatusService::STATUS_ACTIVE)->get();
+        $stages = Stage::where('section_id', $shift->section_id)->where('status', StatusService::STATUS_ACTIVE)->with('preStages')->get();
 
-        $workers = $shift->user()->get();
+        $workers = $shift->users()->get();
 
         return view('backend.shift-output.create', compact('shift', 'stages', 'workers', 'shifts', 'sections'));
     }
@@ -214,114 +231,118 @@ class ShiftOutputController extends Controller
     {
         $inputs = $request->input('input', []);
         $workerDefects = $request->input('worker_defects', []);
+        $sourceStages = $request->input('source_stages', []);
 
-        DB::transaction(function () use ($inputs, $workerDefects, $shift) {
+        DB::transaction(function () use ($inputs, $workerDefects, $shift, $sourceStages) {
             $stages = Stage::where('section_id', $shift->section_id)->get();
-            $workers = $shift->user()->get();
+            $workers = $shift->users()->get();
 
             foreach ($stages as $stage) {
                 $stageTotalQty = 0;
-                $workerDataForStage = [];
+                $stageTotalDefect = 0;
+                $preparedWorkerData = [];
 
-                // 1. Ushbu bosqich (stage) uchun jami miqdorni aniqlaymiz
+                // 1. Oldindan hisob-kitob qilamiz
                 foreach ($workers as $worker) {
                     $qty = (int)preg_replace('/[^\d]/', '', $inputs[$worker->id][$stage->id]['stage_count'] ?? 0);
+
                     if ($qty > 0) {
-                        $stageTotalQty += $qty;
-                        $workerDataForStage[$worker->id] = $qty;
-                    }
-                }
-
-                if ($stageTotalQty > 0) {
-                    // 2. ShiftOutput yaratish
-                    $shiftOutput = $shift->shiftOutputs()->create([
-                        'stage_id' => $stage->id,
-                        'stage_count' => $stageTotalQty,
-                        'defect_amount' => 0, // Quyida hisoblab yangilaymiz
-                    ]);
-
-                    $totalStageDefect = 0;
-
-                    foreach ($workerDataForStage as $workerId => $qty) {
-                        $worker = $workers->find($workerId);
-
-                        // Ishchining barcha bosqichlardagi jami miqdori (brakni taqsimlash uchun)
+                        // Ishchining jami ishini hisoblash (brakni proporsional bo'lish uchun)
                         $totalWorkerQtyAcrossAllStages = 0;
                         foreach ($stages as $s) {
-                            $totalWorkerQtyAcrossAllStages += (int)preg_replace('/[^\d]/', '', $inputs[$workerId][$s->id]['stage_count'] ?? 0);
+                            $totalWorkerQtyAcrossAllStages += (int)preg_replace('/[^\d]/', '', $inputs[$worker->id][$s->id]['stage_count'] ?? 0);
                         }
 
-                        // Umumiy kiritilgan brakni ushbu stage'ga taqsimlaymiz
-                        $totalWorkerDefectInput = (float)($workerDefects[$workerId] ?? 0);
+                        $totalWorkerDefectInput = (float)($workerDefects[$worker->id] ?? 0);
                         $workerStageDefect = $totalWorkerQtyAcrossAllStages > 0
                             ? ($qty / $totalWorkerQtyAcrossAllStages) * $totalWorkerDefectInput
                             : 0;
 
-                        $totalStageDefect += $workerStageDefect;
+                        $stageTotalQty += $qty;
+                        $stageTotalDefect += $workerStageDefect;
 
-                        // 3. Worker Output record yaratish
+                        $preparedWorkerData[] = [
+                            'worker' => $worker,
+                            'qty' => $qty,
+                            'defect' => $workerStageDefect
+                        ];
+                    }
+                }
+
+                // 2. Agar ushbu stageda ish bo'lgan bo'lsa, BIR MARTA create qilamiz
+                if ($stageTotalQty > 0) {
+                    $sourceStageId = $sourceStages[$stage->id] ?? null;
+                    $sourceSectionId = $sourceStageId ? Stage::find($sourceStageId)?->section_id : null;
+
+                    // ShiftOutput yaratish (BIR MARTA - hamma miqdorlar bilan)
+                    $shiftOutput = $shift->shiftOutputs()->create([
+                        'stage_id' => $stage->id,
+                        'source_stage_id' => $sourceStageId,
+                        'source_section_id' => $sourceSectionId,
+                        'stage_count' => $stageTotalQty,
+                        'defect_amount' => $stageTotalDefect, // Endi bu 0 emas!
+                    ]);
+
+                    // 3. Ishchilar kesimida saqlash va Brak Report
+                    foreach ($preparedWorkerData as $data) {
+                        $w = $data['worker'];
+                        $wQty = $data['qty'];
+                        $wDefect = $data['defect'];
+
                         ShiftOutputWorker::create([
                             'shift_output_id' => $shiftOutput->id,
                             'stage_id'      => $stage->id,
-                            'user_id'       => $workerId,
-                            'stage_count'   => $qty,
-                            'defect_amount' => round($workerStageDefect, 3),
-                            'price'         => $stage->price * $qty,
+                            'user_id'       => $w->id,
+                            'stage_count'   => $wQty,
+                            'defect_amount' => round($wDefect, 3),
+                            'price'         => $stage->price * $wQty,
                         ]);
 
-                        // ❗ BRAK CHECK (Sikl ichida, har bir ishchi uchun)
-                        $limitAmount = $qty * 0.02; // 2% limit
+                        if ($stage->defect_type === StatusService::DEFECT_RAW_MATERIAL) {
+                            // Xomashyo kg da
+                            $totalWorkerMaterialWeight = 0;
+                            foreach ($stage->stageMaterials as $stageMaterial) {
+                                // Ishchining chiqargan miqdori uchun ketgan xomashyo (brakni qo'shmagan holda)
+                                $requiredForWorker = $shiftOutput->calculateRequired(
+                                    $stageMaterial,
+                                    $wQty,
+                                    0 // Faqat sof sarfni bilish uchun brakni 0 beramiz
+                                );
+                                $totalWorkerMaterialWeight += $requiredForWorker;
+                            }
 
-                        if ($workerStageDefect > $limitAmount) {
-                            $excess = $workerStageDefect - $limitAmount;
-                            $excessPercent = ($workerStageDefect / $qty) * 100;
+                            // Brak limitini tekshirish
+                            $limitAmount = $totalWorkerMaterialWeight * 0.02;
 
-                            DefectReport::create([
-                                'organization_id'     => $shift->section->organization_id,
-                                'section_id'          => $shift->section_id,
-                                'shift_id'            => $shift->id,
-                                'user_id'             => $workerId,
-                                'stage_id'            => $stage->id,
-                                'stage_count'         => $qty,
-                                'total_defect_amount' => round($workerStageDefect, 3),
-                                'defect_amount'       => round($excess, 3),
-                                'defect_percent'      => round($excessPercent, 2),
-                            ]);
+                            if ($workerStageDefect > $limitAmount) {
+                                $this->sendMaterialDefectNotify($shift, $w, $stage, $wQty, $workerStageDefect, $limitAmount);
+                            }
+                        } elseif ($stage->defect_type === StatusService::DEFECT_PREVIOUS_STAGE) {
+                            $limitAmount = 0;
 
-                            $workerName = $worker->username ?? "ID: $workerId";
-                            $msg = "<b>❗ Брак лимитидан ошди! </b>\n\n"
-                                . "👤 Ишчи: <b>{$workerName}</b>\n"
-                                . "🏭 Филиал: <b>{$shift->organization?->title}</b>\n"
-                                . "📍 Бўлим: <b>{$shift->section?->title}</b>\n"
-                                . "⚙️ Махсулот: <b>{$stage->title}</b>\n"
-                                . "🔢 Чиқарилган: <b>{$qty} dona</b>\n"
-                                . "🔻 Ишчи браки: <b>" . round($workerStageDefect, 3) . " кг</b>\n"
-                                . "⚠️ Лимит (2%): <b>" . round($limitAmount, 3) . " кг</b>\n"
-                                . "🚫 Ортиқча: <b>" . round($excess, 3) . " кг</b>\n"
-                                . "📊 Фоиз: <b>" . round($excessPercent, 2) . "%</b>";
-
-                            TelegramHelper::notifyDefect($msg);
+                            if ($workerStageDefect > $limitAmount) {
+                                $this->sendPreviousDefectNotify($shift, $w, $stage, $wQty, $workerStageDefect, $limitAmount);
+                            }
                         }
                     }
-
-                    // 4. ShiftOutput'ning jami bragini yangilaymiz (Observer xomashyoni ayiradi)
-                    $shiftOutput->update(['defect_amount' => $totalStageDefect]);
                 }
             }
         });
 
-        return redirect()->route('shift.index', $shift->id)->with('success', 'Смена махсулоти яратилди!');
+        return redirect()->route('shift.index')->with('success', 'Смена махсулоти яратилди!');
     }
-
 
     public function edit(ShiftOutput $shiftOutput)
     {
-        // Faqat bitta stage uchun
         $stage = Stage::where('id', $shiftOutput->stage_id)
             ->where('status', StatusService::STATUS_ACTIVE)
             ->first();
 
-        $workers = $shiftOutput->shift->user()->get();
+        $stages = Stage::where('section_id', $shiftOutput->shift->section_id)
+            ->where('status', StatusService::STATUS_ACTIVE)
+            ->get();
+
+        $workers = $shiftOutput->shift->users()->get();
 
         $oldInputs = [];
         $workerDefects = [];
@@ -334,7 +355,7 @@ class ShiftOutputController extends Controller
             ];
 
             // Faqat shu stage uchun defect summasi
-            $workerDefects[$worker->id] = \App\Models\ShiftOutputWorker::where('shift_output_id', $shiftOutput->id)
+            $workerDefects[$worker->id] = ShiftOutputWorker::where('shift_output_id', $shiftOutput->id)
                 ->where('user_id', $worker->id)
                 ->sum('defect_amount');
         }
@@ -342,17 +363,24 @@ class ShiftOutputController extends Controller
         return view('backend.shift-output.update', compact(
             'shiftOutput',
             'stage',
+            'stages',
             'workers',
             'oldInputs',
             'workerDefects'
         ));
     }
 
-
     public function update(Request $request, ShiftOutput $shiftOutput)
     {
         $inputs = $request->input('input', []);
         $stageId = $shiftOutput->stage_id;
+        $sourceStageId = $request->input('source_stage_id');
+        $stage = $shiftOutput->stage;
+
+        $sourceSectionId = null;
+        if ($sourceStageId) {
+            $sourceSectionId = Stage::find($sourceStageId)?->section_id;
+        }
 
         foreach ($inputs as $workerId => $data) {
             if (isset($data[$stageId]['stage_count'])) {
@@ -370,78 +398,152 @@ class ShiftOutputController extends Controller
             'input.*.*.defect_amount' => 'nullable|numeric|min:0',
         ]);
 
-        foreach ($inputs as $userId => $stageData) {
-            $data = $stageData[$stageId] ?? [];
-            $worker = ShiftOutputWorker::firstOrNew([
-                'shift_output_id' => $shiftOutput->id,
-                'user_id' => $userId,
+        DB::transaction(function () use ($shiftOutput, $inputs, $stageId, $sourceStageId, $sourceSectionId, $stage) {
+
+            // 1. Ishchilar ma'lumotlarini yangilash
+            foreach ($inputs as $userId => $stageData) {
+                $data = $stageData[$stageId] ?? [];
+                $wQty = (int)($data['stage_count'] ?? 0);
+                $wDefect = (float)($data['defect_amount'] ?? 0);
+
+                ShiftOutputWorker::updateOrCreate(
+                    ['shift_output_id' => $shiftOutput->id, 'user_id' => $userId],
+                    [
+                        'stage_id' => $stageId,
+                        'stage_count' => $wQty,
+                        'defect_amount' => $wDefect,
+                        'price' => $stage->price * $wQty,
+                    ]
+                );
+            }
+
+            // 2. Jami miqdorlarni yangilash
+            $shiftOutput->update([
+                'stage_count' => $shiftOutput->shiftOutputWorkers()->sum('stage_count'),
+                'defect_amount' => $shiftOutput->shiftOutputWorkers()->sum('defect_amount'),
+                'source_stage_id'   => $sourceStageId,
+                'source_section_id' => $sourceSectionId,
             ]);
 
-            $worker->stage_count = $data['stage_count'] ?? 0;
-            $worker->defect_amount = $data['defect_amount'] ?? 0;
-            $worker->price = $shiftOutput->stage->price * ($worker->stage_count);
-            $worker->save();
-        }
+            // 3. Har bir ishchi uchun alohida limit tekshiruvi va Telegram
+            foreach ($shiftOutput->shiftOutputWorkers as $worker) {
+                $wQty = $worker->stage_count;
+                $wDefect = $worker->defect_amount;
 
-        // Jami va defect
-        $stageTotal = $shiftOutput->shiftOutputWorkers()->sum('stage_count');
-        $defectTotal = $shiftOutput->shiftOutputWorkers()->sum('defect_amount');
-
-        $shiftOutput->update([
-            'stage_count' => $stageTotal,
-            'defect_amount' => $defectTotal,
-        ]);
-
-        // Defect faqat 2% dan oshsa yozish
-        if ($stageTotal > 0) {
-            $limitAmount = $stageTotal * 0.02;
-            $excess = max($defectTotal - $limitAmount, 0);
-
-            if ($excess > 0) {
-                $excessPercent = ($excess / $stageTotal) * 100;
-                foreach ($shiftOutput->shiftOutputWorkers as $worker) {
-                    $workerExcess = $defectTotal > 0
-                        ? ($worker->defect_amount / $defectTotal) * $excess
-                        : 0;
-
-                    DefectReport::updateOrCreate(
-                        [
-                            'shift_id' => $shiftOutput->shift_id,
-                            'stage_id' => $stageId,
-                            'user_id'  => $worker->user_id,
-                        ],
-                        [
-                            'organization_id'    => $shiftOutput->shift->organization?->id,
-                            'section_id'         => $shiftOutput->shift->section_id,
-                            'stage_count'        => $worker->stage_count,
-                            'total_defect_amount' => $defectTotal,
-                            'defect_amount'      => round($workerExcess, 2),
-                            'defect_percent'     => round($excessPercent, 2),
-                        ]
-                    );
+                if ($wQty <= 0 && $wDefect <= 0) {
+                    $this->clearDefectReport($shiftOutput, $worker->user_id);
+                    continue;
                 }
 
-                $msg =
-                    "<b>♻ Брак янгиланди!</b>\n"
-                    . "🏭 Филиал: <b>{$shiftOutput->shift->organization?->title}</b>\n"
-                    . "📍 Бўлим: <b>{$shiftOutput->shift->section?->title}</b>\n"
-                    . "🛠 Смена: <b>{$shiftOutput->shift->title}</b>\n"
-                    . "⚙️ Махсулот: <b>{$shiftOutput->stage->title}</b>\n"
-                    . "🔢 Умумий брак: <b>{$defectTotal} кг</b>\n"
-                    . "🔻 Лимитдан ошган: <b>{$excess} кг</b>\n"
-                    . "📊 Ошган фоиз: <b>" . round($excessPercent, 2) . "%</b>";
+                if ($stage->defect_type === StatusService::DEFECT_RAW_MATERIAL) {
+                    $workerMaterialWeight = 0;
+                    foreach ($stage->stageMaterials as $mat) {
+                        $workerMaterialWeight += $shiftOutput->calculateRequired($mat, $wQty, 0);
+                    }
+                    $limitAmount = $workerMaterialWeight * 0.02;
 
-                TelegramHelper::notifyDefect($msg);
-            } else {
-                // Limit oshmagan → eski defectlar o‘chirilsin
-                DefectReport::where('shift_id', $shiftOutput->shift_id)
-                    ->where('stage_id', $stageId)
-                    ->delete();
+                    if ($wDefect > $limitAmount) {
+                        // Yangi yaratmaydi, borini update qiladi va xabar yuboradi
+                        $this->sendMaterialDefectNotify($shiftOutput->shift, $worker->user, $stage, $wQty, $wDefect, $limitAmount, true);
+                    } else {
+                        DefectReport::where([
+                            'shift_id' => $shiftOutput->shift_id,
+                            'stage_id' => $stageId,
+                            'user_id'  => $worker->user_id
+                        ])->delete();                    }
+                } elseif ($stage->defect_type === StatusService::DEFECT_PREVIOUS_STAGE) {
+                    if ($wDefect > 0) {
+                        $this->sendPreviousDefectNotify($shiftOutput->shift, $worker->user, $stage, $wQty, $wDefect, 0, true);
+                    } else {
+                        DefectReport::where([
+                            'shift_id' => $shiftOutput->shift_id,
+                            'stage_id' => $stageId,
+                            'user_id'  => $worker->user_id
+                        ])->delete();
+                    }
+                }
             }
-        }
+        });
 
-        return redirect()->route('shift-output-worker.list', $shiftOutput->id)
-            ->with('success', 'Смена махсулоти янгиланди!');
+        // return redirect()->route('shift-output-worker.list', $shiftOutput->id)->with('success', 'Смена махсулоти янгиланди!');
+        return redirect()->route('shift-output.index')->with('success', 'Смена махсулоти янгиланди!');
+    }
+
+
+    private function sendMaterialDefectNotify($shift, $w, $stage, $qty, $defect, $limit, $isUpdate = false)
+    {
+        $excess = $defect - $limit;
+        $percent = ($defect / $qty) * 100;
+
+        // Dublikatni oldini olish: shift, stage va ishchi bo'yicha qidiradi
+        DefectReport::updateOrCreate(
+            [
+                'shift_id' => $shift->id,
+                'stage_id' => $stage->id,
+                'user_id'  => $w->id
+            ],
+            [
+                'organization_id'     => $shift->section->organization_id,
+                'section_id'          => $shift->section_id,
+                'stage_count'         => $qty,
+                'total_defect_amount' => round($defect, 3),
+                'defect_amount'       => round($excess, 3),
+                'defect_type'         => $stage->defect_type,
+                'defect_percent'      => round($percent, 2),
+            ]
+        );
+
+        $header = $isUpdate ? "<b>♻️ Лимитидан ошган брак янгиланди!</b>" : "<b>❗ Брак лимитидан ошди!</b>";
+
+        $msg = $header . "\n\n"
+            . "👤 Ишчи: <b>{$w->username}</b>\n"
+            . "🏭 Филиал: <b>{$shift->organization?->title}</b>\n"
+            . "📍 Бўлим: <b>{$shift->section?->title}</b>\n"
+            . "⚙️ Махсулот: <b>{$stage->title}</b>\n"
+            . "🔢 Чиқарилган: <b>{$qty} дона</b>\n"
+            . "🔻 Ишчи браки: <b>" . round($defect, 3) . " кг</b>\n"
+            . "⚠️ Лимит (2%): <b>" . round($limit, 3) . " кг</b>\n"
+            . "🚫 Ортиқча: <b>" . round($excess, 3) . " кг</b>\n"
+            . "📊 Фоиз: <b>" . round($percent, 2) . "%</b>";
+
+        TelegramHelper::notifyDefect($msg);
+    }
+
+    private function sendPreviousDefectNotify($shift, $w, $stage, $qty, $defect, $limit, $isUpdate = false)
+    {
+        $percent = ($defect / $qty) * 100;
+
+        // Dublikatni oldini olish: shift, stage va ishchi bo'yicha qidiradi
+        DefectReport::updateOrCreate(
+            [
+                'shift_id' => $shift->id,
+                'stage_id' => $stage->id,
+                'user_id'  => $w->id
+            ],
+            [
+                'organization_id'     => $shift->section->organization_id,
+                'section_id'          => $shift->section_id,
+                'stage_count'         => $qty,
+                'total_defect_amount' => round($defect, 3),
+                'defect_amount'       => round($defect, 3),
+                'defect_type'         => $stage->defect_type,
+                'defect_percent'      => round($percent, 2),
+            ]
+        );
+
+        $header = $isUpdate ? "<b>♻️ Аниқланган брак янгиланди!</b>" : "<b>❗ Брак аниқланди!</b>";
+
+        $msg = $header . "\n\n"
+            . "👤 Ишчи: <b>{$w->username}</b>\n"
+            . "🏭 Филиал: <b>{$shift->organization?->title}</b>\n"
+            . "📍 Бўлим: <b>{$shift->section?->title}</b>\n"
+            . "⚙️ Махсулот: <b>{$stage->title}</b>\n"
+            . "🔢 Чиқарилган: <b>{$qty} дона</b>\n"
+            . "🔻 Ишчи браки: <b>" . round($defect, 3) . " дона</b>\n"
+            . "⚠️ Лимит (0%): <b>" . round($limit, 3) . " дона</b>\n"
+            . "📊 Фоиз: <b>" . round($percent, 2) . "%</b>";
+
+        TelegramHelper::notifyDefect($msg);
     }
 
 
@@ -452,7 +554,8 @@ class ShiftOutputController extends Controller
         return response()->json([
             'message' => 'Смена махсулоти ўчирилди!',
             'type' => 'delete',
-            'redirect' => route('shift-output.list', $shiftOutput->shift->id),
+            // 'redirect' => route('shift-output.list', $shiftOutput->shift->id),
+            'redirect' => route('shift-output.index'),
         ]);
     }
 }
