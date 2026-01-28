@@ -1,8 +1,8 @@
 <x-backend.layouts.main title="Смена ҳисоботлари">
 
     <div class="card shadow">
-        <div class="card-header d-flex justify-content-end align-items-center">
-            <x-backend.action route="shift-report" :report="true" :todayReport="$todayReport"
+        <div class="card-header d-flex justify-content-start align-items-center">
+            <x-backend.action route="shift-report" :back="true" :report="true" :todayReport="$todayReport"
                               isOpenLabel="Смена ҳисоботини очиш" isCloseLabel="Смена ҳисоботини ёпиш"
                               isOpenTextLabel="Смена ҳисоботини очишни истайсизми?"
                               isCloseTextLabel="Смена ҳисоботини ёпишни истайсизми?"

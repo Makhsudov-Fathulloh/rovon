@@ -7,9 +7,6 @@
     </style>
 
     <div class="card">
-        <div class="card-header">
-            {{--            <h1>{{ $section->title[app()->getLocale()] ?? $section->title }}</h1>--}}
-        </div>
         <div class="card-body">
 
             <x-backend.action route="shift-output-worker" :id="$shiftOutputWorker->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш" deleteLabel="Ўчириш"/>

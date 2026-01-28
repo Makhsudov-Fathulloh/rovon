@@ -39,7 +39,15 @@ class ShiftOutputWorkerController extends Controller
         }
 
         $shifts = Shift::whereHas('shiftOutputs.shiftOutputWorkers')->orderBy('title')->pluck('title', 'id');
-        $stages = Stage::whereHas('shiftOutputs.shiftOutputWorkers')->orderBy('title')->pluck('title', 'id');
+        $stages = Stage::whereHas('shiftOutputs.shiftOutputWorkers')
+            ->with('section')
+            ->orderBy('title')
+            ->get()
+            ->mapWithKeys(function ($stage) {
+                return [
+                    $stage->id => $stage->title . ' (' . ($stage->section?->title ?? '-') . ')'
+                ];
+            });
         $users = User::whereHas('shiftOutputWorker')->orderBy('username')->pluck('username', 'id');
 
         $filters = $request->get('filters', []);
@@ -64,6 +72,7 @@ class ShiftOutputWorkerController extends Controller
             ->get()
             ->map(fn($user) => [
                 'username'        => $user->username,
+                'section_title'   => optional($user->shiftOutputWorker->first()?->shiftOutput?->stage?->section)->title,
                 'daily_product'   => $user->shiftOutputWorker->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('stage_count'),
                 'daily_defect'    => $user->shiftOutputWorker->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('defect_amount'),
                 'daily_price'     => $user->shiftOutputWorker->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('price'),
@@ -141,11 +150,17 @@ class ShiftOutputWorkerController extends Controller
         $userStatistics = User::whereHas('shiftOutputWorker', fn($q) => $q->where('shift_output_id', $shiftOutputId))
             ->where('role_id', Role::where('title', 'Worker')->value('id'))
             ->when($userIds->isNotEmpty(), fn($q) => $q->whereIn('id', $userIds))
-            ->with(['shiftOutputWorker' => fn($q) => $q->where('shift_output_id', $shiftOutputId)
-                ->select('id', 'user_id', 'stage_count', 'defect_amount', 'price', 'created_at')])
+            ->with([
+                'shiftOutputWorker' => function($q) use ($shiftOutputId) {
+                    $q->where('shift_output_id', $shiftOutputId)
+                        ->select('id', 'user_id', 'shift_output_id', 'stage_count', 'defect_amount', 'price', 'created_at')
+                        ->with('shiftOutput.stage.section');
+                }
+            ])
             ->get()
             ->map(fn($user) => [
                 'username'        => $user->username,
+                'section_title'   => optional($user->shiftOutputWorker->first()?->shiftOutput?->stage?->section)->title,
                 'daily_product'   => $user->shiftOutputWorker->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('stage_count'),
                 'daily_defect'    => $user->shiftOutputWorker->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('defect_amount'),
                 'daily_price'     => $user->shiftOutputWorker->whereBetween('created_at', [$dailyFrom, $dailyTo])->sum('price'),

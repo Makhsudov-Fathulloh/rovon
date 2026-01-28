@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ShiftReport;
 use App\Models\Shift;
 use App\Models\User;
+use App\Services\StatusService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -47,8 +48,8 @@ class ShiftReportController extends Controller
         $reportDate = $request->report_date ?? now()->format('Y-m-d');
 
         // Kunlik interval: bugun 6:00 → ertaga 6:00
-        $dayStart = Carbon::parse($reportDate)->setTime(6, 0, 0);
-        $dayEnd   = $dayStart->copy()->addDay()->setTime(6, 0, 0);
+        $dayStart = Carbon::parse($reportDate)->setTime(10, 0, 0);
+        $dayEnd   = $dayStart->copy()->addDay()->setTime(10, 0, 0);
 
         // Barcha smenalarni yuklab olamiz
         $shifts = Shift::with(['shiftOutputs.stage', 'section.organization'])->get();
@@ -132,8 +133,8 @@ class ShiftReportController extends Controller
     {
         $reportDate = $request->report_date ?? now()->format('Y-m-d');
 
-        $dayStart = Carbon::parse($reportDate)->setTime(6, 0, 0);
-        $dayEnd   = $dayStart->copy()->addDay()->setTime(6, 0, 0);
+        $dayStart = Carbon::parse($reportDate)->setTime(10, 0, 0);
+        $dayEnd   = $dayStart->copy()->addDay()->setTime(10, 0, 0);
 
         // Shu intervaldagi barcha shiftlarni olamiz
         $shifts = Shift::with(['shiftOutputs.stage', 'section.organization'])->get();
@@ -152,11 +153,14 @@ class ShiftReportController extends Controller
             $stageProduct = [];
             foreach ($outputs as $o) {
                 $title = $o->stage->title ?? '-';
+                $defectType = $o->stage->defect_type ?? StatusService::DEFECT_PREVIOUS_STAGE;
+
                 if (!isset($stageProduct[$title])) {
                     $stageProduct[$title] = [
                         'product_title' => $title,
                         'stage_count'   => 0,
                         'defect_amount' => 0,
+                        'defect_type'   => $defectType,
                     ];
                 }
 
@@ -227,20 +231,40 @@ class ShiftReportController extends Controller
 
             $message .= "<b>📦 Махсулотлар:</b>\n";
 
+            $totalDefectKg = 0;
+            $totalDefectPcs = 0;
+
             if ($report->stage_product) {
                 foreach ($report->stage_product as $p) {
                     $title  = $p['product_title'];
                     $count  = $p['stage_count'];
                     $defect = $p['defect_amount'];
+                    $type   = $p['defect_type'] ?? '';
+
+                    // Бирликни аниқлаш
+                    if ($type === StatusService::DEFECT_PREVIOUS_STAGE) {
+                        $unit = "дона";
+                        $totalDefectPcs += $defect;
+                    } else {
+                        $unit = "кг";
+                        $totalDefectKg += $defect;
+                    }
 
                     $message .= "• {$title} — <b>{$count} дона</b>\n";
-                    $message .= "   <i>Брак:</i> <b>{$defect} кг</b>\n";
+                    $message .= "   <i>Брак:</i> <b>{$defect} {$unit}</b>\n";
                 }
             } else {
-                $message .= "• Ma'lumot yo‘q\n";
+                $message .= "• Маълумот йўқ\n";
             }
 
-            $message .= "\n<b>❗ Умумий брак:</b> <b>{$report->defect_amount} кг</b>\n";
+            $message .= "\n<b>❗ Умумий брак:</b>\n";
+            if ($totalDefectKg > 0) {
+                $message .= "— Хом-ашё (кг): <b>{$totalDefectKg} кг</b>\n";
+            }
+            if ($totalDefectPcs > 0) {
+                $message .= "— Тайёр маҳсулот (дона): <b>{$totalDefectPcs} дона</b>\n";
+            }
+
             $message .= "-------------------------------------------------\n\n";
         }
 
