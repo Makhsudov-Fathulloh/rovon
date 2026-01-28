@@ -7,12 +7,9 @@
     </style>
 
     <div class="card">
-        <div class="card-header">
-            {{--            <h1>{{ $section->title[app()->getLocale()] ?? $section->title }}</h1>--}}
-        </div>
         <div class="card-body">
 
-            <x-backend.action route="shift-output" :id="$defectReport->id" :back="true" :edit="true" editClass="btn btn-primary sm" editLabel="Янгилаш" deleteLabel="Ўчириш"/>
+            <x-backend.action :back="true"/>
 
             <table class="table table-bordered mt-3">
                 <tbody>
@@ -22,7 +19,9 @@
                 </tr>
                 <tr>
                     <th>Филиал</th>
-                    <td>{{ optional($defectReport->shift->organization)->title }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ optional($defectReport->shift->organization)->title }}</span>
+                    </td>
                 </tr>
                 <tr>
                     <th>Бўлим</th>
@@ -31,6 +30,10 @@
                 <tr>
                     <th>Смена</th>
                     <td>{{ optional($defectReport->shift)->title }}</td>
+                </tr>
+                <tr>
+                    <th>Ходим</th>
+                    <td>{{ optional($defectReport->user)->username }}</td>
                 </tr>
                 <tr>
                     <th>Махсулот</th>

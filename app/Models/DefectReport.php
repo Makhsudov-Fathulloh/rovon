@@ -18,8 +18,9 @@ class DefectReport extends Model
         'user_id',
         'stage_id',
         'stage_count',
-        'total_defect_amount',
         'defect_amount',
+        'total_defect_amount',
+        'defect_type',
         'defect_percent',
     ];
 

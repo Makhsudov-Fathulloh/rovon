@@ -68,143 +68,105 @@ class DataExport implements FromCollection, WithHeadings, WithEvents, WithCustom
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
+                $highestColumn = $sheet->getHighestColumn();
+                $highestRow = $sheet->getHighestRow();
 
-                // ===== HEADER =====
+                // 1. Sarlavhalarni dinamik markazga olish (A dan oxirgi ustungacha)
+                $titleRange = "A1:{$highestColumn}1";
+                $subtitleRange = "A2:{$highestColumn}2";
+                $dateRange = "A3:{$highestColumn}3";
+
+                // Header styling helper function
+                $headerStyle = function($size, $bold = true, $italic = false) {
+                    return [
+                        'font' => ['bold' => $bold, 'size' => $size, 'italic' => $italic],
+                        'alignment' => [
+                            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                            'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        ],
+                    ];
+                };
+
                 if (!empty($this->header['title'])) {
-                $sheet->setCellValue('C1', $this->header['title']);
-                $sheet->mergeCells('C1:F1');
-
-                $sheet->getStyle('C1')->applyFromArray([
-                    'font' => [
-                        'bold'  => true,
-                        'size'  => 16,
-                        'color' => ['argb' => 'FF000000'], // text rangi (qora)
-                    ],
-                    'alignment' => [
-                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                    ],
-                    'fill' => [
-                        'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['argb' => 'FFFFFFFF'], // background rangi (oq)
-                    ],
-                ]);
-            }
-
-            if (!empty($this->header['subtitle'])) {
-                $sheet->setCellValue('C2', $this->header['subtitle']);
-                $sheet->mergeCells('C2:F2');
-
-                $sheet->getStyle('C2')->applyFromArray([
-                    'font' => [
-                        'bold'  => true,
-                        'size'  => 12,
-                        'color' => ['argb' => 'FF000000'], // text rangi (qora)
-                    ],
-                    'alignment' => [
-                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                    ],
-                    'fill' => [
-                        'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['argb' => 'FFFFFFFF'], // background rangi (oq)
-                    ],
-                ]);
-            }
-
-            if (!empty($this->header['date'])) {
-                $sheet->setCellValue('C3', Carbon::parse($this->header['date'])->format('d.m.Y H:i'));
-                $sheet->mergeCells('C3:F3');
-
-                $sheet->getStyle('C3')->applyFromArray([
-                    'font' => [
-                        'italic' => true,
-                        'color'  => ['argb' => 'FF000000'], // text rangi qora
-                    ],
-                    'alignment' => [
-                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                    ],
-                    'fill' => [
-                        'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['argb' => 'FFFFFFFF'], // background rangi (oq)
-                    ],
-                ]);
-            }
-
-                // ===== LOGO =====
-                if (!empty($this->header['logo_left'])) {
-                    $logoLeft = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-                    $logoLeft->setPath(public_path($this->header['logo_left']));
-                    $logoLeft->setHeight(65);
-                    // $logoRight->setWidth();
-                    $logoLeft->setCoordinates('A1');
-                    $logoLeft->setOffsetX(15);   // chapdan biroz ichkariga
-                    $logoLeft->setOffsetY(5);   // yuqoridan biroz pastga
-                    $logoLeft->setWorksheet($sheet);
+                    $sheet->mergeCells($titleRange);
+                    $sheet->setCellValue('A1', $this->header['title']);
+                    $sheet->getStyle('A1')->applyFromArray($headerStyle(16));
                 }
 
-                $highestColumn = $sheet->getHighestColumn();
-                $logoCoord = $highestColumn . '1';
+                if (!empty($this->header['subtitle'])) {
+                    $sheet->mergeCells($subtitleRange);
+                    $sheet->setCellValue('A2', $this->header['subtitle']);
+                    $sheet->getStyle('A2')->applyFromArray($headerStyle(12));
+                }
+
+                if (!empty($this->header['date'])) {
+                    $sheet->mergeCells($dateRange);
+                    $dateValue = Carbon::parse($this->header['date'])->format('d.m.Y H:i');
+                    $sheet->setCellValue('A3', $dateValue);
+                    $sheet->getStyle('A3')->applyFromArray($headerStyle(10, false, true));
+                }
+
+                // 2. LOGOLAR (Dinamik joylashuv)
+                if (!empty($this->header['logo_left'])) {
+                    $this->addLogo($sheet, $this->header['logo_left'], 'A1', 15);
+                }
 
                 if (!empty($this->header['logo_right'])) {
-                    $logoRight = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-                    $logoRight->setPath(public_path($this->header['logo_right']));
-                    $logoRight->setHeight(65);
-                    // $logoRight->setWidth();
-                    $logoRight->setCoordinates($logoCoord);
-                    $logoRight->setOffsetX(5); // o'ngdan biroz ichkariga
-                    $logoRight->setOffsetY(5);  // yuqoridan biroz pastga
-                    $logoRight->setWorksheet($sheet);
+                    // Oxirgi ustunga qo'yish
+                    $this->addLogo($sheet, $this->header['logo_right'], $highestColumn . '1', 20);
                 }
 
-                // ===== TOTALS =====
-                $startRow = $sheet->getHighestRow() + 3;
-                foreach ($this->totals as $label => $value) {
-                    $sheet->setCellValue("A{$startRow}", $label);
-                    $sheet->setCellValue("B{$startRow}", $value);
-                    $startRow++;
-                }
-
-                // ===== COLUMN HEADINGS (5-qator) BOLD QILISH =====
-                $headerRange = 'A6:' . $highestColumn . '6';
-
+                // 3. JADVAL BOSHI (A5 dan boshlab)
+                $headerRange = "A5:{$highestColumn}5";
                 $sheet->getStyle($headerRange)->applyFromArray([
-                   'font' => [
-                      'bold'  => true,
-                      'color' => ['argb' => 'FF444444'], // Yumshoqroq (to'q kulrang) rang
-                    ],
-                    'alignment' => [
-                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                    ],
-                    // 'borders' => [
-                    //     'allBorders' => [
-                    //         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    //     ],
-                    // ],
+                    'font' => ['bold' => true, 'color' => ['argb' => 'FF444444']],
+                    'alignment' => ['horizontal' => 'center'],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FFF2F2F2'] // Och kulrang fon
+                    ]
                 ]);
 
-               // ===== DATA USTUNLARINI TEXT-CENTER VA WRAP QILISH =====
-               $highestRow = $sheet->getHighestRow();
-               $highestColumn = $sheet->getHighestColumn();
-               $sheet->getStyle("A6:{$highestColumn}{$highestRow}")
-                   ->getAlignment()
-                   ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-                   ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
-                   ->setWrapText(true);
+                // 4. MA'LUMOTLARNI FORMATLASH
+                $dataRange = "A5:{$highestColumn}{$highestRow}";
+                $sheet->getStyle($dataRange)->getAlignment()->setHorizontal('center')->setWrapText(true);
 
-               // ===== COLUMN WIDTH AUTOSIZE =====
-               foreach (range('A', $highestColumn) as $col) {
-                   $sheet->getColumnDimension($col)->setAutoSize(true);
-               }
-           },
-       ];
-   }
+                // Borders qo'shish (ixtiyoriy, jadvalni aniq ko'rsatadi)
+                $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
 
+                // 5. TOTALS (Jami qismi)
+                $footerRow = $highestRow + 2;
+                foreach ($this->totals as $label => $value) {
+                    $sheet->setCellValue("A{$footerRow}", $label);
+                    $sheet->setCellValue("B{$footerRow}", $value);
+
+                    $sheet->getStyle("A{$footerRow}")->getFont()->setBold(true);
+                    $sheet->getStyle("A{$footerRow}")->getAlignment()->setHorizontal('right');
+                    $sheet->getStyle("B{$footerRow}")->getAlignment()->setHorizontal('left');
+                    $footerRow++;
+                }
+
+                // 6. AVTO-WIDTH (Ustun kengligi)
+                foreach (range('A', $highestColumn) as $col) {
+                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                }
+            },
+        ];
+    }
+
+    private function addLogo($sheet, $path, $coordinates, $offsetX = 0)
+    {
+        $drawing = new Drawing();
+        $drawing->setPath(public_path($path));
+        $drawing->setHeight(50);
+        $drawing->setCoordinates($coordinates);
+        $drawing->setOffsetX($offsetX);
+        $drawing->setOffsetY(15);
+        $drawing->setWorksheet($sheet);
+    }
 
     public function startCell(): string
     {
-        return 'A6';
+        return 'A5';
     }
 }

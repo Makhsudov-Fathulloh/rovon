@@ -16,8 +16,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('user')->onDelete('cascade');
             $table->foreignId('stage_id')->constrained('stage')->onDelete('cascade');
             $table->integer('stage_count')->default(0);
-            $table->float('total_defect_amount')->default(0);
             $table->float('defect_amount')->default(0);
+            $table->float('total_defect_amount')->default(0);
+            $table->tinyInteger('defect_type');
             $table->float('defect_percent')->default(0);
             $table->timestamps();
         });

@@ -1,7 +1,49 @@
 <x-backend.layouts.main title="{{ 'Брак ҳисоботлари' }}">
 
+    <style>
+        .card-stats {
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            transition: 0.3s ease;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+        .card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
+        .card-stats.eur { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+        .card-stats.gbp { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
+
+         .card-stats h5 {
+             font-weight: 700;
+             margin-bottom: 8px;
+             font-size: 1.25rem;
+         }
+         .card-stats p {
+             margin: 2px 0;
+             font-size: 0.95rem;
+         }
+         .card-stats i {
+             font-size: 2.2rem;
+             opacity: 0.7;
+         }
+</style>
+
     <div class="row">
         <div class="card shadow w-100">
+            <div class="card-header">
+                <div class="row justify-content-start">
+                    <div class="col-sm-12 col-md-auto text-start">
+                        <x-backend.action :back="true"/>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive card-body">
                 <form id="defectReportFilterForm" method="GET" action="{{ route('defect-report.index') }}">
                     <div class="table-responsive d-none d-md-block">
@@ -16,7 +58,7 @@
                                 <th>{!! sortLink('stage_count', 'Микдори') !!}</th>
                                 <th>{!! sortLink('total_defect_amount', 'Умумий') !!}</th>
                                 <th>{!! sortLink('defect_amount', 'Ортикча') !!}</th>
-                                <th>{!! sortLink('defect_percent', '%') !!}</th>
+                                <th>{!! sortLink('defect_percent', 'Фоиз') !!}</th>
                                 <th class="col-date">{!! sortLink('created_at', 'Яратилди') !!}</th>
                             </tr>
                             {{-- Filter Inputs --}}
@@ -48,44 +90,52 @@
                                     </select>
                                 </th>
                                 <th>
-                                    <select name="filters[shift_id]" class="form-control form-control-sm filter-select2 w-100">
+                                    <select name="filters[shift_id]"
+                                            class="form-control form-control-sm filter-select2 w-100">
                                         <option value="">Барчаси</option>
                                         @foreach($shifts as $id => $title)
-                                            <option value="{{ $id }}" {{ request('filters.shift_id') == $id ? 'selected' : '' }}>
+                                            <option
+                                                value="{{ $id }}" {{ request('filters.shift_id') == $id ? 'selected' : '' }}>
                                                 {{ $title }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </th>
                                 <th>
-{{--                                    <select name="filters[stage_id_desktop]" class="form-control form-control-sm filter-select2 w-100">--}}
-                                    <select name="filters[stage_id]" class="form-control form-control-sm filter-select2 w-100">
+                                    {{-- <select name="filters[stage_id_desktop]" class="form-control form-control-sm filter-select2 w-100"> --}}
+                                    <select name="filters[stage_id]"
+                                            class="form-control form-control-sm filter-select2 w-100">
                                         <option value="">Барчаси</option>
                                         @foreach($stages as $id => $title)
-                                            <option value="{{ $id }}" {{ request('filters.stage_id') == $id ? 'selected' : '' }}>
+                                            <option
+                                                value="{{ $id }}" {{ request('filters.stage_id') == $id ? 'selected' : '' }}>
                                                 {{ $title }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </th>
-                                <th><input type="text" name="filters[stage_count]" value="{{ request('filters.stage_count') }}"
+                                <th><input type="text" name="filters[stage_count]"
+                                           value="{{ request('filters.stage_count') }}"
                                            class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[total_defect_amount]" value="{{ request('filters.total_defect_amount') }}"
+                                <th><input type="text" name="filters[total_defect_amount]"
+                                           value="{{ request('filters.total_defect_amount') }}"
                                            class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
-                                <th><input type="text" name="filters[defect_amount]" value="{{ request('filters.defect_amount') }}"
+                                <th><input type="text" name="filters[defect_amount]"
+                                           value="{{ request('filters.defect_amount') }}"
                                            class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
-                                <th><input type="text" name="filters[defect_percent]" value="{{ request('filters.defect_percent') }}"
+                                <th><input type="text" name="filters[defect_percent]"
+                                           value="{{ request('filters.defect_percent') }}"
                                            class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
-                               <th>
-                                 <div class="d-flex">
-                                     <input type="date" name="filters[created_from]"
-                                            value="{{ request('filters.created_from') }}"
-                                            class="form-control form-control-sm me-1" placeholder="From">
-                                     <input type="date" name="filters[created_to]"
-                                            value="{{ request('filters.created_to') }}"
-                                            class="form-control form-control-sm" placeholder="To">
-                                 </div>
-                               </th>
+                                <th>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
+                                </th>
 
                                 @if(session('date_format_errors'))
                                     <div class="alert alert-danger mt-2">
@@ -107,13 +157,16 @@
                             @forelse($defectReports as $defectReport)
                                 <tr class="text-center" id="row-{{ $defectReport->id }}">
                                     <td class="col-id">{{ $defectReport->id }}</td>
-                                    <td>{{ optional($defectReport->organization)->title }}</td>
+                                    <td>
+                                        <span
+                                            class="badge bg-info">{{ optional($defectReport->organization)->title }}</span>
+                                    </td>
                                     <td>{{ optional($defectReport->section)->title }}</td>
                                     <td>{{ optional($defectReport->shift)->title }}</td>
                                     <td>{{ optional($defectReport->stage)->title }}</td>
                                     <td class="text-success fw-bold">{{ $defectReport->stage_count }} </td>
-                                    <td class="text-primary fw-bold">{{ $defectReport->total_defect_amount }} кг</td>
-                                    <td class="text-danger fw-bold">{{ $defectReport->defect_amount }} кг</td>
+                                    <td class="text-primary fw-bold">{{ $defectReport->total_defect_amount }} </td>
+                                    <td class="text-danger fw-bold">{{ $defectReport->defect_amount }} </td>
                                     <td class="text-info fw-bold">{{ $defectReport->defect_percent }} %</td>
                                     <td>{{ $defectReport->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>
@@ -132,11 +185,13 @@
                     {{-- Mobile version start --}}
                     <div class="d-md-none">
                         <div class="d-flex mb-2">
-{{--                            <select name="filters[stage_id_mobile]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг">--}}
-                            <select name="filters[stage_id]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг">
+                            {{--<select name="filters[stage_id_mobile]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг">--}}
+                            <select name="filters[stage_id]" class="form-control form-control-sm filter-select2 w-100"
+                                    data-placeholder="Смена махсулотини танланг">
                                 <option value="">Барчаси</option>
                                 @foreach($stages as $id => $title)
-                                    <option value="{{ $id }}" {{ request('filters.stage_id') == $id ? 'selected' : '' }}>
+                                    <option
+                                        value="{{ $id }}" {{ request('filters.stage_id') == $id ? 'selected' : '' }}>
                                         {{ $title }}
                                     </option>
                                 @endforeach
@@ -151,24 +206,33 @@
                                     <p class="card-text">
                                         <strong>{!! sortLink('id', 'ID:') !!}</strong>{{ $defectReport->id }} </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('organization_title', 'Филиал:') !!}</strong>{{ optional($defectReport->organization)->title }} </p>
+                                        <strong>{!! sortLink('organization_title', 'Филиал:') !!}</strong>{{ optional($defectReport->organization)->title }}
+                                    </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('section_title', 'Бўлим:') !!}</strong>{{ optional($defectReport->section)->title }} </p>
+                                        <strong>{!! sortLink('section_title', 'Бўлим:') !!}</strong>{{ optional($defectReport->section)->title }}
+                                    </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('shift_id', 'Смена:') !!}</strong>{{ optional($defectReport->shift)->title }} </p>
+                                        <strong>{!! sortLink('shift_id', 'Смена:') !!}</strong>{{ optional($defectReport->shift)->title }}
+                                    </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('stage_id', 'Махсулот:') !!}</strong>{{ optional($defectReport->stage)->title }} </p>
+                                        <strong>{!! sortLink('stage_id', 'Махсулот:') !!}</strong>{{ optional($defectReport->stage)->title }}
+                                    </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('stage_count', 'Микдори:') !!}</strong><span class="text-success fw-bold">{{ number_format($defectReport->stage_count, 0, '', ' ') }} та</span></p>
+                                        <strong>{!! sortLink('stage_count', 'Микдори:') !!}</strong><span
+                                            class="text-success fw-bold">{{ number_format($defectReport->stage_count, 0, '', ' ') }} та</span>
+                                    </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('total_defect_amount', 'Умумий:') !!}</strong><span class="text-danger fw-bold">{{ $defectReport->total_defect_amount }} кг</span></p>
+                                        <strong>{!! sortLink('total_defect_amount', 'Умумий:') !!}</strong><span
+                                            class="text-danger fw-bold">{{ $defectReport->total_defect_amount }} </span>
+                                    </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('defect_amount', 'Брак:') !!}</strong><span class="text-danger fw-bold">{{ $defectReport->defect_amount }} кг</span></p>
+                                        <strong>{!! sortLink('defect_amount', 'Брак:') !!}</strong><span
+                                            class="text-danger fw-bold">{{ $defectReport->defect_amount }} </span></p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('defect_percent', '%:') !!}</strong><span class="text-danger fw-bold">{{ $defectReport->defect_percent }} %</span></p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at_exact', 'Яратилди:') !!}</strong> {{ $defectReport->created_at?->format('Y-m-d H:i') }}</p>
-                                    <x-backend.action route="defect-report" :id="$defectReport->id" :view="true" />
+                                        <strong>{!! sortLink('defect_percent', 'Фоиз:') !!}</strong><span
+                                            class="text-danger fw-bold">{{ $defectReport->defect_percent }} %</span>
+                                    </p>
+                                    <x-backend.action route="defect-report" :id="$defectReport->id" :view="true"/>
                                 </div>
                             </div>
                         @empty
@@ -178,96 +242,77 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}
                 <div class="d-flex mt-3 justify-content-center">
                     {{ $defectReports->links('pagination::bootstrap-4') }}
                 </div>
 
-                    <style>
-                       .card-stats {
-                           border-radius: 12px;
-                           padding: 20px;
-                           color: #fff;
-                           transition: 0.3s ease;
-                           text-align: center;
-                           display: flex;
-                           justify-content: space-between;
-                           align-items: center;
-                       }
-                       .card-stats:hover {
-                           transform: translateY(-5px);
-                           box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                       }
-                      .card-stats.uzs {
-                           background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-                           border-left: 5px solid #00d68f;
-                       }
-
-                       .card-stats.usd {
-                           background: linear-gradient(135deg, #0984e3 35%, #0984e3 65%);
-                           border-left: 5px solid #00a8ff;
-                        }
-
-                       .card-stats h5 {
-                           font-weight: 700;
-                           margin-bottom: 8px;
-                           font-size: 1.25rem;
-                       }
-                       .card-stats p {
-                           margin: 2px 0;
-                           font-size: 0.95rem;
-                       }
-                       .card-stats i {
-                           font-size: 2.2rem;
-                           opacity: 0.7;
-                       }
-                   </style>
-                   <div class="row mt-4">
-                       <div class="col-md-6 mb-3">
-                           <div class="card-stats uzs">
-                               <div class="w-100">
-                                   <p>Браклар микдори:</p>
-                                   <h5>{{ number_format($defectAmount, 3, '.', ' ') }} кг</h5>
-                               </div>
-                               <div>
-                                   <i class="bi bi-wallet2"></i>
-                               </div>
-                           </div>
-                       </div>
-                       <div class="col-md-6 mb-3">
-                           <div class="card-stats usd">
-                               <div class="w-100">
-                                 <p>Браклар сони:</strong></p>
-                                <h5>{{ number_format($defectCount, 0, '', ' ') }} та</h5>
-                               </div>
-                               <div>
-                                   <i class="bi bi-currency-exchange"></i>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
-
+                <div class="row mt-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card-stats uzs">
+                            <div class="w-100">
+                                <p>Браклар (Хомашё):</p>
+                                <h5>{{ number_format($rawAmount, 3, '.', ' ') }} кг</h5>
+                            </div>
+                            <div>
+                                <i class="bi bi-wallet2"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card-stats usd">
+                            <div class="w-100">
+                                <p>Браклар сони:</p>
+                                <h5>{{ number_format($rawCount, 0, '', ' ') }} та</h5>
+                            </div>
+                            <div>
+                                <i class="bi bi-currency-exchange"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card-stats eur">
+                            <div class="w-100">
+                                <p>Браклар (Баланс):</p>
+                                <h5>{{ number_format($prevAmount, 0, '', ' ') }} дона</h5>
+                            </div>
+                            <div>
+                                <i class="bi bi-wallet2"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card-stats gbp">
+                            <div class="w-100">
+                                <p>Браклар сони:</p>
+                                <h5>{{ number_format($prevCount, 0, '', ' ') }} та</h5>
+                            </div>
+                            <div>
+                                <i class="bi bi-currency-exchange"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
 
-<script>
-    document.getElementById('defectReportFilterForm').addEventListener('submit', function () {
-        // Bo‘sh input/selectlarni olib tashlaymiz
-        this.querySelectorAll('input[name="filters[stage_id]"], select[name="filters[stage_id]"]').forEach(select => {
-            if (select.offsetParent === null) {
-                select.disabled = true;
-            }
-        });
+    <script>
+        document.getElementById('defectReportFilterForm').addEventListener('submit', function () {
+            // Bo‘sh input/selectlarni olib tashlaymiz
+            this.querySelectorAll('input[name="filters[stage_id]"], select[name="filters[stage_id]"]').forEach(select => {
+                if (select.offsetParent === null) {
+                    select.disabled = true;
+                }
+            });
 
-        // Bo‘sh input/selectlarni name’siz qilamiz
-        this.querySelectorAll('input[name^="filters"], select[name^="filters"]').forEach(input => {
-            if (!input.value || !input.value.trim()) {
-                input.removeAttribute('name'); // name olib tashlanadi
-            }
+            // Bo‘sh input/selectlarni name’siz qilamiz
+            this.querySelectorAll('input[name^="filters"], select[name^="filters"]').forEach(input => {
+                if (!input.value || !input.value.trim()) {
+                    input.removeAttribute('name'); // name olib tashlanadi
+                }
+            });
         });
-    });
-</script>
+    </script>
 
 </x-backend.layouts.main>

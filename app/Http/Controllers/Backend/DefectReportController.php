@@ -45,13 +45,25 @@ class DefectReportController extends Controller
 
         $isFiltered = count($request->get('filters', [])) > 0;
 
-        if ($isFiltered) {
-            $defectAmount = $query->whereMonth('created_at', now()->month)->sum('defect_amount');
-            $defectCount = $query->whereMonth('created_at', now()->month)->count();
-        } else {
-            $defectAmount = DefectReport::sum('defect_amount');
-            $defectCount = DefectReport::count();
-        }
+        $queryBase = $isFiltered
+            ? DefectReport::whereMonth('created_at', now()->month)
+            : DefectReport::query();
+
+        $rawAmount = (clone $queryBase)
+            ->where('defect_type', StatusService::DEFECT_RAW_MATERIAL)
+            ->sum('defect_amount');
+
+        $rawCount = (clone $queryBase)
+            ->where('defect_type', StatusService::DEFECT_RAW_MATERIAL)
+            ->count();
+
+        $prevAmount = (clone $queryBase)
+            ->where('defect_type', StatusService::DEFECT_PREVIOUS_STAGE)
+            ->sum('defect_amount');
+
+        $prevCount = (clone $queryBase)
+            ->where('defect_type', StatusService::DEFECT_PREVIOUS_STAGE)
+            ->count();
 
         $defectReports = $query->paginate(20)->withQueryString();
 
@@ -61,8 +73,10 @@ class DefectReportController extends Controller
             'sections',
             'shifts',
             'stages',
-            'defectAmount',
-            'defectCount',
+            'rawAmount',
+            'rawCount',
+            'prevAmount',
+            'prevCount',
         ));
     }
 
