@@ -37,6 +37,8 @@ class TelegramController extends Controller
 
             // 🔹 Telefon raqamni tozalash va +998 formatga keltirish
             $phone = preg_replace('/[^0-9]/', '', $phone);
+            if (strlen($phone) === 9) $phone = '998' . $phone;
+            $phone = '+' . ltrim($phone, '+');
 
             if (strlen($phone) === 12 && strpos($phone, '998') === 0) {
                 $phone = '+' . $phone;

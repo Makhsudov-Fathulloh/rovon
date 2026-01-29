@@ -65,6 +65,31 @@ class TelegramHelper
     }
 
 
+    /**
+     * Хабарни телефон рақами орқали юбориш (ёрдамчи метод)
+     */
+    public static function sendByPhone(string $phone, string $message)
+    {
+        // Телефон рақамни форматлаш (фақат рақамлар)
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // Базадан шу рақамли ва Telegram уланган фойдаланувчини топиш
+        $user = User::where(function($query) use ($phone) {
+            $query->where('phone', $phone)
+                ->orWhere('phone', '+' . $phone)
+                ->orWhere('phone', 'like', '%' . substr($phone, -9));
+        })
+            ->whereNotNull('telegram_chat_id')
+            ->first();
+
+        if ($user && $user->telegram_chat_id) {
+            return self::send($user->telegram_chat_id, $message);
+        }
+
+        return false;
+    }
+
+
     public static function orderMessage(Order $order, string $type = 'create'): string
     {
         $title = $type === 'update'
@@ -142,32 +167,22 @@ class TelegramHelper
 
     public static function sendOrderToClients(Order $order, string $type = 'create')
     {
-        // order egasi
         if (!$order->relationLoaded('user')) {
             $order->load('user');
         }
 
-        $chatId = $order->user?->telegram_chat_id;
+        $user = $order->user;
 
-        if (!$chatId) {
+        if (!$user || !$user->phone) {
             return false;
         }
 
-        return self::send(
-            $chatId,
-            self::orderMessage($order, $type)
-        );
+        // Телефон орқали юборишга йўналтирамиз
+        return self::sendByPhone($user->phone, self::orderMessage($order, $type));
     }
 
 
-    public static function debtMessage(
-        User $user,
-        float $totalDebtBefore,
-        float $paidAmount,
-        float $remainingDebt,
-        Int $currency,
-        string $type = 'create'
-    ): string {
+    public static function debtMessage(User $user, float $totalDebtBefore, float $paidAmount, float $remainingDebt, Int $currency, string $type = 'create'): string {
         $title = $type === 'update'
             ? '✏️ <b>Қарздорлик янгиланди</b>'
             : '💳 <b>Қарздорлик сўндирилди!</b>';
@@ -200,35 +215,14 @@ class TelegramHelper
         HTML;
     }
 
-    public static function sendDebtToUser(
-        User $user,
-        float $totalDebtBefore,
-        float $paidAmount,
-        float $remainingDebt,
-        Int $currency,
-        string $type = 'create'
-    ) {
-        $roles = Role::whereNotIn('title', ['Client', 'Worker'])
-            ->pluck('title', 'id');
-
-        if (!in_array($user->role_id, $roles->keys()->toArray())) {
+    public static function sendDebtToUser(User $user, float $totalDebtBefore, float $paidAmount, float $remainingDebt, int $currency, string $type = 'create') {
+        if (!$user->phone) {
             return false;
         }
 
-        if (!$user->telegram_chat_id) {
-            return false;
-        }
-
-        return self::send(
-            $user->telegram_chat_id,
-            self::debtMessage(
-                $user,
-                $totalDebtBefore,
-                $paidAmount,
-                $remainingDebt,
-                $currency,
-                $type
-            )
+        return self::sendByPhone(
+            $user->phone,
+            self::debtMessage($user, $totalDebtBefore, $paidAmount, $remainingDebt, $currency, $type)
         );
     }
 
@@ -273,26 +267,26 @@ class TelegramHelper
         $lines = [];
 
         foreach ($items as $i) {
-            $t = htmlspecialchars($i->title, ENT_QUOTES, 'UTF-8');
-            $lines[] = "• {$t} — <code>{$i->count} {$i->unit}</code>";
+            $t = htmlspecialchars($i->code, ENT_QUOTES, 'UTF-8');
+            $lines[] = "• {$t} — " . CountHelper::format($i->count, $i->unit);
         }
 
         $itemsText = implode("\n", $lines);
 
         return <<<HTML
 
-        <b>🕒 Сана:</b> <code>{$date}</code>
+        🕒 <b>Сана:</b> <code>{$date}</code>
         📝 <b>Янги навбатдаги буюртма!</b>
 
         <b>🧍‍♂️ Клиент:</b> {$client}
         <b>👨‍💼 Менежер:</b> {$creator}
 
         <b>📌 Номи:</b> {$title}
-        <b>🔢 Пунктлар сони:</b> {$pre->count}
+        <b>🔢 Пунктлар сони: <code>{$pre->count}</code> хил</b>
         ━━━━━━━━━━━━━━━━━━━━━━━
 
         <b>📦 Махсулотлар:</b>
-        {$itemsText}
+        <code>{$itemsText}</code>
 
         <a href="https://{$_SERVER['HTTP_HOST']}/admin/pre-order/{$pre->id}">🔗 Буюртмани очиш</a>
         HTML;

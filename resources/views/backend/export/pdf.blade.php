@@ -87,7 +87,7 @@
 
         <td width="50%" class="company-info">
             <h2>{{ $header['title'] }}</h2>
-            <p><strong>Ташкилот:</strong> {{ $header['subtitle'] }} </p>
+            <p><strong>Малумот тури:</strong> {{ $header['subtitle'] }} </p>
             <p><strong> Ҳисоботи санаси:</strong> {{ now()->format('d.m.Y H:i') }}</p>
         </td>
 

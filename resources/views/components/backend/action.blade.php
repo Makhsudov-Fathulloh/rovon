@@ -46,6 +46,7 @@
     'viewClass' => 'btn btn-info btn-sm',
     'editClass' => 'btn btn-warning btn-sm',
 
+    'addOutput' => ['Admin', 'Manager', 'Moderator', 'Developer'],
     'addEditDel' => ['Admin', 'Manager', 'Developer'],
 ])
 
@@ -66,15 +67,15 @@
         </button>
     @endif
 
-    {{--    @if($addCount)--}}
-    {{--        <button type="button" class="btn btn-sm btn-success add-count-btn"--}}
-    {{--                data-id="{{ $variation->id }}"--}}
-    {{--                data-title="{{ $variation->title }}"--}}
-    {{--                data-count="{{ $variation->count }}"--}}
-    {{--                title="{{ $addCountTitle }}">--}}
-    {{--            <i class="fa fa-plus"></i>--}}
-    {{--        </button>--}}
-    {{--    @endif--}}
+        {{-- @if($addCount)
+               <button type="button" class="btn btn-sm btn-success add-count-btn"
+                       data-id="{{ $variation->id }}"
+                       data-title="{{ $variation->title }}"
+                       data-count="{{ $variation->count }}"
+                       title="{{ $addCountTitle }}">
+                   <i class="fa fa-plus"></i>
+               </button>
+            @endif --}}
 
     @if($back)
         <a href="javascript:history.back()" class="btn btn-dark"><i class="fa fa-arrow-left"></i> Орқага</a>
@@ -84,7 +85,7 @@
         <a href="{{ route($route . '.create') }}" class="btn btn-primary">{{ $createLabel }}</a>
     @endif
 
-    @if($add && in_array(auth()->user()->role->title, $addEditDel))
+    @if($add && in_array(auth()->user()->role->title, $addOutput))
         <a href="{{ url("admin/$route/$id/$subRoute/create") }}"
            class="btn btn-info btn-sm">
             <i class="fa fa-plus" title="{{ $createTitle }}"></i>
@@ -141,7 +142,7 @@
             <form action="{{ route($route . '.close') }}" method="POST" class="confirmable-form"
                   data-message="{{ $isCloseTextLabel }}">
                 @csrf
-                <button type="submit" class="btn btn-dark">
+                <button type="submit" class="btn btn-info">
                     <i class="fa fa-lock me-1"></i> {{ $isCloseLabel }}
                 </button>
             </form>
