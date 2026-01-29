@@ -28,7 +28,7 @@ class WarehouseController extends Controller
     public function index()
     {
         if (in_array($this->roleTitle, ['Admin', 'Manager', 'Developer'])) {
-            $warehouses = Warehouse::with('organization')->paginate(10);
+            $warehouses = Warehouse::with('organization')->paginate(20);
         } elseif ($this->roleTitle === 'Moderator') {
             $warehouses = Warehouse::with('organization')
                 ->whereHas('organization', function ($query) {

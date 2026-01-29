@@ -5,9 +5,7 @@
             <div class="card-header">
                 <div class="row justify-content-start">
                     <div class="col-sm-12 col-md-auto text-start">
-                        <a href="{{ route('role.create') }}" class="btn btn-primary w-100 w-md-auto">
-                            {{ 'Яратиш' }}
-                        </a>
+                        <x-backend.action route="role" :back="true" :create="true"/>
                     </div>
                 </div>
             </div>
