@@ -210,7 +210,7 @@
                     @include('partials.backend._stats_block', ['data' => $expense, 'prefix' => 'Expense', 'title' => 'Харажат'])
                     @include('partials.backend._stats_block', ['data' => $income, 'prefix' => 'Income', 'title' => 'Кирим'])
                     @include('partials.backend._stats_block', ['data' => $debt, 'prefix' => 'Debt', 'title' => 'Қарз сўндириш'])
-                    @include('partials.backend._stats_block', ['data' => $remaining, 'prefix' => 'RemainingDebt', 'title' => 'Қарздорлик'
+                    @include('partials.backend._stats_block', ['data' => $remaining, 'prefix' => 'RemainingDebt', 'title' => 'Қарздорлик'])
                 @endcan
 
                 <div class="card-header d-flex justify-content-end align-items-center">
