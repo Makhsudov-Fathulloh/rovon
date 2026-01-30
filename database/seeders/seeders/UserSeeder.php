@@ -105,9 +105,9 @@ class UserSeeder extends Seeder
         ]);
 
         DB::table('user')->insert([
-            'first_name' => 'Dimuhammad',
-            'last_name' => 'Dimuhammad',
-            'username' => 'Dimuhammad',
+            'first_name' => 'Dinmuhammad',
+            'last_name' => 'Dinmuhammad',
+            'username' => 'Dinmuhammad',
             'password_hash' => Hash::make('castle4525'),
             'email' => 'dimuhammad@gmail.com',
             'email_verified_at' => now(),
