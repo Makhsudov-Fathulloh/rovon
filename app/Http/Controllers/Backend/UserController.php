@@ -397,18 +397,24 @@ class UserController extends Controller
     public function create()
     {
         $user = new User();
+        $authRole = auth()->user()->role->title;
 
-        $rolesRoot = Role::whereNotIn('title', ['Developer'])->pluck('title', 'id');
-        $rolesAdmin = Role::whereNotIn('title', ['Admin', 'Developer', 'Manager'])->pluck('title', 'id');
-        $roles = Role::whereNotIn('title', ['Admin', 'Manager', 'Moderator', 'Developer'])->pluck('title', 'id');
+//        $rolesRoot = Role::whereNotIn('title', ['Developer'])->pluck('title', 'id');
+//        $rolesAdmin = Role::whereNotIn('title', ['Admin', 'Developer', 'Manager'])->pluck('title', 'id');
+
+        if ($authRole === 'Developer') {
+            $roles = Role::whereNotIn('title', ['Developer'])->pluck('title', 'id');
+        } elseif (in_array($authRole, ['Admin', 'Manager'])) {
+            $roles = Role::whereIn('title', ['Master', 'Worker', 'Client'])->pluck('title', 'id');
+        } else {
+            $roles = Role::where('title', 'Client')->pluck('title', 'id');
+        }
 
         $clientRoleId = Role::where('title', 'Client')->value('id');
         $clientRole = Role::where('title', 'Client')->value('title');
 
         return view('backend.user.create', compact(
             'user',
-            'rolesRoot',
-            'rolesAdmin',
             'roles',
             'clientRoleId',
             'clientRole',
@@ -417,6 +423,14 @@ class UserController extends Controller
 
     public function store(Request $request, User $user)
     {
+        $authRole = auth()->user()->role->title;
+
+        if ($authRole === 'Developer') {
+            $allowedRoles = Role::whereNotIn('title', ['Developer'])->pluck('id')->toArray();
+        } else {
+            $allowedRoles = Role::whereIn('title', ['Master', 'Worker', 'Client'])->pluck('id')->toArray();
+        }
+
         $request->merge([
             'debt' => $request->filled('debt') ? str_replace(' ', '', $request->debt) : 0,
         ]);
@@ -434,8 +448,16 @@ class UserController extends Controller
                 'telegram_chat_id' => 'nullable|integer',
                 'currency'       => 'nullable|in:' . implode(',', [StatusService::CURRENCY_UZS, StatusService::CURRENCY_USD]),
                 'debt'           => 'nullable|numeric|min:0',
-                'role_id'        => 'nullable|integer|exists:role,id',
-                'status'         => 'nullable|in:-1,0,1',
+                'role_id' => [
+                    'required',
+                    'integer',
+                    'exists:role,id',
+                    function ($attribute, $value, $fail) use ($allowedRoles) {
+                        if (!in_array($value, $allowedRoles)) {
+                            $fail('Сизда бундай рол бериш ҳуқуқи йўқ.');
+                        }
+                    },
+                ],                'status'         => 'nullable|in:-1,0,1',
                 'token'          => 'nullable|string',
                 'auth_key'       => 'nullable|string',
             ],
@@ -519,9 +541,18 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $rolesRoot = Role::whereNotIn('title', ['Developer'])->pluck('title', 'id');
-        $rolesAdmin = Role::whereNotIn('title', ['Admin', 'Developer'])->pluck('title', 'id');
-        $roles = Role::whereNotIn('title', ['Admin', 'Manager', 'Moderator', 'Developer'])->pluck('title', 'id');
+        $authRole = auth()->user()->role->title;
+
+//        $rolesRoot = Role::whereNotIn('title', ['Developer'])->pluck('title', 'id');
+//        $rolesAdmin = Role::whereNotIn('title', ['Admin', 'Developer'])->pluck('title', 'id');
+
+        if ($authRole === 'Developer') {
+            $roles = Role::whereNotIn('title', ['Developer'])->pluck('title', 'id');
+        } elseif (in_array($authRole, ['Admin', 'Manager'])) {
+            $roles = Role::whereIn('title', ['Master', 'Worker', 'Client'])->pluck('title', 'id');
+        } else {
+            $roles = Role::where('title', 'Client')->pluck('title', 'id');
+        }
 
         $clientRoleId = Role::where('title', 'Client')->value('id');
         $clientRole = Role::where('title', 'Client')->value('title');
@@ -532,8 +563,6 @@ class UserController extends Controller
 
         return view('backend.user.update', compact(
             'user',
-            'rolesRoot',
-            'rolesAdmin',
             'roles',
             'clientRoleId',
             'clientRole',
@@ -544,6 +573,14 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $authRole = auth()->user()->role->title;
+
+        if ($authRole === 'Developer') {
+            $allowedRoles = Role::whereNotIn('title', ['Developer'])->pluck('id')->toArray();
+        } else {
+            $allowedRoles = Role::whereIn('title', ['Master', 'Worker', 'Client'])->pluck('id')->toArray();
+        }
+
         $request->merge([
             //            'debt' => $request->filled('debt') ? str_replace(' ', '', $request->debt) : 0,
             'debt_uzs' => $request->filled('debt_uzs') ? str_replace(' ', '', $request->debt_uzs) : 0,
@@ -564,8 +601,16 @@ class UserController extends Controller
                 'currency'       => 'nullable|in:' . implode(',', [StatusService::CURRENCY_UZS, StatusService::CURRENCY_USD]),
                 'debt_uzs'           => 'nullable|numeric|min:0',
                 'debt_usd'           => 'nullable|numeric|min:0',
-                'role_id'         => 'nullable|integer|exists:role,id',
-                'status'         => 'nullable|in:-1,0,1',
+                'role_id' => [
+                    'required',
+                    'integer',
+                    'exists:role,id',
+                    function ($attribute, $value, $fail) use ($allowedRoles) {
+                        if (!in_array($value, $allowedRoles)) {
+                            $fail('Сизда бундай рол бериш ҳуқуқи йўқ.');
+                        }
+                    },
+                ],                'status'         => 'nullable|in:-1,0,1',
                 'token'          => 'nullable|string',
                 'auth_key'       => 'nullable|string',
             ],

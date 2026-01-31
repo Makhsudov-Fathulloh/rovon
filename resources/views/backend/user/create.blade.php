@@ -7,8 +7,6 @@
         <x-backend.user.form
             :method="'POST'"
             :user="$user"
-            :rolesRoot="$rolesRoot"
-            :rolesAdmin="$rolesAdmin"
             :roles="$roles"
             :clientRoleId="$clientRoleId"
             :clientRole="$clientRole"

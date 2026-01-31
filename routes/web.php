@@ -119,7 +119,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::delete('organization/{organization}', [OrganizationController::class, 'destroy'])->name('organization.destroy');
     });
     Route::get('/organization/{organization}/sections', [OrganizationController::class, 'organizationSections'])->middleware('role:Admin,Manager,Moderator,Developer')->name('organization.sections');
-    Route::resource('organization', OrganizationController::class)->except(['create', 'destroy'])->middleware('role:Admin,Manager,Moderator,Developer');
+    Route::resource('organization', OrganizationController::class)->except(['create', 'destroy'])->middleware('role:Admin,Manager,Developer');
 
     Route::get('/section/by-organization/{organizationId}', [SectionController::class, 'getSections'])->name('section.byOrganization')->middleware('role:Admin,Manager,Moderator,Developer');
     Route::get('/section/{section_id}/shifts', [ShiftController::class, 'list'])->name('shift.list')->middleware('role:Admin,Manager,Moderator,Developer');
@@ -156,7 +156,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     Route::prefix('pre-order')->group(function () {
         Route::get('{pre_order_id}/items', [PreOrderItemController::class, 'list'])->name('pre-order-item.list')->middleware('role:Admin,Manager,Moderator,Developer');;
-        Route::post('{preOrder}/complete', [PreOrderController::class, 'complete'])->name('pre-order.complete')->middleware('role:Admin,Manager,Moderator,Developer');;
+        Route::post('{pre_order}/complete', [PreOrderController::class, 'complete'])->name('pre-order.complete')->middleware('role:Admin,Manager,Moderator,Developer');;
         Route::get('ajax/product', [PreOrderController::class, 'searchProduct'])->name('ajax.product');
     });
 
