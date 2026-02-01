@@ -64,6 +64,7 @@ class SupplierController extends Controller
         return view('backend.supplier.show', compact('supplier', 'items', 'balances'));
     }
 
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -112,6 +113,7 @@ class SupplierController extends Controller
         return back()->with('success', 'Фирма янгиланди!');
     }
 
+
     public function storeItem(Request $request, Supplier $supplier)
     {
         $data = $request->validate([
@@ -140,18 +142,18 @@ class SupplierController extends Controller
             $rate = $data['rate'];
 
             // Valyutani hisoblash (Faqat UZS da saqlash uchun)
-            $amountInUzs = $paymentAmount;
-            if ($currency == StatusService::CURRENCY_USD) {
-                // Agar kurs requestda bo'lsa shuni olamiz, bo'lmasa bazadan
-                $usdRate = $rate ?: ExchangeRates::where('currency', 'USD')->value('rate');
-                $amountInUzs = $paymentAmount * $usdRate;
-            }
+            // $amountInUzs = $paymentAmount;
+            // if ($currency == StatusService::CURRENCY_USD) {
+            // Agar kurs requestda bo'lsa shuni olamiz, bo'lmasa bazadan
+            // $usdRate = $rate ?: ExchangeRates::where('currency', 'USD')->value('rate');
+            // $amountInUzs = $paymentAmount * $usdRate;
+            // }
 
             // Xarajatlar jadvaliga yozish
             $expense = ExpenseAndIncome::create([
                 'title'        => "Фирмага тўлов #" . $mainItem->id . " | " . $supplier->title,
-                'amount'       => $amountInUzs,
-                'currency'     => StatusService::CURRENCY_UZS,
+                'amount'       => $paymentAmount,
+                'currency'     => $currency,
                 'type'         => ExpenseAndIncome::TYPE_EXPENSE,
                 'type_payment' => ExpenseAndIncome::TYPE_PAYMENT_CASH,
                 'user_id'      => auth()->id(),
@@ -187,23 +189,22 @@ class SupplierController extends Controller
         ]);
 
         // 1. Yangi summani har doim UZS (so'm) ga o'girib olamiz
-        // Chunki kassa (ExpenseAndIncome) asosan so'mda yuritiladi deb hisoblaymiz
-        $newAmountInUzs = $data['amount'];
-        if ($data['currency'] == StatusService::CURRENCY_USD) {
-            $newAmountInUzs = $data['amount'] * $data['rate'];
-        }
+        // $newAmountInUzs = $data['amount'];
+        // if ($data['currency'] == StatusService::CURRENCY_USD) {
+        // $newAmountInUzs = $data['amount'] * $data['rate'];
+        // }
 
         $currentExpenseId = $item->expense_id;
 
         // 2. Kassa (Expense) mantiqi
         if ($data['type'] == SupplierItem::TYPE_PAYMENT) {
-
             $expense = ExpenseAndIncome::find($item->expense_id);
 
             if ($expense) {
                 // MAVJUD BO'LSA - barcha parametrlarini yangilaymiz
                 $expense->update([
-                    'amount'      => $newAmountInUzs,
+                    'amount'      => $data['amount'],
+                    'currency'    => $data['currency'],
                     'user_id'     => auth()->id(),
                     'description' => "Янгиланди (" . ($data['currency'] == StatusService::CURRENCY_UZS ? 'сўм' : '$') . "): " . ($data['description'] ?? ''),
                 ]);
@@ -211,8 +212,8 @@ class SupplierController extends Controller
                 // MAVJUD BO'LMASA - yangi yaratamiz
                 $newExpense = ExpenseAndIncome::create([
                     'title'        => "Фирмага тўлов янгиланди#" . $item->suplier->id . " | " . $item->suplier->title,
-                    'amount'       => $newAmountInUzs,
-                    'currency'     => StatusService::CURRENCY_UZS,
+                    'amount'       => $data['amount'],
+                    'currency'     => $data['currency'],
                     'type'         => ExpenseAndIncome::TYPE_EXPENSE,
                     'type_payment' => ExpenseAndIncome::TYPE_PAYMENT_CASH,
                     'user_id'      => auth()->id(),
@@ -235,6 +236,7 @@ class SupplierController extends Controller
 
         return back()->with('success', 'Амалиёт ва касса харажати янгиланди!');
     }
+
 
     public function destroy(Supplier $supplier)
     {

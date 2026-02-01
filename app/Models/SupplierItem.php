@@ -21,6 +21,15 @@ class SupplierItem extends Model
         'description'
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function ($item) {
+            if ($item->expense_id) {
+                ExpenseAndIncome::where('id', $item->expense_id)->delete();
+            }
+        });
+    }
+
     public function suplier()
     {
         return $this->belongsTo(Supplier::class, 'supplier_id');
