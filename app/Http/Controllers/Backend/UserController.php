@@ -498,8 +498,6 @@ class UserController extends Controller
         $user->token = $request->token ?? Str::random(32);
         $user->auth_key = $request->auth_key ?? Str::random(32);
 
-        $user->save();
-
         // 🔹 Qarzdorlik bo‘lsa — userDebt yaratiladi
         if ($request->debt > 0) {
             $user->userDebt()->create([
@@ -510,7 +508,10 @@ class UserController extends Controller
             ]);
         }
 
-        return redirect()->route('user.index')->with('success', 'Фойдаланувчи яратилди!');
+        $user->save();
+        $route = ($user->role->title === 'Client') ? 'user.index' : 'user.staff';
+
+        return redirect()->route($route)->with('success', 'Фойдаланувчи яратилди!');
     }
 
     public function storeAjax(Request $request)
@@ -690,8 +691,10 @@ class UserController extends Controller
         }
 
         $user->save();
+        $route = ($user->role->title === 'Client') ? 'user.index' : 'user.staff';
 
-        return redirect()->route('user.show', $user->id)->with('success', 'Фойдаланувчи янгиланди!');
+//        return redirect()->route('user.show', $user->id)->with('success', 'Фойдаланувчи янгиланди!');
+        return redirect()->route($route)->with('success', 'Фойдаланувчи янгиланди!');
     }
 
 

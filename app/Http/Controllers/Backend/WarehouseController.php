@@ -31,7 +31,7 @@ class WarehouseController extends Controller
             $warehouses = Warehouse::with('organization')->paginate(20);
         } elseif ($this->roleTitle === 'Moderator') {
             $warehouses = Warehouse::with('organization')
-                ->whereHas('organization', function ($query) {
+                ->whereHas('organization.users', function ($query) {
                     $query->where('user_id', $this->user->id);
                 })
                 ->paginate(10);
@@ -47,7 +47,7 @@ class WarehouseController extends Controller
     {
         $dateService = new DateFilterService();
 
-        if (in_array($this->roleTitle, ['Admin', 'Manager', 'Developer'])) {
+        if (in_array($this->roleTitle, ['Admin', 'Manager', 'Moderator', 'Developer'])) {
 
             $warehouse = Warehouse::findOrFail($warehouse_id);
 
@@ -55,26 +55,6 @@ class WarehouseController extends Controller
                 $q->where('warehouse_id', $warehouse_id);
             });
             $rawQuery = RawMaterialVariation::whereHas('rawMaterial', function ($q) use ($warehouse_id) {
-                $q->where('warehouse_id', $warehouse_id);
-            });
-        } elseif ($this->roleTitle === 'Moderator') {
-
-            $user = Auth::user();
-
-            $warehouse = Warehouse::whereHas('organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->findOrFail($warehouse_id);
-
-            $productQuery = ProductVariation::whereHas('product.warehouse.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->whereHas('product', function ($q) use ($warehouse_id) {
-                $q->where('warehouse_id', $warehouse_id);
-            });
-
-            // 🔹 RawMaterialVariation → RawMaterial → Warehouse → Organization
-            $rawQuery = RawMaterialVariation::whereHas('rawMaterial.warehouse.organization', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->whereHas('rawMaterial', function ($q) use ($warehouse_id) {
                 $q->where('warehouse_id', $warehouse_id);
             });
         } else {

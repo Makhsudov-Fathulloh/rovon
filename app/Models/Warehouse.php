@@ -18,6 +18,11 @@ class Warehouse extends Model
         'status',
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new \App\Scopes\ModeratorScope());
+    }
+
     public function organization()
     {
         return $this->belongsToMany(Organization::class, 'organization_warehouse', 'warehouse_id', 'organization_id')

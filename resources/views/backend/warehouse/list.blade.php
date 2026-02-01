@@ -1,3 +1,9 @@
+@php
+    use App\Services\StatusService;
+    use App\Helpers\CountHelper;
+    use App\Helpers\PriceHelper;
+@endphp
+
 <x-backend.layouts.main title="{{ 'Омбор (' . $warehouse->title . ') элементлари:' }}">
 
     <div class="container-fluid mt-4">
@@ -14,7 +20,7 @@
                 <div class="col-md-2">
                     <select name="filters[status]" class="form-control">
                         <option value="">Барчаси</option>
-                        @foreach(\App\Services\StatusService::getList() as $key => $label)
+                        @foreach(StatusService::getList() as $key => $label)
                             <option
                                 value="{{ $key }}" {{ strval(request('filters.status')) === strval($key) ? 'selected' : '' }}>
                                 {{ $label }}
@@ -23,14 +29,14 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                  <input type="date" name="filters[created_from]"
-                         value="{{ request('filters.created_from') }}"
-                         class="form-control form-control-sm me-1" placeholder="From">
+                    <input type="date" name="filters[created_from]"
+                           value="{{ request('filters.created_from') }}"
+                           class="form-control form-control-sm me-1" placeholder="From">
                 </div>
                 <div class="col-md-2">
-                  <input type="date" name="filters[created_to]"
-                         value="{{ request('filters.created_to') }}"
-                         class="form-control form-control-sm" placeholder="To">
+                    <input type="date" name="filters[created_to]"
+                           value="{{ request('filters.created_to') }}"
+                           class="form-control form-control-sm" placeholder="To">
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-primary w-100"><i class="fa fa-search"></i> Қидириш</button>
@@ -38,38 +44,81 @@
             </div>
         </form>
 
-        <div class="row ">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-secondary text-white fw-bold">
-                    📤 Маҳсулотлар:
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive d-none d-md-block">
-                        <table class="table table-bordered table-hover text-center">
-                            <thead class="table-light">
-                            <tr>
-                                <th class="fw-bold">ID</th>
-                                <th class="fw-bold">Код</th>
-                                <th class="fw-bold">Номи</th>
-                                <th class="fw-bold">Нархи</th>
-                                <th class="fw-bold">Микдори</th>
-                                <th class="fw-bold">Умумий (сўм)</th>
-                                <th class="fw-bold">Статус</th>
-                                <th class="fw-bold">Яратилган сана</th>
-                            </tr>
-                            </thead>
-                            <tbody>
+        @if($warehouse->type == StatusService::TYPE_PRODUCT || $warehouse->type == StatusService::TYPE_ALL)
+            <div class="row ">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-secondary text-white fw-bold">
+                        📤 Тайёр маҳсулотлар:
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive d-none d-md-block">
+                            <table class="table table-bordered table-hover text-center">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">ID</th>
+                                    <th class="fw-bold">Код</th>
+                                    <th class="fw-bold">Номи</th>
+                                    <th class="fw-bold">Нархи</th>
+                                    <th class="fw-bold">Микдори</th>
+                                    <th class="fw-bold">Умумий (сўм)</th>
+                                    <th class="fw-bold">Статус</th>
+                                    <th class="fw-bold">Яратилган сана</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse($productVariations as $item)
+                                    <tr class="text-center" id="row-desktop-{{ $item->id }}">
+                                        <td>{{ $item->id }}</td>
+                                        <td>{{ $item->code }}</td>
+                                        <td>{{ $item->title }}</td>
+                                        <td class="fw-bold text-primary text-nowrap">{{ PriceHelper::format($item->total_price, $item->currency) }}</td>
+                                        <td class="count fw-bold text-success">{{ CountHelper::format($item->count, $item->unit) }}</td>
+                                        <td class="total_price fw-bold text-info">{{ number_format($item->total_price, 0, '', ' ') }}</td>
+                                        <td>{{ StatusService::getList()[$item->status] ?? '-' }}</td>
+                                        <td>{{ $item->created_at?->format('d-m-Y H:i') }}</td>
+                                        <td>
+                                            <div class="btn-group w-100">
+                                                <x-backend.action
+                                                    route="product-variation"
+                                                    :id="$item->id"
+                                                    :variation="$item"
+                                                    :addCount="true"
+                                                    addCountTitle="Махсулот микдорини ошириш"
+                                                    :view="true"
+                                                    data-model="product"
+                                                    data-id="{{ $item->id }}"
+                                                    data-title="{{ $item->title }}"
+                                                    data-count="{{ $item->count }}"
+                                                    class="add-count-btn"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9">Маълумот топилмади</td>
+                                    </tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Mobile version start --}}
+                        <div class="d-md-none">
                             @forelse($productVariations as $item)
-                                <tr class="text-center" id="row-desktop-{{ $item->id }}">
-                                    <td>{{ $item->id }}</td>
-                                    <td>{{ $item->code }}</td>
-                                    <td>{{ $item->title }}</td>
-                                    <td class="fw-bold text-primary text-nowrap">{{ \App\Helpers\PriceHelper::format($item->total_price, $item->currency) }}</td>
-                                    <td class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</td>
-                                    <td class="total_price fw-bold text-info">{{ number_format($item->total_price, 0, '', ' ') }}</td>
-                                    <td>{{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</td>
-                                    <td>{{ $item->created_at?->format('d-m-Y H:i') }}</td>
-                                    <td>
+                                <div class="card border" id="row-mobile-{{ $item->id }}">
+                                    <div class="card-body">
+                                        <p class="card-text"><strong>ID:</strong> {{ $item->id }}</p>
+                                        <p class="card-text"><strong>Код: </strong> {{ $item->code }}</p>
+                                        <p class="card-text"><strong>Номи: </strong> {{ $item->title }}</p>
+                                        <p class="card-text">
+                                            <strong>Микдори:</strong>
+                                            <span
+                                                class="count fw-bold text-success">{{ CountHelper::format($item->count, $item->unit) }}</span>
+                                        </p>
+                                        <p class="card-text">
+                                            <strong>Статус: </strong> {{ StatusService::getList()[$item->status] ?? '-' }}
+                                        </p>
                                         <div class="btn-group w-100">
                                             <x-backend.action
                                                 route="product-variation"
@@ -85,170 +134,139 @@
                                                 class="add-count-btn"
                                             />
                                         </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9">Маълумот топилмади</td>
-                                </tr>
-                            @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        @forelse($productVariations as $item)
-                            <div class="card border" id="row-mobile-{{ $item->id }}">
-                                <div class="card-body">
-                                    <p class="card-text"><strong>ID:</strong> {{ $item->id }}</p>
-                                    <p class="card-text"><strong>Код: </strong> {{ $item->code }}</p>
-                                    <p class="card-text"><strong>Номи: </strong> {{ $item->title }}</p>
-                                    <p class="card-text">
-                                        <strong>Микдори:</strong>
-                                        <span class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</span>
-                                    </p>
-                                    <p class="card-text"><strong>Статус: </strong> {{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</p>
-                                    <div class="btn-group w-100">
-                                        <x-backend.action
-                                            route="product-variation"
-                                            :id="$item->id"
-                                            :variation="$item"
-                                            :addCount="true"
-                                            addCountTitle="Махсулот микдорини ошириш"
-                                            :view="true"
-                                            data-model="product"
-                                            data-id="{{ $item->id }}"
-                                            data-title="{{ $item->title }}"
-                                            data-count="{{ $item->count }}"
-                                            class="add-count-btn"
-                                        />
                                     </div>
                                 </div>
-                            </div>
-                        @empty
-                            <p class="text-center">Маълумот топилмади</p>
-                        @endforelse
-                    </div>
-                    {{-- Mobile version end --}}
+                            @empty
+                                <p class="text-center">Маълумот топилмади</p>
+                            @endforelse
+                        </div>
+                        {{-- Mobile version end --}}
 
-                    {{ $productVariations->links('pagination::bootstrap-4') }}
+                        {{ $productVariations->links('pagination::bootstrap-4') }}
 
-                    <div class="mt-3 text-end">
-                        <strong>Жами: <span
-                                class="fw-bold text-primary">{{ number_format($productAllCount, 0, '', ' ') }}</span>
-                            та. Умумий нарх: <span
-                                class="fw-bold text-info">{{ number_format($productTotalPrice, 0, '', ' ') }}</span> сўм
-                        </strong>
+                        <div class="mt-3 text-end">
+                            <strong>Жами: <span
+                                    class="fw-bold text-primary">{{ number_format($productAllCount, 0, '', ' ') }}</span>
+                                та. Умумий нарх: <span
+                                    class="fw-bold text-info">{{ number_format($productTotalPrice, 0, '', ' ') }}</span>
+                                сўм
+                            </strong>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
 
-        <div class="row">
-            <div class="card shadow">
-                <div class="card-header bg-secondary text-white fw-bold">
-                    📥 Хомашёлар:
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive d-none d-md-block">
-                        <table class="table table-bordered table-hover text-center">
-                            <thead class="table-light">
-                            <tr>
-                                <th class="fw-bold">ID</th>
-                                <th class="fw-bold">Код</th>
-                                <th class="fw-bold">Номи</th>
-                                <th class="fw-bold">Нархи</th>
-                                <th class="fw-bold">Микдори</th>
-                                <th class="fw-bold">Умумий (сўм)</th>
-                                <th class="fw-bold">Статус</th>
-                                <th class="fw-bold">Яратилган сана</th>
-                            </tr>
-                            </thead>
-                            <tbody>
+        @if($warehouse->type == StatusService::TYPE_SPARE_PART || $warehouse->type == StatusService::TYPE_RAW_MATERIAL || $warehouse->type == StatusService::TYPE_ALL)
+            <div class="row">
+                <div class="card shadow">
+                    <div class="card-header bg-secondary text-white fw-bold">
+                        📥 Хомашёлар ва эхтиёт қисмлар:
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive d-none d-md-block">
+                            <table class="table table-bordered table-hover text-center">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">ID</th>
+                                    <th class="fw-bold">Код</th>
+                                    <th class="fw-bold">Номи</th>
+                                    <th class="fw-bold">Нархи</th>
+                                    <th class="fw-bold">Микдори</th>
+                                    <th class="fw-bold">Умумий (сўм)</th>
+                                    <th class="fw-bold">Статус</th>
+                                    <th class="fw-bold">Яратилган сана</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse($rawMaterialVariations as $item)
+                                    <tr class="text-center" id="product-row-desktop-{{ $item->id }}">
+                                        <td>{{ $item->id }}</td>
+                                        <td>{{ $item->code }}</td>
+                                        <td>{{ $item->title }}</td>
+                                        <td class="fw-bold text-primary">{{ PriceHelper::format($item->price, $item->currency) }}</td>
+                                        <td class="count fw-bold text-success">{{ CountHelper::format($item->count, $item->unit) }}</td>
+                                        <td class="total_price fw-bold text-info">{{ number_format($item->total_price, 0, '', ' ') }}</td>
+                                        <td>{{ StatusService::getList()[$item->status] ?? '-' }}</td>
+                                        <td>{{ $item->created_at?->format('d-m-Y H:i') }}</td>
+                                        <td>
+                                            <x-backend.action
+                                                route="raw-material-variation"
+                                                :id="$item->id"
+                                                :variation="$item"
+                                                :addCount="true"
+                                                addCountTitle="Хомашё микдорини ошириш"
+                                                :view="true"
+                                                data-model="raw_material"
+                                                data-id="{{ $item->id }}"
+                                                data-title="{{ $item->title }}"
+                                                data-count="{{ $item->count }}"
+                                                data-unit="{{ $item->unit }}"
+                                                class="add-count-btn"
+                                            />
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9">Маълумот топилмади</td>
+                                    </tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        {{-- Mobile version start --}}
+                        <div class="d-md-none">
                             @forelse($rawMaterialVariations as $item)
-                                <tr class="text-center" id="product-row-desktop-{{ $item->id }}">
-                                    <td>{{ $item->id }}</td>
-                                    <td>{{ $item->code }}</td>
-                                    <td>{{ $item->title }}</td>
-                                    <td class="fw-bold text-primary">{{ \App\Helpers\PriceHelper::format($item->price, $item->currency) }}</td>
-                                    <td class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</td>
-                                    <td class="total_price fw-bold text-info">{{ number_format($item->total_price, 0, '', ' ') }}</td>
-                                    <td>{{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</td>
-                                    <td>{{ $item->created_at?->format('d-m-Y H:i') }}</td>
-                                    <td>
-                                        <x-backend.action
-                                            route="raw-material-variation"
-                                            :id="$item->id"
-                                            :variation="$item"
-                                            :addCount="true"
-                                            addCountTitle="Хомашё микдорини ошириш"
-                                            :view="true"
-                                            data-model="raw_material"
-                                            data-id="{{ $item->id }}"
-                                            data-title="{{ $item->title }}"
-                                            data-count="{{ $item->count }}"
-                                            data-unit="{{ $item->unit }}"
-                                            class="add-count-btn"
-                                        />
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9">Маълумот топилмади</td>
-                                </tr>
-                            @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        @forelse($rawMaterialVariations as $item)
-                            <div class="card border" id="row-mobile-{{ $item->id }}">
-                                <div class="card-body">
-                                    <p class="card-text"><strong>ID:</strong> {{ $item->id }}</p>
-                                    <p class="card-text"><strong>Код: </strong> {{ $item->code }}</p>
-                                    <p class="card-text"><strong>Номи: </strong> {{ $item->title }}</p>
-                                    <p class="card-text">
-                                        <strong>Микдори:</strong>
-                                        <span class="count fw-bold text-success">{{ \App\Helpers\CountHelper::format($item->count, $item->unit) }}</span>
-                                    </p>
-                                    <p class="card-text"><strong>Статус: </strong> {{ \App\Services\StatusService::getList()[$item->status] ?? '-' }}</p>
-                                    <div class="btn-group w-100">
-                                        <x-backend.action
-                                            route="raw-material-variation"
-                                            :id="$item->id"
-                                            :variation="$item"
-                                            :addCount="true"
-                                            addCountTitle="Хомашё микдорини ошириш"
-                                            :view="true"
-                                            data-model="raw_material"
-                                            data-id="{{ $item->id }}"
-                                            data-title="{{ $item->title }}"
-                                            data-count="{{ $item->count }}"
-                                            class="add-count-btn"
-                                        />
+                                <div class="card border" id="row-mobile-{{ $item->id }}">
+                                    <div class="card-body">
+                                        <p class="card-text"><strong>ID:</strong> {{ $item->id }}</p>
+                                        <p class="card-text"><strong>Код: </strong> {{ $item->code }}</p>
+                                        <p class="card-text"><strong>Номи: </strong> {{ $item->title }}</p>
+                                        <p class="card-text">
+                                            <strong>Микдори:</strong>
+                                            <span
+                                                class="count fw-bold text-success">{{ CountHelper::format($item->count, $item->unit) }}</span>
+                                        </p>
+                                        <p class="card-text">
+                                            <strong>Статус: </strong> {{ StatusService::getList()[$item->status] ?? '-' }}
+                                        </p>
+                                        <div class="btn-group w-100">
+                                            <x-backend.action
+                                                route="raw-material-variation"
+                                                :id="$item->id"
+                                                :variation="$item"
+                                                :addCount="true"
+                                                addCountTitle="Хомашё микдорини ошириш"
+                                                :view="true"
+                                                data-model="raw_material"
+                                                data-id="{{ $item->id }}"
+                                                data-title="{{ $item->title }}"
+                                                data-count="{{ $item->count }}"
+                                                class="add-count-btn"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @empty
-                            <p class="text-center">Маълумот топилмади</p>
-                        @endforelse
-                    </div>
-                    {{-- Mobile version end --}}
+                            @empty
+                                <p class="text-center">Маълумот топилмади</p>
+                            @endforelse
+                        </div>
+                        {{-- Mobile version end --}}
 
-                    {{ $rawMaterialVariations->links('pagination::bootstrap-4') }}
+                        {{ $rawMaterialVariations->links('pagination::bootstrap-4') }}
 
-                    <div class="mt-3 text-end">
-                        <strong>Жами: <span
-                                class="fw-bold text-primary">{{ number_format($rawAllCount, 0, '', ' ') }}</span> та,
-                            Умумий нарх: <span
-                                class="fw-bold text-info">{{ number_format($rawTotalPrice, 0, '', ' ') }}</span>
-                            сўм</strong>
+                        <div class="mt-3 text-end">
+                            <strong>Жами: <span
+                                    class="fw-bold text-primary">{{ number_format($rawAllCount, 0, '', ' ') }}</span>
+                                та,
+                                Умумий нарх: <span
+                                    class="fw-bold text-info">{{ number_format($rawTotalPrice, 0, '', ' ') }}</span>
+                                сўм</strong>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
     </div>
 
     <!-- 📦 Product Modal -->

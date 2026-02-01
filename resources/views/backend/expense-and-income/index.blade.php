@@ -199,10 +199,10 @@
                     {{-- Mobile version end --}}
                 </form>
 
-                {{-- Pagination --}}])
                 <div class="d-flex mt-3 justify-content-center">
                     {{ $expenseAndIncomes->links('pagination::bootstrap-4') }}
                 </div>
+
                 @can('hasAccess')
                     @include('partials.backend._stats_payment_block', ['data' => $payment, 'prefix' => 'Payment', 'title' => 'Касса (Нақд тўлов)'])
                     {{--@include('partials.backend._stats_block', ['data' => $amount, 'prefix' => 'AmountPaid', 'title' => 'Касса (Нақд тўлов)'])--}}
