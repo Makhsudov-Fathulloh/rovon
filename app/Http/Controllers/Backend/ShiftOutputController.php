@@ -254,6 +254,7 @@ class ShiftOutputController extends Controller
                         }
 
                         $totalWorkerDefectInput = (float)($workerDefects[$worker->id] ?? 0);
+
                         $workerStageDefect = $totalWorkerQtyAcrossAllStages > 0
                             ? ($qty / $totalWorkerQtyAcrossAllStages) * $totalWorkerDefectInput
                             : 0;
@@ -315,13 +316,13 @@ class ShiftOutputController extends Controller
                             $limitAmount = $totalWorkerMaterialWeight * 0.02;
 
                             if ($workerStageDefect > $limitAmount) {
-                                $this->sendMaterialDefectNotify($shift, $w, $stage, $wQty, $workerStageDefect, $limitAmount);
+                                $this->sendMaterialDefectNotify($shift, $w, $stage, $wQty, $wDefect, $limitAmount);
                             }
                         } elseif ($stage->defect_type === StatusService::DEFECT_PREVIOUS_STAGE) {
                             $limitAmount = 0;
 
                             if ($workerStageDefect > $limitAmount) {
-                                $this->sendPreviousDefectNotify($shift, $w, $stage, $wQty, $workerStageDefect, $limitAmount);
+                                $this->sendPreviousDefectNotify($shift, $w, $stage, $wQty, $wDefect, $limitAmount);
                             }
                         }
                     }
@@ -338,9 +339,20 @@ class ShiftOutputController extends Controller
             ->where('status', StatusService::STATUS_ACTIVE)
             ->first();
 
-        $stages = Stage::where('section_id', $shiftOutput->shift->section_id)
+//        $stages = Stage::where('section_id', $shiftOutput->shift->section_id)
+//            ->where('status', StatusService::STATUS_ACTIVE)
+//            ->get();
+
+        $stages = Stage::whereHas('shiftOutputs', function ($q) use ($shiftOutput) {
+            $q->where('id', $shiftOutput->id)
+                ->where(function ($q) {
+                    $q->where('stage_count', '>', 0)
+                        ->orWhere('defect_amount', '>', 0);
+                });
+        })
             ->where('status', StatusService::STATUS_ACTIVE)
             ->get();
+
 
         $workers = $shiftOutput->shift->users()->get();
 
@@ -431,7 +443,11 @@ class ShiftOutputController extends Controller
                 $wDefect = $worker->defect_amount;
 
                 if ($wQty <= 0 && $wDefect <= 0) {
-                    $this->clearDefectReport($shiftOutput, $worker->user_id);
+                    DefectReport::where([
+                        'shift_id' => $shiftOutput->shift_id,
+                        'stage_id' => $shiftOutput->stage_id,
+                        'user_id' => $worker->user_id,
+                    ])->delete();
                     continue;
                 }
 
@@ -539,8 +555,8 @@ class ShiftOutputController extends Controller
             . "📍 Бўлим: <b>{$shift->section?->title}</b>\n"
             . "⚙️ Махсулот: <b>{$stage->title}</b>\n"
             . "🔢 Чиқарилган: <b>{$qty} дона</b>\n"
-            . "🔻 Ишчи браки: <b>" . round($defect, 3) . " дона</b>\n"
-            . "⚠️ Лимит (0%): <b>" . round($limit, 3) . " дона</b>\n"
+            . "🔻 Ишчи браки: <b>" . round($defect, 3) . " кг/дона</b>\n"
+            . "⚠️ Лимит (0%): <b>" . round($limit, 3) . " кг/дона</b>\n"
             . "📊 Фоиз: <b>" . round($percent, 2) . "%</b>";
 
         TelegramHelper::notifyDefect($msg);
