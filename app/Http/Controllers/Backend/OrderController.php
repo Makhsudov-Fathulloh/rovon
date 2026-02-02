@@ -139,8 +139,7 @@ class OrderController extends Controller
             return $check;
         }
 
-        $users = User::where('role_id', Role::where('title', 'Client')->value('id'))->get();
-        $clientRoleId = Role::where('title', 'Client')->value('id');
+        $users = User::select('id', 'username', 'phone')->get();
 
         $variations = ProductVariation::with('product:id,title')
             ->where('count', '>', 0)
@@ -157,6 +156,7 @@ class OrderController extends Controller
             return $variation;
         });
 
+        $clientRoleId = Role::where('title', 'Client')->value('id');
         $defaultUserId = User::where('username', 'Стандарт клиент')->value('id') ?? null;
 
         $currentCurrency = old('currency', StatusService::CURRENCY_UZS);

@@ -30,8 +30,8 @@ class ShiftReportController extends Controller
 
         $todayReport = $reports->first(function($report) use ($now) {
             $reportDate = Carbon::parse($report->report_date);
-            $reportStart = $reportDate->setHour(6)->setMinute(0)->setSecond(0);
-            $reportEnd   = $reportStart->copy()->addDay(); // keyingi 06:00
+            $reportStart = $reportDate->setHour(12)->setMinute(0)->setSecond(0);
+            $reportEnd   = $reportStart->copy()->addDay(); // keyingi 11:59
             return $now->between($reportStart, $reportEnd);
         });
 
@@ -47,9 +47,9 @@ class ShiftReportController extends Controller
     {
         $reportDate = $request->report_date ?? now()->format('Y-m-d');
 
-        // Kunlik interval: bugun 6:00 → ertaga 6:00
-        $dayStart = Carbon::parse($reportDate)->setTime(10, 0, 0);
-        $dayEnd   = $dayStart->copy()->addDay()->setTime(10, 0, 0);
+        // Kunlik interval: bugun 12:00 → ertaga 11:59
+        $dayStart = Carbon::parse($reportDate)->setTime(12, 0, 0);
+        $dayEnd   = $dayStart->copy()->addDay()->setTime(11, 59, 59);
 
         // Barcha smenalarni yuklab olamiz
         $shifts = Shift::with(['shiftOutputs.stage', 'section.organization'])->get();
@@ -133,8 +133,8 @@ class ShiftReportController extends Controller
     {
         $reportDate = $request->report_date ?? now()->format('Y-m-d');
 
-        $dayStart = Carbon::parse($reportDate)->setTime(10, 0, 0);
-        $dayEnd   = $dayStart->copy()->addDay()->setTime(10, 0, 0);
+        $dayStart = Carbon::parse($reportDate)->setTime(12, 0, 0);
+        $dayEnd   = $dayStart->copy()->addDay()->setTime(11, 59, 59);
 
         // Shu intervaldagi barcha shiftlarni olamiz
         $shifts = Shift::with(['shiftOutputs.stage', 'section.organization'])->get();
