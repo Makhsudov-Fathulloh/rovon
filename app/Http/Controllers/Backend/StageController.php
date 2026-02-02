@@ -89,7 +89,7 @@ class StageController extends Controller
         $data = $stages->map(function ($s) {
             return [
                 'id' => $s->id,
-                'title' => $s->title,
+                'title' => $s->title . " (" . ($s->section->title ?? 'Номаълум') . ")",
                 'pre_stage_ids' => $s->preStages->pluck('id')->toArray(),
             ];
         });

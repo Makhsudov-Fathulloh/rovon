@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Смена махсулотини яратиш: '. ucfirst($shift->title) }}">
+<x-backend.layouts.main title="{!! 'Смена махсулотини яратиш1: '. ucfirst($shift->title) !!}">
     <div class="shift-output-create">
         <x-backend.shift-output.form
             :method="'POST'"

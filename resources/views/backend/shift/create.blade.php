@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Смена яратиш' }}">
+<x-backend.layouts.main title="{!! 'Смена яратиш' !!}">
     <div class="shift-create">
         <x-backend.shift.form
             :method="'POST'"
