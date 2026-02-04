@@ -17,11 +17,12 @@
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}"/>
     <link rel="stylesheet" href="{{ asset('css/backend/dist/style.min.css') }}"/>
-    <link rel="stylesheet" href="{{ asset('css/backend/main.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/backend/libs/float-chart.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/backend/libs/magnific-popup.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/backend/packages/select2.min.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/backend/packages/flatpickr.min.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/backend/main.css') }}"/>
+
     <script src="{{ asset('js/backend/libs/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ asset('js/backend/package/select2.min.js') }}"></script>
     <script src="{{ asset('js/backend/package/ckeditor.js') }}"></script>

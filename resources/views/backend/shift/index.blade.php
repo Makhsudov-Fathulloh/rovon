@@ -1,59 +1,21 @@
 <x-backend.layouts.main title="{{ 'Сменалар' }}">
 
-    <style>
-        .card-stats {
-            border-radius: 12px;
-            padding: 20px;
-            color: #fff;
-            transition: 0.3s ease;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .card-stats:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-        }
-        .card-stats.count {
-            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-            border-left: 5px solid #00d68f;
-        }
+    <div class="container-fluid">
 
-        .card-stats h5 {
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 1.25rem;
-        }
-        .card-stats p {
-            margin: 2px 0;
-            font-size: 0.95rem;
-        }
-        .card-stats i {
-            font-size: 2.2rem;
-            opacity: 0.7;
-        }
-    </style>
-
-    <div class="row">
-        <div class="card shadow w-100">
-            <div class="card-header">
-                <div class="row justify-content-start">
-                    <div class="col-sm-12 col-md-auto text-start">
-                        <x-backend.action route="shift" :back="true" :create="true"/>
-                    </div>
-                </div>
+        <div class="card-custom shadow-sm">
+            <div class="card-header-custom action-btns">
+                <x-backend.action route="shift" :back="true" :create="true"/>
             </div>
-            <div class="table-responsive card-body">
+
+            <div class="card-body p-0">
                 <form id="shiftFilterForm" method="GET" action="{{ route('shift.index') }}">
+
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-bordered table-hover">
+                        <table class="table mb-0">
                             <thead>
-                            <tr>
+                            <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'ID') !!}</th>
-                                <th>{!! sortLink('organization_title', 'Филиал') !!}</th>
-                                <th>{!! sortLink('section_id', 'Бўлим') !!}</th>
-                                <th>{!! sortLink('title', 'Номи') !!}</th>
+                                <th>{!! sortLink('organization_section_shift', 'Номи') !!}</th>
                                 <th>Ходимлар</th>
                                 <th>{!! sortLink('status', 'Статус') !!}</th>
                                 <th class="col-date">Бошланиш</th>
@@ -62,43 +24,14 @@
                             </tr>
                             {{-- Filter Inputs --}}
                             <tr>
-                                <th><input type="text" name="filters[id]" value="{{ request('filters.id') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
                                 <th>
-                                    <select name="filters[organization_id]"
-                                            class="form-control form-control-sm filter-select2 w-100">
-                                        <option value="">Барчаси</option>
-                                        @foreach($organizations as $id => $title)
-                                            <option
-                                                value="{{ $id }}" {{ request('filters.organization_id') == $id ? 'selected' : '' }}>
-                                                {{ $title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <input type="text" name="filters[id]" value="{{ request('filters.id') }}"
+                                           class="form-control form-control-sm w-100 filter-numeric" placeholder="№...">
                                 </th>
                                 <th>
-                                    <select name="filters[section_id]"
-                                            class="form-control form-control-sm filter-select2 w-100">
-                                        <option value="">Барчаси</option>
-                                        @foreach($sections as $id => $title)
-                                            <option
-                                                value="{{ $id }}" {{ request('filters.section_id') == $id ? 'selected' : '' }}>
-                                                {{ $title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </th>
-                                <th>
-                                    <select name="filters[title]"
-                                            class="form-control form-control-sm filter-select2 w-100">
-                                        <option value="">Барчаси</option>
-                                        @foreach($titles as $id => $title)
-                                            <option
-                                                value="{{ $title }}" {{ request('filters.title') == $title ? 'selected' : '' }}>
-                                                {{ $title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <input type="text" name="filters[organization_section_shift]"
+                                           value="{{ request('filters.organization_section_shift') }}"
+                                           class="form-control form-control-sm w-100" placeholder="Қидирув...">
                                 </th>
                                 <th>
                                     <select name="filters[user_id]"
@@ -140,9 +73,13 @@
                                     </div>
                                 @endif
 
-                                <th>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i
-                                            class="fa fa-search"></i></button>
+                                <th class="p-0">
+                                    <div class="d-flex justify-content-center align-items-center"
+                                         style="min-height: 75px;">
+                                        <button type="submit" class="btn btn-custom-search" title="Филтрлаш">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
                                 </th>
                             </tr>
                             </thead>
@@ -150,18 +87,18 @@
                             @forelse($shifts as $shift)
                                 <tr class="text-center" id="row-{{ $shift->id }}">
                                     <td class="col-id">{{ $shift->id }}</td>
-                                    <td>{{ optional($shift->section->organization)->title }}</td>
-                                    <td>{{ optional($shift->section)->title }}</td>
-                                    <td>{{ $shift->title }}</td>
+                                    <td>{{ '(' . optional($shift->section->organization)->title . ') (' . optional($shift->section)->title . ') ' . $shift->section->title }}</td>
                                     <td>
                                         @foreach($shift->users as $user)
                                             <span class="badge bg-info">{{ $user->username }}</span>
                                         @endforeach
                                     </td>
-                                    <td style="width: 100px">{{ \App\Services\StatusService::getList()[$shift->status] ?? '-' }}</td>
+                                    <td>
+                                        <span class="badge-custom {{ \App\Services\StatusService::getListClass()[$shift->status] }}">{{ \App\Services\StatusService::getList()[$shift->status] }}</span>
+                                    </td>
                                     <td>{{ \Carbon\Carbon::parse($shift->started_at)->format('H:i') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($shift->ended_at)->format('H:i') }}</td>
-                                    <td>
+                                    <td class="text-center action-btns">
                                         <x-backend.action
                                             route="shift" listRoute="shift-output" :id="$shift->id"
                                             subRoute="outputs"
@@ -174,7 +111,11 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="text-center">Маълумот топилмади</td>
+                                    <td colspan="8" class="py-5 text-center">
+                                        <img src="{{ asset('images/systems/reference-not-found.png') }}" width="60"
+                                             class="mb-3 opacity-20" alt="">
+                                        <p class="text-muted">Маълумот топилмади</p>
+                                    </td>
                                 </tr>
                             @endforelse
                             </tbody>
@@ -182,93 +123,112 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        <div class="d-flex mb-2">
-                            <select name="filters[title]" class="form-control form-control-sm filter-select2 w-100"
-                                    data-placeholder="Смена номини киритинг">
-                                <option value="">Барчаси</option>
-                                @foreach($titles as $id => $title)
-                                    <option
-                                        value="{{ $title }}" {{ request('filters.title') == $title ? 'selected' : '' }}>
-                                        {{ $title }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
-                                <i class="fa fa-search"></i>
-                            </button>
+                    <div class="d-md-none p-3">
+                        <div class="search-box-mobile mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"
+                                      style="border-radius: 12px 0 0 12px;"><i
+                                        class="fa fa-search text-muted"></i></span>
+                                <input type="text" name="filters[organization_section_shift]"
+                                       value="{{ request('filters.organization_section_shift') }}"
+                                       class="form-control border-start-0 ps-0" placeholder="     Қидирув..."
+                                       style="border-radius: 0 12px 12px 0; height: 48px;">
+                                <button type="submit" class="btn btn-primary ms-2"
+                                        style="border-radius: 12px; width: 48px;"><i class="fa fa-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
+
                         @forelse($shifts as $shift)
-                            <div class="card border">
-                                <div class="card-body">
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('id', 'ID:') !!}</strong>{{ $shift->id }} </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('organization_title', 'Филиал:') !!}</strong>{{ optional($shift->section->organization)->title }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('section_id', 'Бўлим:') !!}</strong>{{ optional($shift->section)->title }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('title', 'Номи') !!}</strong>{{ $shift->title }} </p>
-                                    <p class="card-text">
-                                        <strong>Ходимлар:</strong>
+                            <div class="mobile-card shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="img-wrapper me-3" style="width: 55px; height: 55px;">
+                                            @if(optional($shift->file)->path)
+                                                <img src="{{ asset('storage/' . $shift->file->path) }}" alt="">
+                                            @else
+                                                <div
+                                                    class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                                    <i class="bi bi-image"></i></div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div
+                                                class="fw-bold mb-0 text-dark">{{ '(' . optional($shift->section->organization)->title . ') (' . optional($shift->section)->title . ') ' . $shift->section->title }}</div>
+                                            <span class="text-muted small">ID: {{ $shift->id }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge-custom {{ \App\Services\StatusService::getListClass()[$shift->status] }}">{{ \App\Services\StatusService::getList()[$shift->status] }}</span>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Бошланиш:</small>
+                                        <span
+                                            class="small fw-medium">{{ \Carbon\Carbon::parse($shift->started_at)->format('H:i') }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Тугаш:</small>
+                                        <span
+                                            class="small fw-medium">{{ \Carbon\Carbon::parse($shift->ended_at)->format('H:i') }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="small text-muted"><i class="bi bi-person me-1"></i>
                                         @foreach($shift->users as $user)
                                             <span class="badge bg-info">{{ $user->username }}</span>
                                         @endforeach
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('status', 'Статус:') !!}</strong> {{  \App\Services\StatusService::getList()[$shift->status] ?? '-' }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>Бошланиш: </strong> {{ \Carbon\Carbon::parse($shift->started_at)->format('H:i') }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>Тугаш: </strong> {{ \Carbon\Carbon::parse($shift->ended_at)->format('H:i') }}
-                                    </p>
-                                    <x-backend.action
-                                        route="shift" listRoute="shift-output" :id="$shift->id"
-                                        :add="true" :list="true" :view="true" :edit="true" :delete="true"
-                                        subRoute="outputs"
-                                        createTitle="Смена махсулотини яратиш"
-                                        listTitle="Смена махсулотларини кўриш"
-                                        viewClass="btn btn-secondary btn-sm"
-                                    />
+                                    </span>
+                                    <div class="action-btns">
+                                        <x-backend.action
+                                            route="shift" listRoute="shift-output" :id="$shift->id"
+                                            subRoute="outputs"
+                                            :add="true" :list="true" :view="true" :edit="true" :delete="true"
+                                            createTitle="Смена махсулотини яратиш"
+                                            listTitle="Смен махсулотларни кўриш"
+                                            viewClass="btn btn-secondary btn-sm"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-center">Маълумот топилмади</p>
+                            <div class="py-5 text-center">
+                                <img src="{{ asset('images/systems/reference-not-found.png') }}" width="45"
+                                     class="mb-3 opacity-20" alt="">
+                                <div class="py-4">Маълумот топилмади</div>
+                            </div>
                         @endforelse
                     </div>
                     {{-- Mobile version end --}}
                 </form>
+            </div>
 
+            <div class="card-footer bg-white border-top-0 p-4">
                 <div class="d-flex justify-content-center">
                     {{ $shifts->links('pagination::bootstrap-4') }}
                 </div>
-
-                <div class="row mt-4">
-                    <div class="col-md-12 mb-3">
-                        <div class="card-stats count">
-                            <div class="w-100">
-                                <p>Сменалар</p>
-                                <h5><strong>{{ number_format($shiftCount, 0, '', ' ') }} та</strong></h5>
-                            </div>
-                            <div>
-                                <i class="bi bi-wallet2"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12 mb-3">
+                <div class="card-stats count">
+                    <div class="w-100">
+                        <p>Сменалар</p>
+                        <h5><strong>{{ number_format($shiftCount, 0, '', ' ') }} та</strong></h5>
+                    </div>
+                    <div>
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         document.getElementById('shiftFilterForm').addEventListener('submit', function (e) {
             // Faqat ko‘rinib turgan inputni qoldiramiz
-            this.querySelectorAll('input[name="filters[title]"], select[name="filters[title]"]').forEach(select => {
+            this.querySelectorAll('input[name="filters[organization_section_shift]"], select[name="filters[organization_section_shift]"]').forEach(select => {
                 if (select.offsetParent === null) {
                     select.disabled = true;
                 }

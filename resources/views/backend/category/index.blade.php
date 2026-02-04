@@ -1,156 +1,77 @@
 <x-backend.layouts.main title="{{ 'Қатегориялар' }}">
 
-    <style>
-        .card-stats {
-            border-radius: 12px;
-            padding: 20px;
-            color: #fff;
-            transition: 0.3s ease;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .card-stats:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-        }
-        .card-stats.count {
-            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-            border-left: 5px solid #00d68f;
-        }
+    <div class="container-fluid">
 
-        .card-stats h5 {
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 1.25rem;
-        }
-        .card-stats p {
-            margin: 2px 0;
-            font-size: 0.95rem;
-        }
-        .card-stats i {
-            font-size: 2.2rem;
-            opacity: 0.7;
-        }
-    </style>
-
-    <div class="row">
-        <div class="card shadow w-100">
-            <div class="card-header">
-                <div class="row justify-content-start">
-                    <div class="col-sm-12 col-md-auto text-start">
-                        <x-backend.action route="category" :back="true" :create="true"/>
-                    </div>
-                </div>
+        <div class="card-custom shadow-sm">
+            <div class="card-header-custom action-btns">
+                <x-backend.action route="category" :back="true" :create="true"/>
             </div>
-            <div class="table-responsive card-body">
+
+            <div class="card-body p-0">
                 <form id="categoryFilterForm" method="GET" action="{{ route('category.index') }}">
+
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-bordered table-hover">
+                        <table class="table mb-0">
                             <thead>
                             <tr class="text-center">
-                                <th class="col-id">{!! sortLink('id', 'Id') !!}</th>
+                                <th class="col-id">{!! sortLink('id', 'ID') !!}</th>
                                 <th>{!! sortLink('title', 'Номи') !!}</th>
-                                <th>{!! sortLink('parent_id', 'Ота категория') !!}</th>
-                                <th>{!! sortLink('image', 'Расм') !!}</th>
                                 <th>{!! sortLink('type', 'Тури') !!}</th>
-                                <th>{!! sortLink('user_id', 'Ҳодим') !!}</th>
                                 <th class="col-date">{!! sortLink('created_at', 'Яратилди') !!}</th>
-                                <th></th> {{-- Search btn --}}
+                                <th></th>
                             </tr>
-                            {{-- Filter Inputs --}}
-                            <tr>
-                                <th><input type="text" name="filters[id]" value="{{ request('filters.id') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[title]" value="{{ request('filters.title') }}"
-                                           class="form-control form-control-sm w-100"></th>
+                            <tr class="filter-row">
+                                <th><input type="text" name="filters[id]" value="{{ request('filters.id') }}" class="form-control" placeholder="№..."></th>
+                                <th><input type="text" name="filters[title]" value="{{ request('filters.title') }}" class="form-control" placeholder="Қидирув..."></th>
                                 <th>
-                                    <select name="filters[parent_id]"
-                                            class="form-control form-control-sm filter-select2 w-100">
-                                        <option value="">Барчаси</option>
-                                        @foreach($categoryParents as $id => $title)
-                                            <option
-                                                value="{{ $id }}" {{ request('filters.parent_id') == $id ? 'selected' : '' }}>
-                                                {{ $title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </th>
-                                <th><input type="text" name="filters[image]" value="{{ request('filters.image') }}"
-                                           class="form-control form-control-sm w-100" style="display: none;"></th>
-                                <th>
-                                    <select name="filters[type]" class="form-control form-control-sm w-100">
+                                    <select name="filters[type]" class="form-control">
                                         <option value="">Барчаси</option>
                                         @foreach(\App\Services\StatusService::getType() as $key => $label)
-                                            <option
-                                                value="{{ $key }}" {{ (string) request('filters.type') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
+                                            <option value="{{ $key }}" {{ (string) request('filters.type') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </th>
                                 <th>
-                                    <select name="filters[user_id]"
-                                            class="form-control form-control-sm filter-select2 w-100">
-                                        <option value="">Барчаси</option>
-                                        @foreach($users as $id => $username)
-                                            <option
-                                                value="{{ $id }}" {{ request('filters.user_id') == $id ? 'selected' : '' }}>
-                                                {{ $username }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </th>
-                              <th>
-                                  <div class="d-flex">
-                                      <input type="date" name="filters[created_from]"
-                                             value="{{ request('filters.created_from') }}"
-                                             class="form-control form-control-sm me-1" placeholder="From">
-                                      <input type="date" name="filters[created_to]"
-                                             value="{{ request('filters.created_to') }}"
-                                             class="form-control form-control-sm" placeholder="To">
-                                  </div>
-                                </th>
-
-                                @if(session('date_format_errors'))
-                                    <div class="alert alert-danger mt-2">
-                                        <ul>
-                                            @foreach(session('date_format_errors') as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
+                                    <div class="d-flex align-items-center">
+                                        <input type="date" name="filters[created_from]" value="{{ request('filters.created_from') }}" class="form-control me-1" title="Дан">
+                                        <input type="date" name="filters[created_to]" value="{{ request('filters.created_to') }}" class="form-control" title="Гача">
                                     </div>
-                                @endif
-
-                                <th>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i
-                                            class="fa fa-search"></i></button>
+                                </th>
+                                <th class="p-0">
+                                    <div class="d-flex justify-content-center align-items-center" style="min-height: 75px;">
+                                        <button type="submit" class="btn btn-custom-search" title="Филтрлаш">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
                                 </th>
                             </tr>
                             </thead>
                             <tbody>
                             @forelse($categories as $category)
-                                <tr class="text-center" id="row-{{ $category->id }}">
-                                    <td class="col-id">{{ $category->id }}</td>
-                                    <td>{{ $category->title }}</td>
-                                    <td>{{ $category->parent->title ?? ' '}}</td>
+                                <tr class="text-center">
+                                    <td>{{ $category->id }}</td>
                                     <td>
-                                        @if(optional($category->file)->path)
-                                            <img src="{{ asset('storage/' . $category->file->path) }}" alt="Image"
-                                                 style="width: 50px; height: auto;">
-                                        @else
-
-                                        @endif
+                                        <div class="fw-bold" style="color: var(--text-main);">{{ $category->title }}</div>
                                     </td>
-                                    <td style="width: 100px">{{ \App\Services\StatusService::getType()[$category->type] ?? '-' }}</td>
-                                    <td>{{ optional($category->user)->username }}</td>
-                                    <td class="col-date">{{ $category->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>
+                                        <span class="badge-custom {{ \App\Services\StatusService::getTypeClass()[$category->type] }}">{{ \App\Services\StatusService::getType()[$category->type] }}</span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <i class="bi bi-calendar3 me-1"></i> {{ $category->created_at?->format('d.m.Y') }}
+                                            <div class="text-xs">{{ $category->created_at?->format('H:i') }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center action-btns">
                                         <x-backend.action route="category" :id="$category->id" :view="true" :edit="true"/>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="14" class="text-center">Маълумот топилмади</td>
+                                    <td colspan="8" class="py-5 text-center">
+                                        <img src="{{ asset('images/systems/reference-not-found.png') }}" width="60" class="mb-3 opacity-20" alt="">
+                                        <p class="text-muted">Маълумот топилмади</p>
+                                    </td>
                                 </tr>
                             @endforelse
                             </tbody>
@@ -158,66 +79,80 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        <div class="d-flex mb-2">
-                            <input type="text" name="filters[title]" value="{{ request('filters.title') }}"
-                                   class="form-control form-control-sm me-1" placeholder="Категория номини киритинг">
-                            <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
-                                <i class="fa fa-search"></i>
-                            </button>
+                    <div class="d-md-none p-3">
+                        <div class="search-box-mobile mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-radius: 12px 0 0 12px;"><i class="fa fa-search text-muted"></i></span>
+                                <input type="text" name="filters[title]" value="{{ request('filters.title') }}" class="form-control border-start-0 ps-0" placeholder="     Қидирув..." style="border-radius: 0 12px 12px 0; height: 48px;">
+                                <button type="submit" class="btn btn-primary ms-2" style="border-radius: 12px; width: 48px;"><i class="fa fa-arrow-right"></i></button>
+                            </div>
                         </div>
-                        @forelse($categories as $category)
-                            <div class="card border">
-                                <div class="card-body">
-                                    <div class="text-center mb-2">
-                                        @if(optional($category->file)->path)
-                                            <img src="{{ asset('storage/' . $category->file->path) }}" alt="Image"
-                                                 style="width: 50px; height: auto;">
-                                        @else
 
-                                        @endif
+                        @forelse($categories as $category)
+                            <div class="mobile-card shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="img-wrapper me-3" style="width: 55px; height: 55px;">
+                                            @if(optional($category->file)->path)
+                                                <img src="{{ asset('storage/' . $category->file->path) }}" alt="">
+                                            @else
+                                                <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light"><i class="bi bi-image"></i></div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold mb-0 text-dark">{{ $category->title }}</div>
+                                            <span class="text-muted small">ID: {{ $category->id }}</span>
+                                        </div>
                                     </div>
-                                    <p class="card-text ">
-                                        <strong>{!! sortLink('id', 'ID:') !!} </strong>{{ $category->id }} </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('title', 'Номи:') !!} </strong>{{ $category->title }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('parent_id', 'Ота категория:') !!} </strong>{{ $category->parent->title ?? ' ' }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at_exact', 'Яратилди:') !!} </strong> {{ $category->created_at?->format('Y-m-d H:i') }}
-                                    </p>
-                                    <div class="btn-group w-100">
+                                    <span class="badge-custom {{ \App\Services\StatusService::getTypeClass()[$category->type] }}">{{ \App\Services\StatusService::getType()[$category->type] }}</span>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Ота қатегория</small>
+                                        <span class="small fw-medium">{{ $category->parent->title ?? '—' }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Яратилди</small>
+                                        <span class="small fw-medium">{{ $category->created_at?->format('d.m.Y H:i') }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="small text-muted"><i class="bi bi-person me-1"></i>{{ $category->user->username }}</span>
+                                    <div class="action-btns">
                                         <x-backend.action route="category" :id="$category->id" :view="true" :edit="true"/>
                                     </div>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-center">Маълумот топилмади</p>
+                            <div class="py-5 text-center">
+                                <img src="{{ asset('images/systems/reference-not-found.png') }}" width="45"
+                                     class="mb-3 opacity-20" alt="">
+                                <div class="py-4">Маълумот топилмади</div>
+                            </div>
                         @endforelse
                     </div>
                     {{-- Mobile version end --}}
                 </form>
+            </div>
 
+            <div class="card-footer bg-white border-top-0 p-4">
                 <div class="d-flex justify-content-center">
                     {{ $categories->links('pagination::bootstrap-4') }}
                 </div>
+            </div>
+        </div>
 
-                <div class="row mt-4">
-                    <div class="col-md-12 mb-3">
-                        <div class="card-stats count">
-                            <div class="w-100">
-                                <p>Қатегориялар</p>
-                                <h5><strong>{{ number_format($categoryCount, 0, '', ' ') }} та</strong></h5>
-                            </div>
-                            <div>
-                                <i class="bi bi-wallet2"></i>
-                            </div>
-                        </div>
+        <div class="row mt-4">
+            <div class="col-md-12 mb-3">
+                <div class="card-stats count">
+                    <div class="w-100">
+                        <p>Қатегориялар</p>
+                        <h5><strong>{{ number_format($categoryCount, 0, '', ' ') }} та</strong></h5>
+                    </div>
+                    <div>
+                        <i class="bi bi-wallet2"></i>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

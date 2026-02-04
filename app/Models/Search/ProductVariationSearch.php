@@ -21,24 +21,31 @@ class ProductVariationSearch
             $query->where('id', $filters['id']);
         }
 
-        if (!empty($filters['product_id'])) {
-            $query->where('product_id', $filters['product_id']);
-        }
+        if (!empty($filters['product_code_title'])) {
+            $keyword = strtolower($filters['product_code_title']);
 
-        if (!empty($filters['search'])) {
-            $search = strtolower($filters['search']);
-            $query->where(function($q) use ($search) {
-                $q->whereRaw('LOWER(code) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
+            $query->where(function($q) use ($keyword) {
+                // 1. Standart qidiruv (code va title)
+                $q->whereRaw('LOWER(code) LIKE ?', ["%{$keyword}%"])
+                    ->orWhereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
+                    ->orWhereHas('product', function($subQuery) use ($keyword) {
+                        $subQuery->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"]);
+                    });
+
+                // 2. Agar qidiruvda nuqta bo'lsa (Masalan: "Meva.Olma")
+                if (str_contains($keyword, '.')) {
+                    $parts = explode('.', $keyword);
+                    $productPart = trim($parts[0]);
+                    $titlePart = trim($parts[1]);
+
+                    $q->orWhere(function($subQ) use ($productPart, $titlePart) {
+                        $subQ->whereRaw('LOWER(title) LIKE ?', ["%{$titlePart}%"])
+                            ->whereHas('product', function($pQ) use ($productPart) {
+                                $pQ->whereRaw('LOWER(title) LIKE ?', ["%{$productPart}%"]);
+                            });
+                    });
+                }
             });
-        }
-
-        if (!empty($filters['code'])) {
-            $query->whereRaw('LOWER(code) LIKE ?', ['%' . strtolower($filters['code']) . '%']);
-        }
-
-        if (!empty($filters['title'])) {
-            $query->whereRaw('LOWER(title) LIKE ?', ['%' . strtolower($filters['title']) . '%']);
         }
 
         if (!empty($filters['subtitle'])) {
@@ -50,27 +57,24 @@ class ProductVariationSearch
             $query->where('body_price', (int) $filters['body_price']);
         }
 
-        if (isset($filters['count']) && $filters['count'] !== '') {
-            $filters['count'] = preg_replace('/\D/', '', $filters['count']);
-            $query->where('count', (int) $filters['count']);
+        if (isset($filters['price_count_total_price']) && $filters['price_count_total_price'] !== '') {
+            $value = (int) preg_replace('/\D/', '', $filters['price_count_total_price']);
+
+            if ($value !== '') {
+                $query->where(function ($q) use ($value) {
+                    $q->whereRaw('CAST(count AS TEXT) LIKE ?', ["%{$value}%"])
+                        ->orWhereRaw('CAST(price AS TEXT) LIKE ?', ["%{$value}%"])
+                        ->orWhereRaw('CAST(total_price AS TEXT) LIKE ?', ["%{$value}%"]);
+                });
+            }
         }
 
         if (!empty($filters['unit'])) {
             $query->where('unit', $filters['unit']);
         }
 
-        if (isset($filters['price']) && $filters['price'] !== '') {
-            $filters['price'] = preg_replace('/\D/', '', $filters['price']);
-            $query->where('price', (int) $filters['price']);
-        }
-
         if (!empty($filters['currency'])) {
             $query->where('currency', $filters['currency']);
-        }
-
-        if (isset($filters['total_price']) && $filters['total_price'] !== '') {
-            $filters['total_price'] = preg_replace('/\D/', '', $filters['total_price']);
-            $query->where('total_price', (int) $filters['total_price']);
         }
 
         if (!empty($filters['type'])) {

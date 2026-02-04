@@ -35,12 +35,31 @@ class StatusService
         ];
     }
 
+    public static function getTypeClass(): array
+    {
+        return [
+            self::TYPE_ALL          => 'type-all',
+            self::TYPE_SPARE_PART   => 'type-spare-part',
+            self::TYPE_RAW_MATERIAL => 'type-raw-material',
+            self::TYPE_PRODUCT      => 'type-product',
+        ];
+    }
+
     public static function getList()
     {
         return [
             self::STATUS_ACTIVE => 'Фаол',
             self::STATUS_INACTIVE => 'Фаол эмас',
             self::STATUS_DELETED  => 'Ўчирилган',
+        ];
+    }
+
+    public static function getListClass(): array
+    {
+        return [
+            self::STATUS_ACTIVE   => 'status-active',
+            self::STATUS_INACTIVE => 'status-inactive',
+            self::STATUS_DELETED  => 'status-deleted',
         ];
     }
 
@@ -54,11 +73,29 @@ class StatusService
         ];
     }
 
+    public static function getUnitClass(): array
+    {
+        return [
+            self::UNIT_PSC   => 'unit-psc',
+            self::UNIT_KG    => 'unit-kg',
+            self::UNIT_METER => 'unit-meter',
+            self::UNIT_LITER => 'unit-liter',
+        ];
+    }
+
     public static function getCurrency()
     {
         return [
             self::CURRENCY_UZS => 'сўм',
             self::CURRENCY_USD => '$',
+        ];
+    }
+
+    public static function getCurrencyClass(): array
+    {
+        return [
+            self::CURRENCY_UZS => 'curr-uzs',
+            self::CURRENCY_USD => 'curr-usd',
         ];
     }
 }

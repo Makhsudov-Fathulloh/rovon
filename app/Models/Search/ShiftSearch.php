@@ -26,18 +26,40 @@ class ShiftSearch
             $query->where('shift.id', $filters['id']);
         }
 
-        if ($organizationId = data_get($filters, 'organization_id')) {
-            $query->whereHas('section.organization', function ($q) use ($organizationId) {
-                $q->where('id', $organizationId);
+        if (!empty($filters['organization_section_shift'])) {
+            $raw = trim($filters['organization_section_shift']);
+            $parts = array_values(array_filter(
+                array_map(fn($v) => mb_strtolower(trim($v)), explode('.', $raw))
+            ));
+
+            $query->where(function ($q) use ($parts) {
+
+                // 🔹 1) NUQTASIZ — oddiy qidiruv
+                if (count($parts) === 1) {
+                    $keyword = $parts[0];
+
+                    $q->whereRaw('LOWER(organization.title) LIKE ?', ["%{$keyword}%"])
+                        ->orWhereRaw('LOWER(section.title) LIKE ?', ["%{$keyword}%"])
+                        ->orWhereRaw('LOWER(shift.title) LIKE ?', ["%{$keyword}%"]);
+                }
+
+                // 🔹 2) Organization.Section
+                elseif (count($parts) === 2) {
+                    [$org, $section] = $parts;
+
+                    $q->whereRaw('LOWER(organization.title) LIKE ?', ["%{$org}%"])
+                        ->whereRaw('LOWER(section.title) LIKE ?', ["%{$section}%"]);
+                }
+
+                // 🔹 3) Organization.Section.Shift
+                elseif (count($parts) >= 3) {
+                    [$org, $section, $shift] = $parts;
+
+                    $q->whereRaw('LOWER(organization.title) LIKE ?', ["%{$org}%"])
+                        ->whereRaw('LOWER(section.title) LIKE ?', ["%{$section}%"])
+                        ->whereRaw('LOWER(shift.title) LIKE ?', ["%{$shift}%"]);
+                }
             });
-        }
-
-        if (!empty($filters['section_id'])) {
-            $query->where('section_id', $filters['section_id']);
-        }
-
-        if (!empty($filters['title'])) {
-            $query->whereRaw('LOWER(shift.title) LIKE ?', ['%' . strtolower($filters['title']) . '%']);
         }
 
         if (!empty($filters['user_id'])) {

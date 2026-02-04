@@ -1,18 +1,6 @@
-.col-id, .col-debt, .col-price {
-    width: 1%;              /* avtomatik eng kichik joyni oladi */
-    white-space: nowrap;    /* satrni bo‘lib yubormasin */
-    min-width: 100px;        /* minimal kenglik (masalan 4 xonali raqam uchun yetarli) */
-}
-
-.col-date {
-    width: 12.5%;
-    white-space: nowrap;
-}
-
-.col-title {
-    width: 15%;
-    white-space: nowrap;
-}
+.col-id, .col-debt, .col-price { width: 1%; white-space: nowrap; min-width: 100px; }
+.col-date { width: 12.5%; white-space: nowrap; }
+.col-title { width: 15%; white-space: nowrap; }
 
 #addCountModal .modal-content,
 #addProductCountModal .modal-content,
@@ -21,3 +9,169 @@
     box-shadow: 0 8px 25px rgba(0,0,0,0.25);
 }
 
+/* --- TYPE COLORS --- */
+.type-all { background: rgba(85, 75, 251, 0.15); color: #3b31d1; border-color: rgba(85, 75, 251, 0.2); }
+.type-spare-part { background: rgba(99, 110, 114, 0.15); color: #2d3436; border-color: rgba(99, 110, 114, 0.2); }
+.type-raw-material { background: rgba(243, 156, 18, 0.15); color: #d35400; border-color: rgba(243, 156, 18, 0.2); }
+.type-product { background: rgba(0, 184, 148, 0.15); color: #008967; border-color: rgba(0, 184, 148, 0.2); }
+
+/* --- STATUS COLORS --- */
+.status-active { background: rgba(46, 213, 115, 0.2); color: #218c74; border: 1px solid rgba(46, 213, 115, 0.3); }
+.status-inactive { background: rgba(255, 171, 0, 0.2); color: #b35900; border: 1px solid rgba(255, 171, 0, 0.3); }
+.status-deleted { background: rgba(255, 71, 87, 0.2); color: #b33939; border: 1px solid rgba(255, 71, 87, 0.3); }
+
+/* --- UNIT COLORS --- */
+.unit-psc { background: rgba(112, 111, 211, 0.15); color: #474787; border: 1px solid rgba(112, 111, 211, 0.3); }
+.unit-kg { background: rgba(52, 172, 224, 0.15); color: #227093; border: 1px solid rgba(52, 172, 224, 0.3); }
+.unit-meter { background: rgba(33, 191, 115, 0.15); color: #1b8d54; border: 1px solid rgba(33, 191, 115, 0.3); }
+.unit-liter { background: rgba(255, 177, 66, 0.15); color: #cc8e35; border: 1px solid rgba(255, 177, 66, 0.3); }
+
+/* --- CURRENCY COLORS --- */
+.curr-uzs { background: #f1f2f6; color: #2f3542; border: 1px solid #ced4da; font-weight: bold; }
+.curr-usd { background: rgba(30, 144, 255, 0.1); color: #1e90ff; border: 1px solid rgba(30, 144, 255, 0.4); font-weight: bold; }
+
+
+
+:root {
+    --primary-color: #554BFB;
+    --hover-color: #4338ca;
+    --secondary-bg: #F8F9FD;
+    --accent-green: #00D09C;
+    --accent-orange: #FF9F43;
+    --text-main: #2D3748;
+    --text-muted: #718096;
+    --border-color: #EDF2F7;
+}
+
+body { font-family: 'Inter', sans-serif; }
+
+.card-custom {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(85, 75, 251, 0.05);
+    background: #fff;
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.card-header-custom {
+    padding: 20px 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table thead th {
+    background: var(--secondary-bg);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.8px;
+    padding: 18px 15px;
+    border: none;
+}
+
+.table tbody tr { transition: all 0.2s ease; }
+.table tbody tr:hover { background-color: #FBFBFF !important; }
+
+.table td {
+    padding: 16px 15px;
+    vertical-align: middle;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.88rem;
+}
+
+.filter-row { background-color: #FDFDFF; }
+
+.form-control {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    background-color: #fff;
+    transition: 0.3s;
+}
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(85, 75, 251, 0.1);
+    outline: none;
+}
+
+.badge-custom {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.img-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    margin: 0 auto;
+}
+.img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+.btn-custom-search {
+    height: 38px;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+.btn-custom-search:hover { transform: scale(1.05); background: var(--hover-color); color: #fff; }
+
+.action-btns .btn { border-radius: 10px; }
+
+@media (max-width: 768px) {
+    .mobile-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+    }
+}
+
+.line {
+    width: 150px;
+    height: 2px;
+    background-color: #000;
+    margin: 3px auto;
+}
+
+.card-stats {
+    border-radius: 12px;
+    padding: 20px;
+    color: #fff;
+    transition: 0.3s ease;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 180px; /* minimal kenglik */
+    flex: 1 1 200px; /* responsive */
+}
+.card-stats:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
+
+.card-stats.count { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+.card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
+.card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
+.card-stats.total-body-price { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
+.card-stats.total-price { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
+
+.card-stats h5 { font-weight: 700; margin-bottom: 8px; font-size: 1.25rem; }
+.card-stats p { margin: 2px 0; font-size: 0.95rem; }
+.card-stats i { font-size: 2.2rem; opacity: 0.7; }

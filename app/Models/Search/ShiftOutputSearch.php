@@ -24,34 +24,54 @@ class ShiftOutputSearch
             $query->where('shift_output.id', $filters['id']);
         }
 
-        if ($organizationId = data_get($filters, 'organization_id')) {
-            $query->whereHas('shift.section.organization', function ($q) use ($organizationId) {
-                $q->where('id', $organizationId);
-            });
-        }
+        if (!empty($filters['organization_section_shift'])) {
+            $raw = trim($filters['organization_section_shift']);
+            $parts = array_values(array_filter(
+                array_map(fn($v) => mb_strtolower(trim($v)), explode('.', $raw))
+            ));
 
-        if ($sectionId = data_get($filters, 'section_id')) {
-            $query->whereHas('shift.section', function ($q) use ($sectionId) {
-                $q->where('id', $sectionId);
-            });
-        }
+            $query->where(function ($q) use ($parts) {
+                // 🔹 1) NUQTASIZ — oddiy qidiruv
+                if (count($parts) === 1) {
+                    $keyword = $parts[0];
 
-        if (!empty($filters['shift_id'])) {
-            $query->where('shift_id', $filters['shift_id']);
+                    $q->whereRaw('LOWER(organization.title) LIKE ?', ["%{$keyword}%"])
+                        ->orWhereRaw('LOWER(section.title) LIKE ?', ["%{$keyword}%"])
+                        ->orWhereRaw('LOWER(shift.title) LIKE ?', ["%{$keyword}%"]);
+                }
+
+                // 🔹 2) Organization.Section
+                elseif (count($parts) === 2) {
+                    [$org, $section] = $parts;
+
+                    $q->whereRaw('LOWER(organization.title) LIKE ?', ["%{$org}%"])
+                        ->whereRaw('LOWER(section.title) LIKE ?', ["%{$section}%"]);
+                }
+
+                // 🔹 3) Organization.Section.Shift
+                elseif (count($parts) >= 3) {
+                    [$org, $section, $shift] = $parts;
+
+                    $q->whereRaw('LOWER(organization.title) LIKE ?', ["%{$org}%"])
+                        ->whereRaw('LOWER(section.title) LIKE ?', ["%{$section}%"])
+                        ->whereRaw('LOWER(shift.title) LIKE ?', ["%{$shift}%"]);
+                }
+            });
         }
 
         if (!empty($filters['stage_id'])) {
             $query->where('stage_id', $filters['stage_id']);
         }
 
-        if (isset($filters['stage_count']) && $filters['stage_count'] !== '') {
-            $filters['stage_count'] = preg_replace('/\D/', '', $filters['stage_count']);
-            $query->where('stage_count', (int) $filters['stage_count']);
-        }
+        if (!empty($filters['count_or_defect'])) {
+            $numeric = preg_replace('/[^\d.]/', '', $filters['count_or_defect']);
 
-        if (isset($filters['defect_amount']) && $filters['defect_amount'] !== '') {
-            $filters['defect_amount'] = preg_replace('/[^\d.]/', '', $filters['defect_amount']);
-            $query->where('defect_amount', (float) $filters['defect_amount']);
+            if ($numeric !== '') {
+                $query->where(function ($q) use ($numeric) {
+                    $q->whereRaw('CAST(stage_count AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(defect_amount AS TEXT) LIKE ?', ["%{$numeric}%"]);
+                });
+            }
         }
 
         // Sanadan-sanagacha filter

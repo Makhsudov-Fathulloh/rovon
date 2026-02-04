@@ -6,71 +6,26 @@
 
 <x-backend.layouts.main title="{{ 'Махсулотлар' }}">
 
-    <style>
-        .card-stats {
-            border-radius: 12px;
-            padding: 20px;
-            color: #fff;
-            transition: 0.3s ease;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            min-width: 180px; /* minimal kenglik */
-            flex: 1 1 200px; /* responsive */
-        }
-        .card-stats:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-        }
+    <div class="container-fluid">
 
-        .card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-        .card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-        .card-stats.total-body-price { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-        .card-stats.total-price { background: linear-gradient(135deg, #fd79a8 30%, #e84393 90%); border-left: 5px solid #ff6b81; }
-
-        .card-stats h5 {
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 1.25rem;
-        }
-        .card-stats p {
-            margin: 2px 0;
-            font-size: 0.95rem;
-        }
-        .card-stats i {
-            font-size: 2.2rem;
-            opacity: 0.7;
-        }
-    </style>
-
-    <div class="row">
-        <div class="card shadow w-100">
-            <div class="card-header">
-                <div class="row justify-content-start">
-                    <div class="col-sm-12 col-md-auto text-start">
-                        <x-backend.action :back="true"/>
-                    </div>
-                </div>
+        <div class="card-custom shadow-sm">
+            <div class="card-header-custom action-btns">
+                <x-backend.action :back="true"/>
             </div>
-            <div class="table-responsive card-body">
+
+            <div class="card-body p-0">
                 <form id="productVariationFilterForm" method="GET" action="{{ route('product-variation.index') }}">
+
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-bordered table-hover">
+                        <table class="table mb-0">
                             <thead>
                             <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'Id') !!}</th>
-                                <th>{!! sortLink('code', 'Код') !!}</th>
-                                <th>{!! sortLink('product_id', 'Турлари') !!}</th>
-                                <th>{!! sortLink('title', 'Номи') !!}</th>
-                                <th>{!! sortLink('image', 'Расм') !!}</th>
+                                <th>{!! sortLink('product_code_title', 'Турлари') !!}</th>
                                 {{--@can('aodAccess')--}}
                                 {{--<th>{!! sortLink('body_price', 'Тан нархи') !!}</th>--}}
                                 {{--@endcan--}}
-                                <th>{!! sortLink('price', 'Нархи') !!}</th>
-                                <th>{!! sortLink('count', 'Миқдори') !!}</th>
-                                <th>{!! sortLink('total_price', 'Умумий(сўм)') !!}</th>
-                                {{--                                <th>{!! sortLink('top', 'Toп') !!}</th>--}}
+                                <th>{!! sortLink('price_count_total_price', 'Нархи/Миқдори') !!}</th>
                                 <th>{!! sortLink('status', 'Статус') !!}</th>
                                 <th>{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th></th> {{-- Search btn --}}
@@ -78,43 +33,18 @@
                             {{-- Filter Inputs --}}
                             <tr>
                                 <th><input type="text" name="filters[id]" value="{{ request('filters.id') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[code]" value="{{ request('filters.code') }}"
-                                           class="form-control form-control-sm w-100"></th>
-                                <th>
-                                    <select name="filters[product_id]"
-                                            class="form-control form-control-sm w-100">
-                                        <option value="">Барчаси</option>
-                                        @foreach($products as $id => $title)
-                                            <option
-                                                value="{{ $id }}" {{ request('filters.product_id') == $id ? 'selected' : '' }}>{{ $title }}</option>
-                                        @endforeach
-                                    </select>
+                                           class="form-control form-control-sm w-100 filter-numeric" placeholder="№...">
                                 </th>
-                                <th><input type="text" name="filters[title]" value="{{ request('filters.title') }}"
-                                           class="form-control form-control-sm w-100"></th>
-                                <th><input type="text" name="filters[image]" value="{{ request('filters.image') }}"
-                                           class="form-control form-control-sm w-100" style="display: none;"></th>
+                                <th><input type="text" name="filters[product_code_title]"
+                                           value="{{ request('filters.product_code_title') }}"
+                                           class="form-control form-control-sm w-100" placeholder="Қидирув..."></th>
                                 {{--@can('aodAccess')--}}
                                 {{--<th><input type="text" name="filters[body_price]" value="{{ request('filters.body_price') }}"--}}
                                 {{--class="form-control form-control-sm w-100 filter-numeric"></th>--}}
                                 {{--@endcan--}}
-                                <th><input type="text" name="filters[price]" value="{{ request('filters.price') }}"
+                                <th><input type="text" name="filters[price_count_total_price]"
+                                           value="{{ request('filters.price_count_total_price') }}"
                                            class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[count]" value="{{ request('filters.count') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[total_price]"
-                                           value="{{ request('filters.total_price') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
-                                {{--<th>--}}
-                                {{--<select name="filters[top]" class="form-control form-control-sm w-100">--}}
-                                {{--<option value="">Барчаси</option>--}}
-                                {{--@foreach(\App\Models\ProductVariation::getTopList() as $key => $label)--}}
-                                {{--<option--}}
-                                {{--value="{{ $key }}" {{ (string) request('filters.top') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>--}}
-                                {{--@endforeach--}}
-                                {{--</select>--}}
-                                {{--</th>--}}
                                 <th>
                                     <select name="filters[status]" class="form-control form-control-sm w-100">
                                         <option value="">Барчаси</option>
@@ -125,14 +55,14 @@
                                     </select>
                                 </th>
                                 <th>
-                                  <div class="d-flex">
-                                      <input type="date" name="filters[created_from]"
-                                             value="{{ request('filters.created_from') }}"
-                                             class="form-control form-control-sm me-1" placeholder="From">
-                                      <input type="date" name="filters[created_to]"
-                                             value="{{ request('filters.created_to') }}"
-                                             class="form-control form-control-sm" placeholder="To">
-                                  </div>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
                                 </th>
 
                                 @if(session('date_format_errors'))
@@ -145,9 +75,13 @@
                                     </div>
                                 @endif
 
-                                <th>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i
-                                            class="fa fa-search"></i></button>
+                                <th class="p-0">
+                                    <div class="d-flex justify-content-center align-items-center"
+                                         style="min-height: 75px;">
+                                        <button type="submit" class="btn btn-custom-search" title="Филтрлаш">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
                                 </th>
                             </tr>
                             </thead>
@@ -155,31 +89,28 @@
                             @forelse($productVariations as $productVariation)
                                 <tr class="text-center" id="row-desktop-{{ $productVariation->id }}">
                                     <td class="col-id">{{ $productVariation->id }}</td>
-                                    <td>{{ $productVariation->code }}</td>
-                                    <td>{{ $productVariation->product->title }}</td>
-                                    <td>{{ $productVariation->title }}</td>
-                                    <td>
-                                        @if(optional($productVariation->file)->path)
-                                            <img src="{{ asset('storage/' . $productVariation->file->path) }}"
-                                                 alt="Image" style="width: 50px; height: auto;">
-                                        @endif
-                                    </td>
+                                    <td>{{ '(' . $productVariation->product->title . ') ' . $productVariation->title  }}</td>
                                     {{--@can('aodAccess')--}}
                                     {{--<td>{{ number_format($productVariation->body_price, 0, '', ' ') }}</td>--}}
                                     {{--@endcan--}}
-                                    <td class="price fw-bold text-success tex">
-                                        {{ PriceHelper::format($productVariation->price, $productVariation->currency, false) }}
+                                    <td class="fw-bold text-center" style="line-height: 1;">
+                                        <div
+                                            class="text-success">{{ PriceHelper::format($productVariation->price, $productVariation->currency) }}</div>
+                                        <div class="line"></div>
+                                        <div
+                                            class="text-primary">{{ CountHelper::format($productVariation->count, $productVariation->unit) }}</div>
+                                        <div class="line"></div>
+                                        <div
+                                            class="text-info">{{ PriceHelper::format($productVariation->total_price, $productVariation->currency, false) }}
+                                            сўм
+                                        </div>
                                     </td>
-                                    <td class="count fw-bold text-primary">
-                                        {{ CountHelper::format($productVariation->count, $productVariation->unit, false) }}
-                                    </td>
-                                    <td class="total_price fw-bold text-info text-nowrap">
-                                        {{ PriceHelper::format($productVariation->total_price, $productVariation->currency, false) }}
-                                    </td>
-                                    {{--<td style="width: 100px">{{ \App\Models\ProductVariation::getTopList()[$productVariation->top] }}</td>--}}
-                                    <td style="width: 100px">{{ StatusService::getList()[$productVariation->status] }}</td>
-                                    <td>{{ $productVariation->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>
+                                        <span
+                                            class="badge-custom {{ StatusService::getListClass()[$productVariation->status] }}">{{ StatusService::getList()[$productVariation->status] }}</span>
+                                    </td>
+                                    <td class="col-date">{{ $productVariation->created_at?->format('Y-m-d H:i') }}</td>
+                                    <td class="text-center action-btns">
                                         <button type="button" class="btn btn-sm btn-success add-count-btn"
                                                 data-id="{{ $productVariation->id }}"
                                                 data-title="{{ $productVariation->title }}"
@@ -193,7 +124,11 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="14" class="text-center">Маълумот топилмади</td>
+                                    <td colspan="8" class="py-5 text-center">
+                                        <img src="{{ asset('images/systems/reference-not-found.png') }}" width="60"
+                                             class="mb-3 opacity-20" alt="">
+                                        <p class="text-muted">Маълумот топилмади</p>
+                                    </td>
                                 </tr>
                             @endforelse
                             </tbody>
@@ -201,58 +136,74 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        <div class="d-flex mb-2">
-                          <input type="text" name="filters[search]" value="{{ request('filters.search') }}"
-                               class="form-control form-control-sm me-1"
-                               placeholder="Код ёки номни киритинг">
-                            <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
-                                <i class="fa fa-search"></i>
-                            </button>
+                    <div class="d-md-none p-3">
+                        <div class="search-box-mobile mb-4">
+                            <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"
+                                          style="border-radius: 12px 0 0 12px;"><i
+                                            class="fa fa-search text-muted"></i></span>
+                                <input type="text" name="filters[product_code_title]"
+                                       value="{{ request('filters.product_code_title') }}"
+                                       class="form-control border-start-0 ps-0" placeholder="     Қидирув..."
+                                       style="border-radius: 0 12px 12px 0; height: 48px;">
+                                <button type="submit" class="btn btn-primary ms-2"
+                                        style="border-radius: 12px; width: 48px;"><i class="fa fa-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
                         @forelse($productVariations as $productVariation)
-                            <div class="card border" id="row-mobile-{{ $productVariation->id }}">
-                                <div class="card-body">
-                                    <div class="text-center mb-2">
-                                        @if(optional($productVariation->file)->path)
-                                            <img src="{{ asset('storage/' . $productVariation->file->path) }}"
-                                                 alt="Image"
-                                                 style="width: 50px; height: auto;">
-                                        @endif
+                            <div class="mobile-card shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="img-wrapper me-3" style="width: 55px; height: 55px;">
+                                            @if(optional($productVariation->file)->path)
+                                                <img src="{{ asset('storage/' . $productVariation->file->path) }}"
+                                                     alt="">
+                                            @else
+                                                <div
+                                                    class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                                    <i class="bi bi-image"></i></div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div
+                                                class="fw-bold mb-0 text-dark">{{ $productVariation->title }}</div>
+                                            <span class="text-muted small">ID: {{ $productVariation->id }}</span>
+                                        </div>
                                     </div>
-                                    <p class="card-text ">
-                                        <strong>{!! sortLink('id', 'ID:') !!} </strong>{{ $productVariation->id }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('code', 'Код:') !!} </strong>{{ $productVariation->code }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('product_id', 'Тури:') !!} </strong>{{ $productVariation->product->title }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('title', 'Номи:') !!} </strong>{{ $productVariation->title }}
-                                    </p>
-                                    {{--@can('aodAccess')--}}
-                                    {{--<p class="card-text"><strong>{!! sortLink('body_price', 'Тан нархи:') !!} </strong>{{ number_format($productVariation->body_price, 0, '', ' ') }} сўм</p>--}}
-                                    {{--@endcan--}}
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('price', 'Нархи:') !!}</strong>
+                                    <span class="badge-custom {{ StatusService::getTypeClass()[4] }}">
+                                        <div class="fw-bold text-center" style="line-height: 1;">
+                                            <div
+                                                class="text-success">{{ PriceHelper::format($productVariation->price, $productVariation->currency) }}</div>
+                                            <div style="height: 2px; background-color: #000; margin: 3px 0;"></div>
+                                            <div
+                                                class="text-primary">{{ CountHelper::format($productVariation->count, $productVariation->unit) }}</div>
+                                                <div style="height: 2px; background-color: #000; margin: 3px 0;"></div>
+                                            <div
+                                                class="text-info">{{ PriceHelper::format($productVariation->total_price, $productVariation->currency, false) }}
+                                                сўм
+                                            </div>
+                                        </div>
+                                    </span>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase"
+                                               style="font-size: 0.65rem;">Махсулот тури</small>
                                         <span
-                                            class="price fw-bold text-success">{{ PriceHelper::format($productVariation->price, $productVariation->currency, false) }}</span> {{ StatusService::getCurrency()[$productVariation->currency] }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('count', 'Миқдори:') !!}</strong>
+                                            class="small fw-medium">{{ $productVariation->product->title }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase"
+                                               style="font-size: 0.65rem;">Яратилди</small>
                                         <span
-                                            class="count fw-bold text-primary">{{ CountHelper::format($productVariation->count, $productVariation->unit, false) }}</span> {{ StatusService::getTypeCount()[$productVariation->unit] }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('total_price', 'Умумий:') !!}</strong>
-                                        <span
-                                            class="total_price fw-bold text-info">{{ PriceHelper::format($productVariation->total_price, $productVariation->currency, false) }}</span> {{ StatusService::getCurrency()[$productVariation->currency] }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('status', 'Статус:')  !!} </strong> {{ StatusService::getList()[$productVariation->status] }}
-                                    </p>
-                                    <div class="btn-group w-100">
+                                            class="small fw-medium">{{ $productVariation->created_at?->format('d.m.Y H:i') }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="small text-muted"><i class="bi bi-person me-1"></i><span
+                                                class="badge bg-info">{{ optional($productVariation->product->warehouse)->title }}</span></span>
+                                    <div class="action-btns">
                                         <x-backend.action route="product-variation" :id="$productVariation->id"
                                                           :variation="$productVariation"
                                                           addCountTitle="Махсулот миқдорини ошириш" :addCount="true"
@@ -261,108 +212,114 @@
                                 </div>
                             </div>
                         @empty
-                            <p class="text-center">Маълумот топилмади</p>
+                            <div class="py-5 text-center">
+                                <img src="{{ asset('images/systems/reference-not-found.png') }}" width="45"
+                                     class="mb-3 opacity-20" alt="">
+                                <div class="py-4">Маълумот топилмади</div>
+                            </div>
                         @endforelse
                     </div>
                     {{-- Mobile version end --}}
                 </form>
+            </div>
 
-                <!-- Add Count Modal -->
-                <div class="modal fade" id="addCountModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-top">
-                        <div class="modal-content">
-                            <form id="addCountForm">
-                                @csrf
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Маҳсулот миқдорини ошириш.</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <!-- Add Count Modal -->
+            <div class="modal fade" id="addCountModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-top">
+                    <div class="modal-content">
+                        <form id="addCountForm">
+                            @csrf
+                            <div class="modal-header">
+                                <h5 class="modal-title">Маҳсулот миқдорини ошириш.</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="variation_id">
+                                <div class="mb-3">
+                                    <label>Маҳсулот номи:</label>
+                                    <input type="text" id="variation_title" class="form-control" disabled>
                                 </div>
-                                <div class="modal-body">
-                                    <input type="hidden" id="variation_id">
-                                    <div class="mb-3">
-                                        <label>Маҳсулот номи:</label>
-                                        <input type="text" id="variation_title" class="form-control" disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Ҳозирги миқдори:</label>
-                                        <input type="text" id="current_count" class="form-control" disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Қўшиладиган маҳсулот миқдори:</label>
-                                        <input type="number" id="add_count" name="add_count" class="form-control"
-                                               min="1" required>
-                                    </div>
+                                <div class="mb-3">
+                                    <label>Ҳозирги миқдори:</label>
+                                    <input type="text" id="current_count" class="form-control" disabled>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Бекор қилиш
-                                    </button>
-                                    <button type="submit" class="btn btn-info">Сақлаш</button>
+                                <div class="mb-3">
+                                    <label>Қўшиладиган маҳсулот миқдори:</label>
+                                    <input type="number" id="add_count" name="add_count" class="form-control"
+                                           min="1" required>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Бекор қилиш
+                                </button>
+                                <button type="submit" class="btn btn-info">Сақлаш</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+            </div>
 
-                <div class="d-flex justify-content-center mt-3">
+            <div class="card-footer bg-white border-top-0 p-4">
+                <div class="d-flex justify-content-center">
                     {{ $productVariations->links('pagination::bootstrap-4') }}
                 </div>
-
-                <div class="d-flex flex-wrap gap-3 mt-4">
-                    <!-- UZS -->
-                    <div class="card-stats uzs">
-                        <div class="w-100">
-                            <h5>🇺🇿 UZS</h5>
-                            <p>Маҳсулотлар (сўм):</p>
-                            <h5><strong>{{ number_format($allCountUzs, 0, '', ' ') }} та</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-wallet2"></i>
-                        </div>
-                    </div>
-
-                    <!-- USD -->
-                    <div class="card-stats usd">
-                        <div class="w-100">
-                            <h5>🇺🇸 USD</h5>
-                            <p>Маҳсулотлар ($):</p>
-                            <h5><strong>{{ number_format($allCountUsd, 0, '', ' ') }}  та</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-currency-exchange"></i>
-                        </div>
-                    </div>
-
-                    <!-- TotalBodyPrice -->
-                    <div class="card-stats total-body-price">
-                        <div class="w-100">
-                            <p>Умумий сумма (Тан нарх)</p>
-                            <h5><strong>{{ number_format($bodyPriceTotal ?? 0, 0, '', ' ') }} сўм</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-currency-euro"></i>
-                        </div>
-                    </div>
-
-                     <!-- TotalPrice -->
-                    <div class="card-stats total-price">
-                        <div class="w-100">
-                            <p>Умумий сумма (Сотиш нархи)</p>
-                            <h5><strong>{{ number_format($totalPrice ?? 0, 0, '', ' ') }} сўм</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-currency-euro"></i>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
+
+        <div class="d-flex flex-wrap gap-3 mt-4">
+            <!-- UZS -->
+            <div class="card-stats uzs">
+                <div class="w-100">
+                    <h5>🇺🇿 UZS</h5>
+                    <p>Маҳсулотлар (сўм):</p>
+                    <h5><strong>{{ number_format($allCountUzs, 0, '', ' ') }} та</strong></h5>
+                </div>
+                <div>
+                    <i class="bi bi-wallet2"></i>
+                </div>
+            </div>
+
+            <!-- USD -->
+            <div class="card-stats usd">
+                <div class="w-100">
+                    <h5>🇺🇸 USD</h5>
+                    <p>Маҳсулотлар ($):</p>
+                    <h5><strong>{{ number_format($allCountUsd, 0, '', ' ') }} та</strong></h5>
+                </div>
+                <div>
+                    <i class="bi bi-currency-exchange"></i>
+                </div>
+            </div>
+
+            <!-- TotalBodyPrice -->
+            <div class="card-stats total-body-price">
+                <div class="w-100">
+                    <p>Умумий сумма (Тан нарх)</p>
+                    <h5><strong>{{ number_format($bodyPriceTotal ?? 0, 0, '', ' ') }} сўм</strong></h5>
+                </div>
+                <div>
+                    <i class="bi bi-currency-euro"></i>
+                </div>
+            </div>
+
+            <!-- TotalPrice -->
+            <div class="card-stats total-price">
+                <div class="w-100">
+                    <p>Умумий сумма (Сотиш нархи)</p>
+                    <h5><strong>{{ number_format($totalPrice ?? 0, 0, '', ' ') }} сўм</strong></h5>
+                </div>
+                <div>
+                    <i class="bi bi-currency-euro"></i>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         document.getElementById('productVariationFilterForm').addEventListener('submit', function () {
             // Faqat ko‘rinib turgan selectni qoldiramiz
-            this.querySelectorAll('input[name="filters[title]"]').forEach(select => {
+            this.querySelectorAll('input[name="filters[product_code_title]"]').forEach(select => {
                 if (select.offsetParent === null) {
                     select.disabled = true;
                 }
@@ -412,7 +369,7 @@
 
                 const id = document.getElementById('variation_id').value;
                 const addCount = parseInt(document.getElementById('add_count').value, 10);
-                const typeCount = parseInt(document.querySelector('.add-count-btn[data-id="'+id+'"]').dataset.unit || 1, 10);
+                const typeCount = parseInt(document.querySelector('.add-count-btn[data-id="' + id + '"]').dataset.unit || 1, 10);
 
                 if (isNaN(addCount) || addCount < 1) {
                     showCustomConfirm('Илтимос, маҳсулот миқдорини киритинг!', 'warning');
