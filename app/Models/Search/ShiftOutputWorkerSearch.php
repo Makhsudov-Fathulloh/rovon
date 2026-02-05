@@ -24,36 +24,6 @@ class ShiftOutputWorkerSearch
             $query->where('shift_output_worker.id', $filters['id']);
         }
 
-        if ($organizationId = data_get($filters, 'organization_id')) {
-            $query->whereHas('shift.section.organization', function ($q) use ($organizationId) {
-                $q->where('id', $organizationId);
-            });
-        }
-
-        if ($sectionId = data_get($filters, 'section_id')) {
-            $query->whereHas('shift.section', function ($q) use ($sectionId) {
-                $q->where('id', $sectionId);
-            });
-        }
-
-        if ($shiftId = data_get($filters, 'shift_id')) {
-            $query->whereHas('shiftOutput.shift', function ($q) use ($shiftId) {
-                $q->where('id', $shiftId);
-            });
-        }
-
-        if ($stageId = data_get($filters, 'stage_id')) {
-            $query->whereHas('shiftOutput.stage', function ($q) use ($stageId) {
-                $q->where('id', $stageId);
-            });
-        }
-
-        //        if (!empty($filters['stage_id'])) {
-        //            $query->whereHas('shiftOutput.stage', function ($q) use ($filters) {
-        //                $q->where('id', $filters['stage_id']);
-        //            });
-        //        }
-
         if (!empty($filters['shift_output_id'])) {
             $query->where('shift_output_id', $filters['shift_output_id']);
         }
@@ -62,19 +32,51 @@ class ShiftOutputWorkerSearch
             $query->where('user_id', $filters['user_id']);
         }
 
-        if (isset($filters['stage_count']) && $filters['stage_count'] !== '') {
-            $filters['stage_count'] = preg_replace('/\D/', '', $filters['stage_count']);
-            $query->where('stage_count', (int) $filters['stage_count']);
+        if (!empty($filters['shift_or_stage'])) {
+            $raw = trim($filters['shift_or_stage']);
+
+            $parts = array_values(array_filter(
+                array_map(fn ($v) => mb_strtolower(trim($v)), explode('.', $raw))
+            ));
+
+            $query->where(function ($q) use ($parts) {
+
+                // 🔹 1) Nuqtasiz — shift VA stage dan qidiradi
+                if (count($parts) === 1) {
+                    $keyword = $parts[0];
+
+                    $q->whereHas('shiftOutput.shift', function ($sq) use ($keyword) {
+                        $sq->whereRaw('LOWER(shift.title) LIKE ?', ["%{$keyword}%"]);
+                    })
+                        ->orWhereHas('shiftOutput.stage', function ($stq) use ($keyword) {
+                            $stq->whereRaw('LOWER(stage.title) LIKE ?', ["%{$keyword}%"]);
+                        });
+                }
+
+                // 🔹 2) Shift.Stage
+                elseif (count($parts) >= 2) {
+                    [$shift, $stage] = $parts;
+
+                    $q->whereHas('shiftOutput.shift', function ($sq) use ($shift) {
+                        $sq->whereRaw('LOWER(shift.title) LIKE ?', ["%{$shift}%"]);
+                    })
+                        ->whereHas('shiftOutput.stage', function ($stq) use ($stage) {
+                            $stq->whereRaw('LOWER(stage.title) LIKE ?', ["%{$stage}%"]);
+                        });
+                }
+            });
         }
 
-        if (isset($filters['defect_amount']) && $filters['defect_amount'] !== '') {
-            $filters['defect_amount'] = preg_replace('/[^\d.]/', '', $filters['defect_amount']);
-            $query->where('defect_amount', (float) $filters['defect_amount']);
-        }
+        if (isset($filters['stage_defect_price']) && $filters['stage_defect_price'] !== '') {
+            $value = (int) preg_replace('/\D/', '', $filters['stage_defect_price']);
 
-        if (isset($filters['price']) && $filters['price'] !== '') {
-            $filters['price'] = preg_replace('/\D/', '', $filters['price']);
-            $query->where('price', (int) $filters['price']);
+            if ($value !== '') {
+                $query->where(function ($q) use ($value) {
+                    $q->whereRaw('CAST(stage_count AS TEXT) LIKE ?', ["%{$value}%"])
+                        ->orWhereRaw('CAST(defect_amount AS TEXT) LIKE ?', ["%{$value}%"])
+                        ->orWhereRaw('CAST(price AS TEXT) LIKE ?', ["%{$value}%"]);
+                });
+            }
         }
 
         // Sanadan-sanagacha filter

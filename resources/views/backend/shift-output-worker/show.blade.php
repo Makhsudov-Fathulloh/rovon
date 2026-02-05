@@ -38,6 +38,10 @@
                     <td class="text-danger fw-bold">{{ $shiftOutputWorker->defect_amount }} кг</td>
                 </tr>
                 <tr>
+                    <th>Нархи</th>
+                    <td class="text-info fw-bold">{{ number_format($shiftOutputWorker->price, 0, '', ' ') }} сўм</td>
+                </tr>
+                <tr>
                     <th>Яратилди</th>
                     <td>{{ $shiftOutputWorker->created_at?->format('Y-m-d H:i') }}</td>
                 </tr>
