@@ -17,7 +17,7 @@
                                 <th class="col-id">{!! sortLink('id', 'ID') !!}</th>
                                 <th>{!! sortLink('organization_section_shift', 'Смена') !!}</th>
                                 <th>{!! sortLink('stage_id', 'Махсулот') !!}</th>
-                                <th>{!! sortLink('stage_count_defect', 'Микдори/Брак') !!}</th>
+                                <th>{!! sortLink('count_or_defect', 'Микдори/Брак') !!}</th>
                                 <th class="col-date">{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th></th> {{-- Search btn --}}
                             </tr>

@@ -54,7 +54,6 @@
     }
 </style>
 
-
 <form id="order-form" action="{{ $action }}" method="POST">
     @csrf
     @if ($method === 'PUT')
@@ -63,9 +62,9 @@
 
     <div class="container-fluid mt-2">
 
-         <div class="mb-2">
+        {{-- <div class="mb-2">
             <x-backend.action :back="true"/>
-        </div>
+        </div> --}}
 
         <div class="card shadow">
             <div class="card-body">
@@ -247,38 +246,6 @@
     </div>
 </form>
 
-<div class="modal fade" id="createClientModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius: 0.5rem">
-            <div class="modal-header">
-                <h5>Клиент яратиш</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <div id="client-create-form">
-                    @csrf
-                    <input type="hidden" name="role_id" value="{{ $clientRoleId }}">
-
-                    <div class="mb-3">
-                        <label>Фойдаланувчи номи (Username)</label>
-                        <input name="username" class="form-control" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Телефон</label>
-                        <input id="phone" type="text" name="phone" class="form-control">
-                    </div>
-
-                    <button type="button" id="save-client-btn" class="btn btn-primary">
-                        Сақлаш
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
     let itemIndex = $('#items .item').length;
 
@@ -287,8 +254,8 @@
         let optionsHtml = `<option value="">Маҳсулотни танланг</option>`;
 
         @foreach($variations as $variation)
-            optionsHtml += `<option value="{{ $variation->id }}" data-price="{{ $variation->price }}"
-                ${selectedIds.includes('{{ $variation->id }}') ? 'display' : ''}>
+        optionsHtml += `<option value="{{ $variation->id }}" data-price="{{ $variation->price }}"
+            ${selectedIds.includes('{{ $variation->id }}') ? 'display' : ''}>
         {!! $variation->title !!} — {!! $variation->product->title !!}
         ({{ number_format($variation->price, 0, '', ' ') }} сўм)
             [{{ \App\Helpers\CountHelper::format($variation->count, $variation->unit) }}]
@@ -690,18 +657,10 @@
 </script>
 
 
-
+{{--------------------------------------------------------------------------------------------------------------------}}
 
 
 {{--<style>--}}
-{{--    :root {--}}
-{{--        --primary-color: #5544FC;--}}
-{{--        --secondary-bg: #f8f9fa;--}}
-{{--        --border-color: #e3e6f0;--}}
-{{--        --dark-text: #2c3e50;--}}
-{{--        --success-btn: #198754;--}}
-{{--    }--}}
-
 {{--    /* Card styling */--}}
 {{--    .erp-card {--}}
 {{--        border: none;--}}
@@ -711,14 +670,36 @@
 {{--    }--}}
 
 {{--    .section-title {--}}
-{{--        font-size: 0.9rem;--}}
+{{--        font-size: 0.85rem;--}}
 {{--        font-weight: 700;--}}
 {{--        text-transform: uppercase;--}}
 {{--        letter-spacing: 0.5px;--}}
 {{--        color: var(--primary-color);--}}
 {{--        border-bottom: 2px solid var(--primary-color);--}}
 {{--        display: inline-block;--}}
-{{--        margin-bottom: 1.5rem;--}}
+{{--        margin-bottom: 1rem;--}}
+{{--    }--}}
+
+{{--    /* Select2 va tugmani bir qatorda chiroyli chiqarish uchun */--}}
+{{--    .input-group > .flex-grow-1 .select2-container {--}}
+{{--        width: 100% !important;--}}
+{{--    }--}}
+
+{{--    .input-group > .flex-grow-1 .select2-selection {--}}
+{{--        border-top-right-radius: 0 !important;--}}
+{{--        border-bottom-right-radius: 0 !important;--}}
+{{--    }--}}
+
+{{--    .custom-radius-btn {--}}
+{{--        border-top-left-radius: 0 !important;--}}
+{{--        border-bottom-left-radius: 0 !important;--}}
+{{--        border-top-right-radius: 5px !important;--}}
+{{--        border-bottom-right-radius: 5px !important;--}}
+{{--    }--}}
+
+{{--    .input-group > .btn {--}}
+{{--        border-top-left-radius: 0 !important;--}}
+{{--        border-bottom-left-radius: 0 !important;--}}
 {{--    }--}}
 
 {{--    /* Input & Select2 overrides */--}}
@@ -810,21 +791,19 @@
 {{--            <div class="col-lg-8">--}}
 {{--                <div class="card erp-card mb-4">--}}
 {{--                    <div class="card-body">--}}
-{{--                        <h5 class="section-title">Asosiy ma'lumotlar</h5>--}}
-
 {{--                        <div class="row g-3 mb-4">--}}
-{{--                            <div class="col-md-6">--}}
+{{--                            <div class="col-md-7">--}}
 {{--                                <label class="form-label fw-bold">Клиент</label>--}}
-{{--                                <div class="input-group">--}}
-{{--                                    <select name="user_id" id="user_id" class="form-control filter-select2" required>--}}
-{{--                                        <option value="">Клиentni tanlang</option>--}}
-{{--                                        @foreach($users as $user)--}}
-{{--                                            <option value="{{ $user->id }}" {{ old('user_id', $order->user_id ?? $defaultUserId) == $user->id ? 'selected' : '' }}>--}}
-{{--                                                {{ $user->username }} ({{ \App\Services\PhoneFormatService::uzPhone($user->phone) }})--}}
-{{--                                            </option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-{{--                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createClientModal">--}}
+{{--                                <div class="input-group flex-nowrap"> <div class="flex-grow-1"> <select name="user_id" id="user_id" class="form-control filter-select2" required>--}}
+{{--                                            <option value="">Klientni tanlang</option>--}}
+{{--                                            @foreach($users as $user)--}}
+{{--                                                <option value="{{ $user->id }}" {{ old('user_id', $order->user_id ?? $defaultUserId) == $user->id ? 'selected' : '' }}>--}}
+{{--                                                    {{ $user->username }} ({{ \App\Services\PhoneFormatService::uzPhone($user->phone) }})--}}
+{{--                                                </option>--}}
+{{--                                            @endforeach--}}
+{{--                                        </select>--}}
+{{--                                    </div>--}}
+{{--                                    <button type="button" class="btn btn-outline-primary custom-radius-btn" data-bs-toggle="modal" data-bs-target="#createClientModal">--}}
 {{--                                        <i class="fas fa-plus"></i>--}}
 {{--                                    </button>--}}
 {{--                                </div>--}}
@@ -837,8 +816,8 @@
 {{--                                    @endforeach--}}
 {{--                                </select>--}}
 {{--                            </div>--}}
-{{--                            <div class="col-md-3">--}}
-{{--                                <label class="form-label fw-bold">Валюта</label>--}}
+{{--                            <div class="col-md-2">--}}
+{{--                                <label for="currency" class="form-label fw-bold">Валюта</label>--}}
 {{--                                <select id="currency" name="currency" class="form-control shadow-sm" onchange="changeCurrency()" required>--}}
 {{--                                    @foreach(StatusService::getCurrency() as $key => $label)--}}
 {{--                                        <option value="{{ $key }}" {{ $currentCurrency == $key ? 'selected' : '' }}>{{ $label }}</option>--}}
@@ -885,7 +864,7 @@
 {{--                        </div>--}}
 
 {{--                        <button type="button" class="btn btn-link text-decoration-none fw-bold p-0 mt-2" style="color: var(--primary-color)" onclick="addItem()">--}}
-{{--                            <i class="fas fa-plus-circle"></i> Mahsulot qo'shish--}}
+{{--                            <i class="fas fa-plus-circle"></i> Маҳсулот қўшиш--}}
 {{--                        </button>--}}
 {{--                    </div>--}}
 {{--                </div>--}}
@@ -895,13 +874,13 @@
 {{--                <div class="card erp-card payment-summary mb-4">--}}
 {{--                    <div class="card-body">--}}
 {{--                        <div class="d-flex justify-content-between align-items-center mb-4">--}}
-{{--                            <h5 class="m-0 fw-bold">To'lov hisobi</h5>--}}
+{{--                            <h5 class="m-0 fw-bold">Тўлов ҳисоби</h5>--}}
 {{--                            <div class="debt-switch-wrapper">--}}
 {{--                                <label class="switch m-0">--}}
 {{--                                    <input type="checkbox" id="allowZeroPayment">--}}
 {{--                                    <span class="slider"></span>--}}
 {{--                                </label>--}}
-{{--                                <span class="ms-2 small fw-bold text-dark">Qarz</span>--}}
+{{--                                <span class="ms-2 small fw-bold text-dark">Қарздорлик</span>--}}
 {{--                            </div>--}}
 {{--                        </div>--}}
 
@@ -943,7 +922,7 @@
 {{--                        </div>--}}
 
 {{--                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow">--}}
-{{--                            <i class="fas fa-save me-2"></i> {{ Route::currentRouteName() == 'order.edit' ? 'Янгилаш' : 'Buyurtmani saqlash' }}--}}
+{{--                            <i class="fas fa-save me-2"></i> {{ Route::currentRouteName() == 'order.edit' ? 'Буюртмани янгиалш' : 'Буюртмани якунлаш' }}--}}
 {{--                        </button>--}}
 {{--                    </div>--}}
 {{--                </div>--}}
@@ -951,41 +930,6 @@
 {{--        </div>--}}
 {{--    </div>--}}
 {{--</form>--}}
-
-{{--<div class="modal fade" id="createClientModal" tabindex="-1" aria-hidden="true">--}}
-{{--    <div class="modal-dialog modal-dialog-centered">--}}
-{{--        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">--}}
-{{--            <div class="modal-header" style="background: #f8f9fa; border-radius: 15px 15px 0 0;">--}}
-{{--                <h5 class="modal-title fw-bold" style="color: var(--dark-text)">--}}
-{{--                    <i class="fas fa-user-plus me-2" style="color: var(--primary-color)"></i> Янги клиент қўшиш--}}
-{{--                </h5>--}}
-{{--                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>--}}
-{{--            </div>--}}
-{{--            <div class="modal-body p-4">--}}
-{{--                <div id="client-create-form">--}}
-{{--                    @csrf--}}
-{{--                    <input type="hidden" name="role_id" value="{{ $clientRoleId }}">--}}
-
-{{--                    <div class="mb-3">--}}
-{{--                        <label class="form-label small fw-bold">Username</label>--}}
-{{--                        <input name="username" class="form-control" placeholder="F.I.SH kiriting" required>--}}
-{{--                    </div>--}}
-
-{{--                    <div class="mb-4">--}}
-{{--                        <label class="form-label small fw-bold">Телефон</label>--}}
-{{--                        <input id="phone" type="text" name="phone" class="form-control" placeholder="+998 00 000 00 00">--}}
-{{--                    </div>--}}
-
-{{--                    <div class="d-grid">--}}
-{{--                        <button type="button" id="save-client-btn" class="btn btn-primary shadow-sm py-2 fw-bold">--}}
-{{--                            Сақlash--}}
-{{--                        </button>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--</div>--}}
 
 {{--<script>--}}
 {{--    let itemIndex = $('#items .item').length;--}}
@@ -1077,7 +1021,7 @@
 {{--            @foreach($variations as $variation)--}}
 {{--            allOptions.push({--}}
 {{--                id: '{{ $variation->id }}',--}}
-{{--                // code: '{{ $variation->code }}',--}}
+{{--                --}}{{--code: '{{ $variation->code }}',--}}
 {{--                title: '{{ $variation->product->title }} → {{ $variation->title }}',--}}
 {{--                price: '{{ $variation->price }}',--}}
 {{--                text: `{!! $variation->title !!} — {!! $variation->product->title !!}--}}
@@ -1402,3 +1346,39 @@
 
 {{--    toggleZeroPaymentSwitch();--}}
 {{--</script>--}}
+
+
+
+
+
+<div class="modal fade" id="createClientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 0.5rem">
+            <div class="modal-header">
+                <h5><i class="fas fa-user-plus me-2" style="color: var(--primary-color)"></i> Янги клиент қўшиш</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="client-create-form">
+                    @csrf
+                    <input type="hidden" name="role_id" value="{{ $clientRoleId }}">
+
+                    <div class="mb-3">
+                        <label>Фойдаланувчи номи (Username)</label>
+                        <input name="username" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input id="phone" type="text" name="phone" class="form-control">
+                    </div>
+
+                    <button type="button" id="save-client-btn" class="btn btn-primary">
+                        Сақлаш
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

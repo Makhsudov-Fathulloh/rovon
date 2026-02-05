@@ -33,7 +33,7 @@
 
 
 :root {
-    --primary-color: #554BFB;
+    --primary-color: #5544FC;
     --hover-color: #4338ca;
     --secondary-bg: #F8F9FD;
     --accent-green: #00D09C;
@@ -41,6 +41,8 @@
     --text-main: #2D3748;
     --text-muted: #718096;
     --border-color: #EDF2F7;
+    --dark-text: #2c3e50;
+    --success-btn: #198754;
 }
 
 body { font-family: 'Inter', sans-serif; }

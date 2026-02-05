@@ -4,42 +4,7 @@
     use App\Helpers\CountHelper;
 @endphp
 
-<x-backend.layouts.main title="{{ 'Махсулот ( ' . ucfirst($section->title) . ' (' . ucfirst($section->organization->title) . ')' . '):' }}">
-
-    <style>
-        .card-stats {
-            border-radius: 12px;
-            padding: 20px;
-            color: #fff;
-            transition: 0.3s ease;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .card-stats:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-        }
-        .card-stats.count {
-            background: linear-gradient(135deg, #00b894 35%, #2ecc71 65%);
-            border-left: 5px solid #00d68f;
-        }
-
-        .card-stats h5 {
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 1.25rem;
-        }
-        .card-stats p {
-            margin: 2px 0;
-            font-size: 0.95rem;
-        }
-        .card-stats i {
-            font-size: 2.2rem;
-            opacity: 0.7;
-        }
-    </style>
+<x-backend.layouts.main title="{!! 'Махсулот ( ' . ucfirst($section->title) . ' (' . ucfirst($section->organization->title) . ')' . '):' !!}">
 
     <div class="row">
         <div class="card shadow w-100">
