@@ -127,7 +127,7 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                     <div class="d-md-none">
+                     <div class="d-md-none p-3">
                         <div class="d-flex mb-2">
                             <select name="filters[title]" class="form-control form-control-sm filter-select2 w-100"
                                     data-placeholder="Смена номини киритинг">
