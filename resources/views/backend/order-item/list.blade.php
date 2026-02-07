@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртма ( ' . $order->user->username . ' ) тури:' }}">
+<x-backend.layouts.main title="{{ 'Савдо ( ' . $order->user->username . ' ) элементи:' }}">
 
     <style>
         .card-stats {
@@ -204,7 +204,7 @@
                     <div class="col-md-6 mb-3">
                         <div class="card-stats count">
                             <div class="w-100">
-                                <p>Буюртма элементи сони:</p>
+                                <p>Савдо элементи сони:</p>
                                 <h5>{{ number_format($allCount, 0, '', ' ') }} та</h5>
                             </div>
                             <div>

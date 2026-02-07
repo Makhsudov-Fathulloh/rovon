@@ -280,10 +280,10 @@ class OrderItemController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('order-item.list', $order->id)->with('success', 'Буюртма элементи қўшилди!');
+            return redirect()->route('order-item.list', $order->id)->with('success', 'Савдо элементи қўшилди!');
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Буюртма элементи яратишда хатолик!: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Савдо элементи яратишда хатолик!: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->with('error', $e->getMessage())->withInput();
         }
     }
@@ -331,13 +331,13 @@ class OrderItemController extends Controller
             if (request()->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Буюртма элементи ўчирилди!',
+                    'message' => 'Савдо элементи ўчирилди!',
                     'redirect' => route('order-item.index')
                 ]);
             }
 
             return redirect()->route('order-item.index', $order->id)
-                ->with('success', 'Буюртма элементи ўчирилди!');
+                ->with('success', 'Савдо элементи ўчирилди!');
         } catch (\Throwable $e) {
             DB::rollBack();
 

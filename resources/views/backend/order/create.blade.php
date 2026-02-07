@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртма яратиш' }}">
+<x-backend.layouts.main title="{{ 'Савдо яратиш' }}">
     <div class="order-create">
         <x-backend.order.form
             :method="'POST'"

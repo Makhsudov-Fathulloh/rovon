@@ -115,7 +115,7 @@ class ExpenseAndIncome extends Model
             }
         }
 
-        // Orders (Буюртмалар)
+        // Orders (Савдолар)
         foreach ($periods as $period => $filterFunc) {
             $qOrder = \App\Models\Order::query();
             $filterFunc($qOrder);

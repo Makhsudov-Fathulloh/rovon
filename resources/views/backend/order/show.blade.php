@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртмани кўриш: ' . ucfirst($order->user->username) }}">
+<x-backend.layouts.main title="{{ 'Савдони кўриш: ' . ucfirst($order->user->username) }}">
 
     <style>
         th {

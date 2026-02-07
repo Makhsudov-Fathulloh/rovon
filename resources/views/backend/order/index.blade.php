@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртмалар' }}">
+<x-backend.layouts.main title="{{ 'Савдолар' }}">
 
     <style>
         .card-stats {
@@ -162,8 +162,8 @@
                                         <x-backend.action
                                             route="order" listRoute="order-item" :id="$order->id" subRoute="items"
                                             :add="true" :list="true" :view="true" :edit="true" :delete="true"
-                                            createTitle="Буюртма элементини яратиш"
-                                            listTitle="Буюртма элементлнарини кўриш"
+                                            createTitle="Савдо элементини яратиш"
+                                            listTitle="Савдо элементлнарини кўриш"
                                             viewClass="btn btn-secondary btn-sm"
                                         />
                                     </td>
@@ -237,7 +237,7 @@
                                     <x-backend.action
                                         route="order" listRoute="order-item" :id="$order->id" subRoute="items"
                                         :add="true" :list="true" :view="true" :edit="true" :delete="true"
-                                        createTitle="Буюртма элементини яратиш" listTitle="Буюртма элементлнарини кўриш"
+                                        createTitle="Савдо элементини яратиш" listTitle="Савдо элементлнарини кўриш"
                                         viewClass="btn btn-secondary btn-sm"
                                     />
                                 </div>
@@ -258,7 +258,7 @@
                     <!-- Count -->
                     <div class="card-stats count">
                         <div class="w-100">
-                            <p>Буюртмалар сони:<strong></strong></p>
+                            <p>Савдолар сони:<strong></strong></p>
                             <h5>🇺🇿 {{ number_format($orderCountUzs, 0, '', ' ') }} та</h5>
                             <h5>🇺🇸 {{ number_format($orderCountUsd, 0, '', ' ') }} та</h5>
                         </div>

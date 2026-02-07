@@ -21,7 +21,7 @@
                             <thead>
                             <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'Id') !!}</th>
-                                <th>{!! sortLink('order_item_id', 'Буюртма элементи') !!}</th>
+                                <th>{!! sortLink('order_item_id', 'Савдо элементи') !!}</th>
                                 <th>{!! sortLink('product_variation_id', 'Маҳсулот') !!}</th>
                                 <th>{!! sortLink('original_price', 'Асл нарх') !!}</th>
                                 <th>{!! sortLink('sold_price', 'Сотилган нарх') !!}</th>
@@ -151,7 +151,7 @@
                                     <p class="card-text">
                                         <strong>{!! sortLink('id', 'ID:') !!} </strong>{{ $profitAndLoss->id }} </p>
                                     <p class="card-text">
-                                        <strong>{!! sortLink('order_item_id', 'Буюртма элементи:') !!} </strong>{{ $profitAndLoss->order_item_id }}
+                                        <strong>{!! sortLink('order_item_id', 'Савдо элементи:') !!} </strong>{{ $profitAndLoss->order_item_id }}
                                     </p>
                                     <p class="card-text">
                                         <strong>{!! sortLink('product_variation_id', 'Маҳсулот:') !!} </strong>{{ $profitAndLoss->variation->title }}

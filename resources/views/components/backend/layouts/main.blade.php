@@ -111,7 +111,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             @if (auth()->user()->role->title === 'Admin' || 'Manager' || 'Developer')
-                                <li><a class="dropdown-item" href="{{ route('order.create') }}">Буюртма</a></li>
+                                <li><a class="dropdown-item" href="{{ route('order.create') }}">Савдо</a></li>
                             @endif
                             @if (auth()->user()->role->title === 'Admin' || 'Manager' || 'Moderator' || 'Developer')
                                 <li><a class="dropdown-item" href="{{ route('product.index') }}">Маҳсулот</a></li>
@@ -1523,7 +1523,7 @@
                                               d="M80.39,36.737l-62.1,12.9c-12.4,2.6-20.4,14.7-17.8,27.1s14.7,20.3,27.1,17.8l62.1-12.9L80.39,36.737 z"/>
                                     </g>
                                 </svg>
-                                <span class="hide-menu">Буюртмалар</span>
+                                <span class="hide-menu">Савдолар</span>
                             </a>
                         </li>
 
@@ -1561,7 +1561,7 @@
                                         </g>
                                     </g>
                                 </svg>
-                                <span class="hide-menu">Буюртма элементлари</span>
+                                <span class="hide-menu">Савдо элементлари</span>
                             </a>
                         </li>
 

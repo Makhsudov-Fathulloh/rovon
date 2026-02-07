@@ -17,7 +17,7 @@
                     <th>Id</th> <td>{{ $profitAndLoss->id }}</td>
                 </tr>
                 <tr>
-                    <th>Буюртма элементи</th> <td>{{ $profitAndLoss->order_item_id }}</td>
+                    <th>Савдо элементи</th> <td>{{ $profitAndLoss->order_item_id }}</td>
                 </tr>
                 <tr>
                     <th>Маҳсулот</th> <td>{{ $profitAndLoss->variation->title }}</td>

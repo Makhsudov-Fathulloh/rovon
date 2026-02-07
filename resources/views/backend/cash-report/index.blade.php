@@ -17,7 +17,7 @@
                     <thead class="table-light">
                     <tr class="text-center align-middle">
                         <th>№</th>
-                        <th>Жами буюртма</th>
+                        <th>Жами савдо</th>
                         <th>Жами тўланган</th>
                         <th>Жами қолган қарз</th>
                         <th>Жами қайтиш</th>
@@ -72,7 +72,7 @@
                                 <div class="card-body">
                                     <p><strong>№ </strong>{{ $report->id }}</p>
                                     <p><strong>Сана: </strong>{{ $report->report_date->format('Y-m-d') }}</p>
-                                    <p><strong>Жами буюртма: </strong>{{ PriceHelper::format($report->total_order_amount, $report->currency) }}</p>
+                                    <p><strong>Жами савдо: </strong>{{ PriceHelper::format($report->total_order_amount, $report->currency) }}</p>
                                     <p><strong>Жами тўланган: </strong>{{ PriceHelper::format($report->total_amount_paid, $report->currency) }}</p>
                                     <p><strong>Жами қолган қарз: </strong>{{ PriceHelper::format($report->total_remaining_debt, $report->currency) }}</p>
                                     <p><strong>Жами харажат: </strong>{{ PriceHelper::format($report->total_expense, $report->currency) }}</p>
@@ -135,7 +135,7 @@
                         <div class="card-body">
                             <p><strong>№ </strong>{{ $report->id }}</p>
                             <p><strong>Сана: </strong>{{ $report->report_date->format('Y-m-d') }}</p>
-                            <p><strong>Жами буюртма: </strong>{!! PriceHelper::formatArray($report->total_order_amount, $currencies, false) !!}</p>
+                            <p><strong>Жами савдо: </strong>{!! PriceHelper::formatArray($report->total_order_amount, $currencies, false) !!}</p>
                             <p><strong>Жами тўланган: </strong>{!! PriceHelper::formatArray($report->total_amount_paid, $currencies, false) !!}</p>
                             <p><strong>Жами қолган қарз: </strong>{!! PriceHelper::formatArray($report->total_remaining_debt, $currencies, false) !!}</p>
                             <p><strong>Жами қайтиш: </strong>{!! PriceHelper::formatArray($report->total_return_amount, $currencies, false) !!}</p>

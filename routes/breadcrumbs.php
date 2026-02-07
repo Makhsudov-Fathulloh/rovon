@@ -385,7 +385,7 @@ Breadcrumbs::for('shift-output-worker.delete', function (BreadcrumbTrail $trail)
 // Order
 Breadcrumbs::for('order.index', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Буюртмалар', route('order.index'));
+    $trail->push('Савдолар', route('order.index'));
 });
 Breadcrumbs::for('order.show', function (BreadcrumbTrail $trail, $order) {
     $trail->parent('order.index');
@@ -393,7 +393,7 @@ Breadcrumbs::for('order.show', function (BreadcrumbTrail $trail, $order) {
 });
 Breadcrumbs::for('order.create', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Буюртма яратиш', route('order.create'));
+    $trail->push('Савдо яратиш', route('order.create'));
 });
 Breadcrumbs::for('order.edit', function (BreadcrumbTrail $trail, $order) {
     $trail->parent('order.index');
@@ -401,13 +401,13 @@ Breadcrumbs::for('order.edit', function (BreadcrumbTrail $trail, $order) {
 });
 Breadcrumbs::for('order.delete', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Буюртмани ўчириш', route('order.delete'));
+    $trail->push('Савдони ўчириш', route('order.delete'));
 });
 
 // Order Item
 Breadcrumbs::for('order-item.index', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Буюртма элементлари', route('order-item.index'));
+    $trail->push('Савдо элементлари', route('order-item.index'));
 });
 Breadcrumbs::for('order-item.list', function (BreadcrumbTrail $trail, $order_id) {
     $trail->parent('dashboard');
@@ -420,7 +420,7 @@ Breadcrumbs::for('order-item.show', function (BreadcrumbTrail $trail, $orderItem
 });
 Breadcrumbs::for('order-item.create.custom', function (BreadcrumbTrail $trail, $order_id) {
     $trail->parent('dashboard');
-    $trail->push('Буюртма элементини яратиш', route('order-item.create.custom', $order_id));;
+    $trail->push('Савдо элементини яратиш', route('order-item.create.custom', $order_id));;
 });
 Breadcrumbs::for('order-item.edit', function (BreadcrumbTrail $trail, $orderItem) {
     $trail->parent('order-item.index');
@@ -428,7 +428,7 @@ Breadcrumbs::for('order-item.edit', function (BreadcrumbTrail $trail, $orderItem
 });
 Breadcrumbs::for('order-item.delete', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Буюртма элементини ўчириш', route('order-item.delete'));
+    $trail->push('Савдо элементини ўчириш', route('order-item.delete'));
 });
 
 

@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртма элементлари' }}">
+<x-backend.layouts.main title="{{ 'Савдо элементлари' }}">
 
     <style>
         .card-stats {
@@ -60,7 +60,7 @@
                             <thead>
                             <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'Id') !!}</th>
-                                <th class="col-title">{!! sortLink('order_id', 'Буюртмачи') !!}</th>
+                                <th class="col-title">{!! sortLink('order_id', 'Савдо') !!}</th>
                                 <th>{!! sortLink('product_variation_id', 'Маҳсулот') !!}</th>
                                 <th>{!! sortLink('price', 'Нархи') !!}</th>
                                 <th>{!! sortLink('quantity', 'Сони') !!}</th>
@@ -229,7 +229,7 @@
                     <div class="col-md-6 mb-3">
                         <div class="card-stats count">
                             <div class="w-100">
-                                <p>Буюртма элементи сони:</p>
+                                <p>Савдо элементи сони:</p>
                                 <h5>
                                     @foreach ($orderItemCount as $currency => $count)
                                         {{ $count }} та <br>

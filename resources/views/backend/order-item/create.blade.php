@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртма турини яратиш: ' . ucfirst($order->user->username) }}">
+<x-backend.layouts.main title="{{ 'Савдо  элементини яратиш: ' . ucfirst($order->user->username) }}">
     <div class="order-item-create">
         <x-backend.order-item.form
             :method="'POST'"

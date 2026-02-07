@@ -1,4 +1,4 @@
-<x-backend.layouts.main title="{{ 'Буюртма турини кўриш: ' . ucfirst($orderItem->title) }}">
+<x-backend.layouts.main title="{{ 'Савдо элементини кўриш: ' . ucfirst($orderItem->title) }}">
 
     <style>
         th {
@@ -19,7 +19,7 @@
                     <td>{{ $orderItem->id }}</td>
                 </tr>
                 <tr>
-                    <th>Буюртмачи</th>
+                    <th>Мижоз</th>
                     <td>{{ $orderItem->order->user->username }}</td>
                 </tr>
                 <tr>

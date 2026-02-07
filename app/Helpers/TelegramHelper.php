@@ -93,8 +93,8 @@ class TelegramHelper
     public static function orderMessage(Order $order, string $type = 'create'): string
     {
         $title = $type === 'update'
-            ? '✏️ <b>Буюртма янгиланди!</b>'
-            : '🧾 <b>Янги буюртма!</b>';
+            ? '✏️ <b>Савдо янгиланди!</b>'
+            : '🧾 <b>Янги Савдо!</b>';
 
         $currency = $order->currency == StatusService::CURRENCY_USD ? '$' : 'сўм';
 
@@ -146,7 +146,7 @@ class TelegramHelper
             {$title}
 
             ━━━━━━━━━━━━━━━━━━━━━━━━
-            <b>📦 Буюртма:</b> <code>{$orderId}</code>
+            <b>📦 Савдо:</b> <code>{$orderId}</code>
             <b>👤 Мижоз:</b> {$username}
 
             <b>🧾 Умумий:</b> <code>{$fmt($order->total_price,$order->currency == StatusService::CURRENCY_USD ? 2 : 0)} {$currency}</code>
@@ -158,7 +158,7 @@ class TelegramHelper
 
             <b>🕒 Сана:</b> <code>{$date}</code>
             ━━━━━━━━━━━━━━━━━━━━━━━━
-            <a href="https://{$_SERVER['HTTP_HOST']}/admin/order/{$order->id}">🔗 Буюртмани очиш</a>
+            <a href="https://{$_SERVER['HTTP_HOST']}/admin/order/{$order->id}">🔗 Савдони очиш</a>
         HTML;
 
         return $message;

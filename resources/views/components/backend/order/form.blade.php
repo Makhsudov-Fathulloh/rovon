@@ -922,7 +922,7 @@
 {{--                        </div>--}}
 
 {{--                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow">--}}
-{{--                            <i class="fas fa-save me-2"></i> {{ Route::currentRouteName() == 'order.edit' ? 'Буюртмани янгиалш' : 'Буюртмани якунлаш' }}--}}
+{{--                            <i class="fas fa-save me-2"></i> {{ Route::currentRouteName() == 'order.edit' ? 'Савдони янгиалш' : 'Савдони якунлаш' }}--}}
 {{--                        </button>--}}
 {{--                    </div>--}}
 {{--                </div>--}}

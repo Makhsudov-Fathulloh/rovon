@@ -109,7 +109,7 @@
 
             {{-- Agar Client bo‘lsa --}}
             @if($user->role->title === 'Client')
-                <h3 class="text-center">Буюртмалари:</h3>
+                <h3 class="text-center">Савдолари:</h3>
                 <form id="orderFilterForm" method="GET" action="{{ route('user.show', $user->id) }}">
                     <div class="table-responsive d-none d-md-block">
                         <table class="table table-bordered table-hover">
@@ -136,7 +136,7 @@
                                             'created_at:datetime' => 'Яратилди',
                                         ]"
                                         :totals="[
-                                            'Буюртмалар сони:' => number_format($orderCountUzs, 0, '', ' ') . ' та (сўм)' . ' • ' . number_format($orderCountUsd, 2, '.', ' ') . ' та ($)',
+                                            'Савдолар сони:' => number_format($orderCountUzs, 0, '', ' ') . ' та (сўм)' . ' • ' . number_format($orderCountUsd, 2, '.', ' ') . ' та ($)',
                                             'Умумий сумма:'     => number_format($orderTotalPriceUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderTotalPriceUsd, 2, '.', ' ') . ' $',
                                             'Тўланган сумма:'    => number_format($orderAmountPaidUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderAmountPaidUsd, 2, '.', ' ') . ' $',
                                             'Умумий қарздорлик:'    => number_format($remainingDebtUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($remainingDebtUsd, 2, '.', ' ') . ' $',
@@ -227,8 +227,8 @@
                                             :list="true"
                                             :view="true"
                                             :edit="true"
-                                            createTitle="Буюртма элементини яратиш"
-                                            listTitle="Буюртма элементлнарини кўриш"
+                                            createTitle="Савдо элементини яратиш"
+                                            listTitle="Савдо элементлнарини кўриш"
                                             viewClass="btn btn-secondary btn-sm"
                                         />
                                     </td>
@@ -259,7 +259,7 @@
                                             'created_at:datetime' => 'Яратилди',
                                         ]"
                                     :totals="[
-                                            'Буюртмалар сони:' => number_format($orderCountUzs, 0, '', ' ') . ' та (сўм)' . ' • ' . number_format($orderCountUsd, 2, '.', ' ') . ' та ($)',
+                                            'Савдолар сони:' => number_format($orderCountUzs, 0, '', ' ') . ' та (сўм)' . ' • ' . number_format($orderCountUsd, 2, '.', ' ') . ' та ($)',
                                             'Умумий сумма:'     => number_format($orderTotalPriceUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderTotalPriceUsd, 2, '.', ' ') . ' $',
                                             'Тўланган сумма:'    => number_format($orderAmountPaidUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($orderAmountPaidUsd, 2, '.', ' ') . ' $',
                                             'Умумий қарздорлик:'    => number_format($remainingDebtUzs, 0, '', ' ') . ' сўм' . ' • ' . number_format($remainingDebtUsd, 2, '.', ' ') . ' $',
@@ -325,8 +325,8 @@
                                         :list="true"
                                         :view="true"
                                         :edit="true"
-                                        createTitle="Буюртма элементини яратиш"
-                                        listTitle="Буюртма элементлнарини кўриш"
+                                        createTitle="Савдо элементини яратиш"
+                                        listTitle="Савдо элементлнарини кўриш"
                                         viewClass="btn btn-secondary btn-sm"
                                     />
                                 </div>
@@ -401,7 +401,7 @@
                     <!-- Count -->
                     <div class="card-stats count">
                         <div class="w-100">
-                            <p>Буюртмалар сони:</p>
+                            <p>Савдолар сони:</p>
                             <h5>
                                 {{ number_format($orderCountUzs, 0, '', ' ') }} та<br>
                                 {{ number_format($orderCountUsd, 0, '', ' ') }} та

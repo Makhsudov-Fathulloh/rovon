@@ -19,7 +19,7 @@
                                         <path style="fill:#4CDBC4;" d="M80.39,36.737l-62.1,12.9c-12.4,2.6-20.4,14.7-17.8,27.1s14.7,20.3,27.1,17.8l62.1-12.9L80.39,36.737z"/>
                                 </svg>
                                 </h1>
-                                <h6 class="text-white">Буюртма яратиш</h6>
+                                <h6 class="text-white">Савдо яратиш</h6>
                             </div>
                         </div>
                     </a>
@@ -42,7 +42,7 @@
                                         </g></g>
                                 </svg>
                                 </h1>
-                                <h6 class="text-white">Буюртма элементлари</h6>
+                                <h6 class="text-white">Савдо элементлари</h6>
                             </div>
                         </div>
                     </a>
@@ -428,7 +428,7 @@
                                         <path style="fill:#4CDBC4;" d="M80.39,36.737l-62.1,12.9c-12.4,2.6-20.4,14.7-17.8,27.1s14.7,20.3,27.1,17.8l62.1-12.9L80.39,36.737z"/>
                                 </svg>
                                 </h1>
-                                <h6 class="text-white">Буюртма яратиш</h6>
+                                <h6 class="text-white">Савдо яратиш</h6>
                             </div>
                         </div>
                     </a>
@@ -524,7 +524,7 @@
                                             <h5 class="mb-0 mt-1">
                                                 {!! number_format($orderTotalUzs, 0, '', ' ') . ' сўм' . '<br>' . number_format($orderTotalUsd, 2, '.', ' ') . ' $' !!}
                                             </h5>
-                                            <small class="font-light">Буюртма суммаcи</small>
+                                            <small class="font-light">Савдо суммаcи</small>
                                         </div>
                                     </div>
                                     <div class="col-6 mt-3">

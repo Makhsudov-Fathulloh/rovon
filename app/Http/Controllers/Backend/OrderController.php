@@ -377,11 +377,11 @@ class OrderController extends Controller
 
             TelegramHelper::sendOrderToClients($order, 'create');
 
-            //            return redirect()->route('order.show', $order)->with('success', 'Буюртма яратилди!');
-            return redirect()->route('order.create')->with('success', 'Буюртма яратилди!');
+            //            return redirect()->route('order.show', $order)->with('success', 'Савдо яратилди!');
+            return redirect()->route('order.create')->with('success', 'Савдо яратилди!');
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Буюртма яратишда хатолик: ' . $e->getMessage(), [
+            Log::error('Савдо яратишда хатолик: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
             return back()->with('error', 'Хатолик: ' . $e->getMessage())->withInput();
@@ -647,11 +647,11 @@ class OrderController extends Controller
 
             TelegramHelper::sendOrderToClients($order, 'update');
 
-            //            return redirect()->route('order.show', $order)->with('success', 'Буюртма янгиланди!');
-            return redirect()->route('order.index')->with('success', 'Буюртма янгиланди!');
+            //            return redirect()->route('order.show', $order)->with('success', 'Савдо янгиланди!');
+            return redirect()->route('order.index')->with('success', 'Савдо янгиланди!');
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Буюртма янгилашда хатолик: ' . $e->getMessage(), [
+            Log::error('Савдо янгилашда хатолик: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
             return back()->with('error', 'Хатолик: ' . $e->getMessage())->withInput();
@@ -679,12 +679,12 @@ class OrderController extends Controller
             if (request()->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Буюртма ўчирилди ва қарз қайta ҳисобланди!',
+                    'message' => 'Савдо ўчирилди ва қарз қайta ҳисобланди!',
                     'redirect' => route('order.index')
                 ]);
             }
 
-            return redirect()->route('order.index')->with('success', 'Буюртма ўчирилди!');
+            return redirect()->route('order.index')->with('success', 'Савдо ўчирилди!');
         } catch (\Throwable $e) {
             DB::rollBack();
             // Log::error($e->getMessage()); // Xatolikni logga yozish tavsiya etiladi

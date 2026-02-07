@@ -221,7 +221,7 @@ class CashReportController extends Controller
         }
 
         $labels = [
-            'total_order_amount'   => 'Жами буюртма',
+            'total_order_amount'   => 'Жами савдо',
             'total_amount_paid'    => 'Жами тўланган',
             'total_remaining_debt' => 'Жами қолган қарз',
             'total_return_amount' => 'Жами қайтиш',

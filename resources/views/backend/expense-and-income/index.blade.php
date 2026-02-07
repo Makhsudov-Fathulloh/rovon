@@ -206,7 +206,7 @@
                 @can('hasAccess')
                     @include('partials.backend._stats_payment_block', ['data' => $payment, 'prefix' => 'Payment', 'title' => 'Касса (Нақд тўлов)'])
                     {{--@include('partials.backend._stats_block', ['data' => $amount, 'prefix' => 'AmountPaid', 'title' => 'Касса (Нақд тўлов)'])--}}
-                    @include('partials.backend._stats_block', ['data' => $order, 'prefix' => 'Order', 'title' => 'Буюртмалар'])
+                    @include('partials.backend._stats_block', ['data' => $order, 'prefix' => 'Order', 'title' => 'Савдолар'])
                     @include('partials.backend._stats_block', ['data' => $expense, 'prefix' => 'Expense', 'title' => 'Харажат'])
                     @include('partials.backend._stats_block', ['data' => $income, 'prefix' => 'Income', 'title' => 'Кирим'])
                     @include('partials.backend._stats_block', ['data' => $debt, 'prefix' => 'Debt', 'title' => 'Қарз сўндириш'])
