@@ -53,18 +53,18 @@ class ProductVariationSearch
         }
 
         if (isset($filters['body_price']) && $filters['body_price'] !== '') {
-            $filters['body_price'] = preg_replace('/\D/', '', $filters['body_price']);
+            $filters['body_price'] = preg_replace('/[^\d.]/', '', $filters['body_price']);
             $query->where('body_price', (int) $filters['body_price']);
         }
 
         if (isset($filters['price_count_total_price']) && $filters['price_count_total_price'] !== '') {
-            $value = (int) preg_replace('/\D/', '', $filters['price_count_total_price']);
+            $numeric = preg_replace('/[^\d.]/', '', $filters['price_count_total_price']);
 
-            if ($value !== '') {
-                $query->where(function ($q) use ($value) {
-                    $q->whereRaw('CAST(count AS TEXT) LIKE ?', ["%{$value}%"])
-                        ->orWhereRaw('CAST(price AS TEXT) LIKE ?', ["%{$value}%"])
-                        ->orWhereRaw('CAST(total_price AS TEXT) LIKE ?', ["%{$value}%"]);
+            if ($numeric !== '') {
+                $query->where(function ($q) use ($numeric) {
+                    $q->whereRaw('CAST(count AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(price AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(total_price AS TEXT) LIKE ?', ["%{$numeric}%"]);
                 });
             }
         }

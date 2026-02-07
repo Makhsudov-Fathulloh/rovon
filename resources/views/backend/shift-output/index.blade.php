@@ -113,43 +113,46 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        <div class="d-flex m-4">
-                            {{-- <select name="filters[stage_id_mobile]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг"> --}}
-                            <select name="filters[stage_id]" class="form-control form-control-sm filter-select2 w-100"
-                                    data-placeholder="Смена махсулотини танланг">
-                                <option value="">Барчаси</option>
-                                @foreach($stages as $id => $title)
-                                    <option
-                                        value="{{ $id }}" {{ request('filters.stage_id') == $id ? 'selected' : '' }}>
-                                        {{ $title }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </div>
-                        @forelse($shiftOutputs as $shiftOutput)
-                            <div class="mobile-card shadow-sm">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="img-wrapper me-3" style="width: 55px; height: 55px;">
-                                            @if(optional($shiftOutput->file)->path)
-                                                <img src="{{ asset('storage/' . $shiftOutput->file->path) }}" alt="">
-                                            @else
+                    <div class="d-md-none p-3">
+                        <div class="search-box-mobile mb-4">
+                            <div class="d-flex m-4">
+                                {{-- <select name="filters[stage_id_mobile]" class="form-control form-control-sm filter-select2 w-100" data-placeholder="Смена махсулотини танланг"> --}}
+                                <select name="filters[stage_id]"
+                                        class="form-control form-control-sm filter-select2 w-100"
+                                        data-placeholder="Смена махсулотини танланг">
+                                    <option value="">Барчаси</option>
+                                    @foreach($stages as $id => $title)
+                                        <option
+                                            value="{{ $id }}" {{ request('filters.stage_id') == $id ? 'selected' : '' }}>
+                                            {{ $title }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                            @forelse($shiftOutputs as $shiftOutput)
+                                <div class="mobile-card shadow-sm">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="img-wrapper me-3" style="width: 55px; height: 55px;">
+                                                @if(optional($shiftOutput->file)->path)
+                                                    <img src="{{ asset('storage/' . $shiftOutput->file->path) }}"
+                                                         alt="">
+                                                @else
+                                                    <div
+                                                        class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                                        <i class="bi bi-image"></i></div>
+                                                @endif
+                                            </div>
+                                            <div>
                                                 <div
-                                                    class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
-                                                    <i class="bi bi-image"></i></div>
-                                            @endif
+                                                    class="fw-bold mb-0 text-dark">{{ optional($shiftOutput->stage)->title }}</div>
+                                                <span class="text-muted small">ID: {{ $shiftOutput->id }}</span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div
-                                                class="fw-bold mb-0 text-dark">{{ optional($shiftOutput->stage)->title }}</div>
-                                            <span class="text-muted small">ID: {{ $shiftOutput->id }}</span>
-                                        </div>
-                                    </div>
-                                    <span class="badge-custom {{ \App\Services\StatusService::getTypeClass()[4] }}">
+                                        <span class="badge-custom {{ \App\Services\StatusService::getTypeClass()[4] }}">
                                         <div class="fw-bold text-center" style="line-height: 1;">
                                             <div
                                                 class="text-success">{{ number_format($shiftOutput->stage_count, 0, '', ' ') }}</div>
@@ -158,37 +161,41 @@
                                                 class="text-danger">{{ number_format($shiftOutput->defect_amount, 3, '.', ' ') }}</div>
                                         </div>
                                     </span>
-                                </div>
-                                <div class="row g-2 mb-3">
-                                    <div class="col-6">
-                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Смена</small>
-                                        <span
-                                            class="small fw-medium">{{ '(' . optional($shiftOutput->shift->section->organization)->title . ') (' . optional($shiftOutput->shift->section)->title . ') ' . optional($shiftOutput->shift)->title }}</span>
                                     </div>
-                                    <div class="col-6">
-                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Яратилди</small>
-                                        <span
-                                            class="small fw-medium">{{ $shiftOutput->created_at?->format('d.m.Y H:i') }}</span>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block text-uppercase"
+                                                   style="font-size: 0.65rem;">Смена</small>
+                                            <span
+                                                class="small fw-medium">{{ '(' . optional($shiftOutput->shift->section->organization)->title . ') (' . optional($shiftOutput->shift->section)->title . ') ' . optional($shiftOutput->shift)->title }}</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block text-uppercase"
+                                                   style="font-size: 0.65rem;">Яратилди</small>
+                                            <span
+                                                class="small fw-medium">{{ $shiftOutput->created_at?->format('d.m.Y H:i') }}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                                     <span class="small text-muted"><i class="bi bi-person me-1"></i>
                                         @foreach($shiftOutput->shift->users as $user)
                                             <span class="badge bg-info">{{ $user->username }}</span>
                                         @endforeach
                                     </span>
-                                    <div class="action-btns">
-                                        <x-backend.action route="shift-output" :id="$shiftOutput->id" :view="true" :edit="true"/>
+                                        <div class="action-btns">
+                                            <x-backend.action route="shift-output" :id="$shiftOutput->id" :view="true"
+                                                              :edit="true"/>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @empty
-                            <div class="py-5 text-center">
-                                <img src="{{ asset('images/systems/reference-not-found.png') }}" width="45"
-                                     class="mb-3 opacity-20" alt="">
-                                <div class="py-4">Маълумот топилмади</div>
-                            </div>
-                        @endforelse
+                            @empty
+                                <div class="py-5 text-center">
+                                    <img src="{{ asset('images/systems/reference-not-found.png') }}" width="45"
+                                         class="mb-3 opacity-20" alt="">
+                                    <div class="py-4">Маълумот топилмади</div>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
                     {{-- Mobile version end --}}
                 </form>

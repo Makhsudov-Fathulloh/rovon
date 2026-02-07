@@ -160,13 +160,12 @@
                                     <div class="col-6">
                                         <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Номи</small>
                                         <span
-                                            class="small fw-medium">{{ '('. $product->warehouse->organization->pluck('title')->implode(', ') . ') (' . optional($product->warehouse)->title . ') ' . $product->title }}</span>
+                                            class="small fw-medium">{{ '('. $product->warehouse->organization->pluck('title')->implode(', ') . ') ' . optional($product->warehouse)->title }}</span>
                                     </div>
                                     <div class="col-6">
                                         <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Яратилди</small>
                                         <span
-                                        <span
-                                            class="small fw-medium">{{ $product->created_at?->format('d.m.Y H:i') }}</span>
+                                            class="small fw-medium">{{ $product->created_at?->format('d.m.Y H:i') }}</>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center pt-2 border-top">

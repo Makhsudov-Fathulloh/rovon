@@ -89,7 +89,7 @@
                 </div>
 
                 {{-- Mobile Version --}}
-                <div class="d-md-none">
+                <div class="d-md-none p-3">
                     <form method="GET" class="m-4">
                         <div class="d-flex">
                             <input type="date"

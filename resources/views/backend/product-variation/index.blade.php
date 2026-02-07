@@ -42,9 +42,8 @@
                                 {{--<th><input type="text" name="filters[body_price]" value="{{ request('filters.body_price') }}"--}}
                                 {{--class="form-control form-control-sm w-100 filter-numeric"></th>--}}
                                 {{--@endcan--}}
-                                <th><input type="text" name="filters[price_count_total_price]"
-                                           value="{{ request('filters.price_count_total_price') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
+                                <th><input type="text" name="filters[price_count_total_price]" value="{{ request('filters.price_count_total_price') }}"
+                                           class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
                                 <th>
                                     <select name="filters[status]" class="form-control form-control-sm w-100">
                                         <option value="">Барчаси</option>
@@ -106,8 +105,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span
-                                            class="badge-custom {{ StatusService::getListClass()[$productVariation->status] }}">{{ StatusService::getList()[$productVariation->status] }}</span>
+                                        <span class="badge-custom {{ StatusService::getListClass()[$productVariation->status] }}">{{ StatusService::getList()[$productVariation->status] }}</span>
                                     </td>
                                     <td class="col-date">{{ $productVariation->created_at?->format('Y-m-d H:i') }}</td>
                                     <td class="text-center action-btns">
@@ -118,8 +116,7 @@
                                                 title="Маҳсулот миқдорини ошириш">
                                             <i class="fa fa-plus"></i> Қўшиш
                                         </button>
-                                        <x-backend.action route="product-variation" :id="$productVariation->id"
-                                                          :view="true" :edit="true" :delete="true"/>
+                                        <x-backend.action route="product-variation" :id="$productVariation->id" :view="true" :edit="true" :delete="true"/>
                                     </td>
                                 </tr>
                             @empty

@@ -68,7 +68,7 @@ class ShiftOutputWorkerSearch
         }
 
         if (isset($filters['stage_defect_price']) && $filters['stage_defect_price'] !== '') {
-            $value = (int) preg_replace('/\D/', '', $filters['stage_defect_price']);
+            $value = (int) preg_replace('/[^\d.]/', '', $filters['stage_defect_price']);
 
             if ($value !== '') {
                 $query->where(function ($q) use ($value) {

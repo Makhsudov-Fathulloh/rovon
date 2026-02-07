@@ -117,7 +117,7 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                    <div class="d-md-none">
+                    <div class="d-md-none p-3">
                         <div class="d-flex m-4">
                             <select name="filters[user_id]"
                                     class="form-control form-control-sm filter-select2 w-100"
