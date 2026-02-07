@@ -6,29 +6,59 @@ use App\Helpers\TelegramHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ShiftReport;
 use App\Models\Shift;
-use App\Models\User;
 use App\Services\StatusService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
 
 class ShiftReportController extends Controller
 {
     public function index(Request $request)
     {
-
         $query = ShiftReport::with(['organization', 'section', 'shift']);
 
-        if ($request->filled('report_date')) {
-            $query->whereDate('report_date', $request->report_date);
+        $from = $request->input('report_date_from');
+        $to   = $request->input('report_date_to');
+
+        try {
+            if ($from && $to) {
+                $fromDate = Carbon::parse($from)->startOfDay();
+                $toDate   = Carbon::parse($to)->endOfDay();
+
+                if ($toDate->lt($fromDate)) {
+                    Session::flash('date_format_errors', [
+                        'Охирги сана бошланғич санадан олдин бўлиши мумкин эмас.'
+                    ]);
+                } else {
+                    $query->whereBetween('report_date', [$fromDate, $toDate]);
+                }
+
+            } elseif ($from) {
+                // faqat FROM → o‘sha kun
+                $query->whereBetween('report_date', [
+                    Carbon::parse($from)->startOfDay(),
+                    Carbon::parse($from)->endOfDay()
+                ]);
+
+            } elseif ($to) {
+                // faqat TO → o‘sha kun
+                $query->whereBetween('report_date', [
+                    Carbon::parse($to)->startOfDay(),
+                    Carbon::parse($to)->endOfDay()
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Session::flash('date_format_errors', ['Сана формати нотўғри.']);
         }
 
-        $reports = $query->orderBy('shift_id')->get();
-
-        $overallStatus = $reports->every(fn($r) => $r->status == ShiftReport::SHIFT_CLOSE) ? ShiftReport::SHIFT_CLOSE : ShiftReport::SHIFT_OPEN;
+        $reports = $query->orderByDesc('id')->paginate(20)->withQueryString();
+        $allReports = $query->get();
+        $overallStatus = $allReports->every(fn($r) => $r->status == ShiftReport::SHIFT_CLOSE) ? ShiftReport::SHIFT_CLOSE : ShiftReport::SHIFT_OPEN;
 
         $now = now();
 
-        $todayReport = $reports->first(function($report) use ($now) {
+        $todayReport = $allReports->first(function($report) use ($now) {
             $reportDate = Carbon::parse($report->report_date);
             $reportStart = $reportDate->setHour(12)->setMinute(0)->setSecond(0);
             $reportEnd   = $reportStart->copy()->addDay(); // keyingi 11:59

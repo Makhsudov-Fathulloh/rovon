@@ -25,7 +25,7 @@
                             {{-- Filter Inputs --}}
                             <tr>
                                 <th><input type="text" name="filters[id]" value="{{ request('filters.id') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
+                                           class="form-control form-control-sm w-100 filter-numeric" placeholder="№..."></th>
                                 <th>
                                     <select name="filters[user_id]"
                                             class="form-control form-control-sm filter-select2 w-100">

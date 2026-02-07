@@ -28,30 +28,60 @@ class DefectReportSearch
             $query->where('organization_id', $filters['organization_id']);
         }
 
-        if (!empty($filters['section_id'])) {
-            $query->where('section_id', $filters['section_id']);
+        if (!empty($filters['section_shift_stage'])) {
+            $raw = trim($filters['section_shift_stage']);
+            $parts = array_values(array_filter(
+                array_map(fn($v) => mb_strtolower(trim($v)), explode('.', $raw))
+            ));
+
+            $query->where(function ($q) use ($parts) {
+                // 🔹 1) NUQTASIZ — oddiy qidiruv
+                if (count($parts) === 1) {
+                    $keyword = $parts[0];
+
+                    $q->whereHas('section', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"]))
+                        ->orWhereHas('shift', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"]))
+                        ->orWhereHas('stage', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"]));
+                }
+
+                // 🔹 2) Section.Shift
+                elseif (count($parts) === 2) {
+                    [$section, $shift] = $parts;
+
+                    $q->whereHas('section', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$section}%"]))
+                        ->whereHas('shift', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$shift}%"]));
+                }
+
+                // 🔹 3) Section.Shift.Stage
+                else {
+                    [$section, $shift, $stage] = $parts;
+
+                    $q->whereHas('section', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$section}%"]))
+                        ->whereHas('shift', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$shift}%"]))
+                        ->whereHas('stage', fn($sq) =>
+                    $sq->whereRaw('LOWER(title) LIKE ?', ["%{$stage}%"]));
+                }
+            });
         }
 
-        if (!empty($filters['shift_id'])) {
-            $query->where('shift_id', $filters['shift_id']);
-        }
+        if (!empty($filters['stage_defect_amount_percent'])) {
+            $numeric = preg_replace('/[^\d.]/', '', $filters['stage_defect_amount_percent']);
 
-        if (!empty($filters['stage_id'])) {
-            $query->where('stage_id', $filters['stage_id']);
-        }
-
-        if (!empty($filters['stage_count'])) {
-            $query->where('stage_count', $filters['stage_count']);
-        }
-
-        if (isset($filters['defect_amount']) && $filters['defect_amount'] !== '') {
-            $filters['defect_amount'] = preg_replace('/[^\d.]/', '', $filters['defect_amount']);
-            $query->where('defect_amount', (float) $filters['defect_amount']);
-        }
-
-        if (isset($filters['defect_percent']) && $filters['defect_percent'] !== '') {
-            $filters['defect_percent'] = preg_replace('/[^\d.]/', '', $filters['defect_percent']);
-            $query->where('defect_percent', (float) $filters['defect_percent']);
+            if ($numeric !== '') {
+                $query->where(function ($q) use ($numeric) {
+                    $q->whereRaw('CAST(stage_count AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(total_defect_amount AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(defect_amount AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(defect_percent AS TEXT) LIKE ?', ["%{$numeric}%"]);
+                });
+            }
         }
 
         // Sanadan-sanagacha filter
