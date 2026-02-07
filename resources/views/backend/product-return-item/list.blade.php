@@ -7,20 +7,23 @@
 <x-backend.layouts.main
     title="{!! 'Қайтиш ( ' . ucfirst($productReturn->title) . '):' !!}">
 
-    <div class="row">
-        <div class="card shadow w-100">
-            <div class="table-responsive card-body">
+    <div class="container-fluid">
+
+        <div class="card-custom shadow-sm">
+            <div class="card-header-custom action-btns">
+                <x-backend.action :back="true"/>
+            </div>
+
+            <div class="card-body p-0">
                 <form id="productVariationListFilterForm" method="GET"
                       action="{{ route('product-return-item.list', $productReturn) }}">
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-bordered table-hover">
+                        <table class="table mb-0">
                             <thead>
                             <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'Id') !!}</th>
                                 <th>{!! sortLink('product_variation_id', 'Номи') !!}</th>
-                                <th>{!! sortLink('price', 'Нархи') !!}</th>
-                                <th>{!! sortLink('count', 'Миқдори') !!}</th>
-                                <th>{!! sortLink('total_price', 'Умумий(сўм)') !!}</th>
+                                <th>{!! sortLink('price_count_total_price', 'Нархи/Миқдори') !!}</th>
                                 <th>{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th></th> {{-- Search btn --}}
                             </tr>
@@ -40,22 +43,18 @@
                                         @endforeach
                                     </select>
                                 </th>
-                                <th><input type="text" name="filters[price]" value="{{ request('filters.price') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[count]" value="{{ request('filters.count') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[total_price]"
-                                           value="{{ request('filters.total_price') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
+                                <th><input type="text" name="filters[price_count_total_price]"
+                                           value="{{ request('filters.price_count_total_price') }}"
+                                           class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
                                 <th>
-                                  <div class="d-flex">
-                                      <input type="date" name="filters[created_from]"
-                                             value="{{ request('filters.created_from') }}"
-                                             class="form-control form-control-sm me-1" placeholder="From">
-                                      <input type="date" name="filters[created_to]"
-                                             value="{{ request('filters.created_to') }}"
-                                             class="form-control form-control-sm" placeholder="To">
-                                  </div>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
                                 </th>
 
                                 @if(session('date_format_errors'))
@@ -68,8 +67,13 @@
                                     </div>
                                 @endif
 
-                                <th>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i class="fa fa-search"></i></button>
+                                <th class="p-0">
+                                    <div class="d-flex justify-content-center align-items-center"
+                                         style="min-height: 75px;">
+                                        <button type="submit" class="btn btn-custom-search" title="Филтрлаш">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
                                 </th>
                             </tr>
                             </thead>
@@ -77,24 +81,30 @@
                             @forelse($productReturnItems as $returnItem)
                                 <tr class="text-center" id="row-desktop-{{ $returnItem->id }}">
                                     <td class="col-id">{{ $returnItem->id }}</td>
-                                    <td>{{ optional($returnItem->variation)->title }}</td>
-                                    <td class="price fw-bold text-success">
-                                        {{ PriceHelper::format($returnItem->price, $returnItem->productReturn->currency, false) }}
-                                    </td>
-                                    <td class="count fw-bold text-primary">
-                                        {{ CountHelper::format($returnItem->count, $returnItem->variation->unit, false) }}
-                                    </td>
-                                    <td class="total_price fw-bold text-info text-nowrap">
-                                        {{ PriceHelper::format($returnItem->total_price, $returnItem->productReturn->currency, false) }}
+                                    <td style="width: 35%">{{ optional($returnItem->variation)->title }}</td>
+                                    <td class="fw-bold text-center" style="line-height: 1;">
+                                        <div
+                                            class="price fw-bold text-success">{{ PriceHelper::format($returnItem->price, $returnItem->productReturn->currency) }}</div>
+                                        <div class="line"></div>
+                                        <div
+                                            class="count fw-bold text-primary">{{ CountHelper::format($returnItem->count, $returnItem->variation->unit) }}</div>
+                                        <div class="line"></div>
+                                        <div
+                                            class="total_price fw-bold text-info">{{ PriceHelper::format($returnItem->total_price, $returnItem->productReturn->currency) }}</div>
                                     </td>
                                     <td>{{ $returnItem->created_at?->format('Y-m-d H:i') }}</td>
-                                    <td>
-                                        <x-backend.action route="product-return-item" :id="$returnItem->id" :view="true"/>
+                                    <td class="text-center action-btns">
+                                        <x-backend.action route="product-return-item" :id="$returnItem->id"
+                                                          :view="true"/>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="14" class="text-center">Маълумот топилмади</td>
+                                    <td colspan="8" class="py-5 text-center">
+                                        <img src="{{ asset('images/systems/reference-not-found.png') }}" width="60"
+                                             class="mb-3 opacity-20" alt="">
+                                        <p class="text-muted">Маълумот топилмади</p>
+                                    </td>
                                 </tr>
                             @endforelse
                             </tbody>
@@ -102,118 +112,127 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        <div class="d-flex mb-2">
-                            <input type="text" name="filters[title]" value="{{ request('filters.title') }}"
-                                   class="form-control form-control-sm me-1" placeholder="Элемент номини киритинг">
+                    <div class="d-md-none p-3">
+                        <div class="d-flex m-4">
+                            <select name="filters[product_variation_id]"
+                                    class="form-control form-control-sm filter-select2 w-100" data-placeholder="Қайтиш номини киритинг">
+                                <option value="">Барчаси</option>
+                                @foreach($productVariations as $id => $title)
+                                    <option
+                                        value="{{ $id }}" {{ request('filters.product_variation_id') == $id ? 'selected' : '' }}>
+                                        {{ $title }}
+                                    </option>
+                                @endforeach
+                            </select>
                             <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
                                 <i class="fa fa-search"></i>
                             </button>
                         </div>
                         @forelse($productReturnItems as $returnItem)
-                            <div class="card border" id="row-mobile-{{ $returnItem->id }}">
-                                <div class="card-body">
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('id', 'ID:') !!}</strong> {{ $returnItem->id }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('title', 'Номи:') !!}</strong> {{ optional($returnItem->variation)->title }}</p>
-                                    <p class="card-text"><strong>{!! sortLink('price', 'Нархи:') !!} </strong><span
-                                            class="price fw-bold text-info">{{ PriceHelper::format($returnItem->price, $returnItem->productReturn->currency, false) }}</span> {{ StatusService::getCurrency()[$returnItem->productReturn->currency] }}
-                                    </p>
-                                    <p class="card-text"><strong>{!! sortLink('count', 'Миқдори:') !!} </strong><span
-                                            class="count fw-bold text-primary">{{ CountHelper::format($returnItem->count, $returnItem->variation->unit, false) }}</span> {{ StatusService::getTypeCount()[$returnItem->variation->unit] }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('total_price', 'Умумий:') !!} </strong><span
-                                            class="total_price fw-bold text-info">{{ PriceHelper::format($returnItem->total_price, $returnItem->productReturn->currency, false) }}</span> {{ StatusService::getCurrency()[$returnItem->productReturn->currency] }}
-                                        </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('created_at', 'Яратилди:') !!}</strong> {{ $returnItem->created_at?->format('Y-m-d H:i') }}
-                                    </p>
-                                    <div class="btn-group w-100">
-                                        <x-backend.action route="product-return-item" :id="$returnItem->id" :view="true"/>
+                            <div class="mobile-card shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="img-wrapper me-3" style="width: 55px; height: 55px;">
+                                            @if(optional($returnItem->file)->path)
+                                                <img src="{{ asset('storage/' . $returnItem->file->path) }}"
+                                                     alt="">
+                                            @else
+                                                <div
+                                                    class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                                    <i class="bi bi-image"></i></div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div
+                                                class="fw-bold mb-0 text-dark">{{ optional($returnItem->variation)->title }}</div>
+                                            <span class="text-muted small">ID: {{ $returnItem->id }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge-custom {{ StatusService::getTypeClass()[4] }}">
+                                        <div
+                                            class="price fw-bold text-success">{{ PriceHelper::format($returnItem->price, $returnItem->productReturn->currency) }}</div>
+                                                <div style="height: 2px; background-color: #000; margin: 3px 0;"></div>
+                                        <div
+                                            class="count fw-bold text-primary">{{ CountHelper::format($returnItem->count, $returnItem->variation->unit) }}</div>
+                                                <div style="height: 2px; background-color: #000; margin: 3px 0;"></div>
+                                        <div
+                                            class="total_price fw-bold text-info">{{ PriceHelper::format($returnItem->total_price, $returnItem->productReturn->currency) }}</div>
+                                    </span>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase"
+                                               style="font-size: 0.65rem;">Харажат номи</small>
+                                        <span
+                                            class="small fw-medium">{{ optional($returnItem->productReturn->expense)->title }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase"
+                                               style="font-size: 0.65rem;">Яратилди</small>
+                                        <span
+                                            class="small fw-medium">{{ $returnItem->created_at?->format('d.m.Y H:i') }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="small text-muted"><i class="bi bi-person me-1"></i><span
+                                                class="badge bg-info"></span></span>
+                                    <div class="action-btns">
+                                        <x-backend.action route="product-variation" :id="$returnItem->id"
+                                                          :variation="$returnItem"
+                                                          addCountTitle="Махсулот миқдорини ошириш" :addCount="true"
+                                                          :view="true" :edit="true" :delete="true"/>
                                     </div>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-center">Маълумот топилмади</p>
+                            <div class="py-5 text-center">
+                                <img src="{{ asset('images/systems/reference-not-found.png') }}" width="45"
+                                     class="mb-3 opacity-20" alt="">
+                                <div class="py-4">Маълумот топилмади</div>
+                            </div>
                         @endforelse
                     </div>
                     {{-- Mobile version end --}}
                 </form>
+            </div>
 
-                {{-- Pagination --}}
-                <div class="d-flex justify-content-center mt-3">
+            <div class="card-footer bg-white border-top-0 p-4">
+                <div class="d-flex justify-content-center">
                     {{ $productReturnItems->links('pagination::bootstrap-4') }}
                 </div>
-
-                  <style>
-                    .card-stats {
-                        border-radius: 12px;
-                        padding: 20px;
-                        color: #fff;
-                        transition: 0.3s ease;
-                        text-align: center;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        min-width: 180px; /* minimal kenglik */
-                        flex: 1 1 200px; /* responsive */
-                    }
-                    .card-stats:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-                    }
-
-                    .card-stats.count { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-                    .card-stats.total { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-
-                    .card-stats h5 {
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                        font-size: 1.25rem;
-                    }
-                    .card-stats p {
-                        margin: 2px 0;
-                        font-size: 0.95rem;
-                    }
-                    .card-stats i {
-                        font-size: 2.2rem;
-                        opacity: 0.7;
-                    }
-                </style>
-                <div class="d-flex flex-wrap gap-3 mt-4">
-                    <!-- Count -->
-                    <div class="card-stats count">
-                        <div class="w-100">
-                            <p>Маҳсулотлар:</p>
-                            <h5><strong>{{ number_format($allCount, 0, '', ' ') }} та</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-wallet2"></i>
-                        </div>
-                    </div>
-                    <!-- TotalPrice -->
-                    <div class="card-stats total">
-                        <div class="w-100">
-                            <p>Умумий сумма</p>
-                            <h5><strong>{{ number_format($totalAmount ?? 0, 0, '', ' ') }} сўм</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-currency-euro"></i>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
+
+        <div class="d-flex flex-wrap gap-3 mt-4">
+            <!-- Count -->
+            <div class="card-stats count">
+                <div class="w-100">
+                    <p>Маҳсулотлар:</p>
+                    <h5><strong>{{ number_format($allCount, 0, '', ' ') }} та</strong></h5>
+                </div>
+                <div>
+                    <i class="bi bi-wallet2"></i>
+                </div>
+            </div>
+            <!-- TotalPrice -->
+            <div class="card-stats total">
+                <div class="w-100">
+                    <p>Умумий сумма</p>
+                    <h5><strong>{{ number_format($totalAmount ?? 0, 0, '', ' ') }} сўм</strong></h5>
+                </div>
+                <div>
+                    <i class="bi bi-currency-euro"></i>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         document.getElementById('productVariationListFilterForm').addEventListener('submit', function (e) {
             // Faqat ko‘rinib turgan selectni qoldiramiz
-            this.querySelectorAll('input[name="filters[title]"]').forEach(select => {
-                if (select.offsetParent === null) {
+            this.querySelectorAll('input[name="filters[product_variation_id]"], select[name="filters[product_variation_id]"]').forEach(select => {
+                    if (select.offsetParent === null) {
                     select.disabled = true;
                 }
             });
@@ -262,7 +281,7 @@
 
                 const id = document.getElementById('variation_id').value;
                 const addCount = parseInt(document.getElementById('add_count').value, 10);
-                const typeCount = parseInt(document.querySelector('.add-count-btn[data-id="'+id+'"]').dataset.unit || 1, 10);
+                const typeCount = parseInt(document.querySelector('.add-count-btn[data-id="' + id + '"]').dataset.unit || 1, 10);
 
                 if (isNaN(addCount) || addCount < 1) {
                     showCustomConfirm('Илтимос, маҳсулот миқдорини киритинг!', 'warning');

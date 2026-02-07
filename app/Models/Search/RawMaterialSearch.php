@@ -21,12 +21,46 @@ class RawMaterialSearch
             $query->where('id', $filters['id']);
         }
 
-        if (!empty($filters['warehouse_id'])) {
-            $query->where('warehouse_id', $filters['warehouse_id']);
-        }
+        if (!empty($filters['organization_warehouse_raw_material'])) {
+            $raw = trim($filters['organization_warehouse_raw_material']);
+            $parts = array_values(array_filter(
+                array_map(fn($v) => mb_strtolower(trim($v)), explode('.', $raw))
+            ));
 
-        if (!empty($filters['title'])) {
-            $query->whereRaw('LOWER(title) LIKE ?', ['%' . strtolower($filters['title']) . '%']);
+            $query->where(function ($q) use ($parts) {
+                // 🔹 1) NUQTASIZ — oddiy qidiruv
+                if (count($parts) === 1) {
+                    $keyword = $parts[0];
+
+                    $q->whereHas('warehouse.organization', function($oq) use ($keyword) {
+                        $oq->whereRaw('LOWER(organization.title) LIKE ?', ["%{$keyword}%"]);
+                    })->orWhereHas('warehouse', function($wq) use ($keyword) {
+                        $wq->whereRaw('LOWER(warehouse.title) LIKE ?', ["%{$keyword}%"]);
+                    })->orWhereRaw('LOWER(raw_material.title) LIKE ?', ["%{$keyword}%"]);
+                }
+
+                // 🔹 2) Organization.Warehouse
+                elseif (count($parts) === 2) {
+                    [$org, $warehouse] = $parts;
+
+                    $q->whereHas('warehouse.organization', function($oq) use ($org) {
+                        $oq->whereRaw('LOWER(organization.title) LIKE ?', ["%{$org}%"]);
+                    })->whereHas('warehouse', function($wq) use ($warehouse) {
+                        $wq->whereRaw('LOWER(warehouse.title) LIKE ?', ["%{$warehouse}%"]);
+                    });
+                }
+
+                // 🔹 3) Organization.Warehouse.RawMaterial
+                elseif (count($parts) >= 3) {
+                    [$org, $warehouse, $raw_material] = $parts;
+
+                    $q->whereHas('warehouse.organization', function($oq) use ($org) {
+                        $oq->whereRaw('LOWER(organization.title) LIKE ?', ["%{$org}%"]);
+                    })->whereHas('warehouse', function($wq) use ($warehouse) {
+                        $wq->whereRaw('LOWER(warehouse.title) LIKE ?', ["%{$warehouse}%"]);
+                    })->whereRaw('LOWER(raw_material.title) LIKE ?', ["%{$raw_material}%"]);
+                }
+            });
         }
 
         if (!empty($filters['subtitle'])) {

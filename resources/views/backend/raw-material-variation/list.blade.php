@@ -4,68 +4,26 @@
     use App\Helpers\CountHelper;
 @endphp
 
-<x-backend.layouts.main :title="'Хомашё тури ( ' . ucfirst($rawMaterial->title) . ' (' . ucfirst($rawMaterial->warehouse->title) . ')' . '):'">
+<x-backend.layouts.main
+    :title="'Хомашё тури ( ' . ucfirst($rawMaterial->title) . ' (' . ucfirst($rawMaterial->warehouse->title) . ')' . '):'">
 
-    <style>
-        .card-stats {
-            border-radius: 12px;
-            padding: 20px;
-            color: #fff;
-            transition: 0.3s ease;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            min-width: 180px; /* minimal kenglik */
-            flex: 1 1 200px; /* responsive */
-        }
-        .card-stats:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-        }
+    <div class="container-fluid">
 
-        .card-stats.uzs { background: linear-gradient(135deg, #00b894 30%, #2ecc71 90%); border-left: 5px solid #00d68f; }
-        .card-stats.usd { background: linear-gradient(135deg, #0984e3 30%, #0984e3 90%); border-left: 5px solid #00a8ff; }
-        .card-stats.total { background: linear-gradient(135deg, #6c5ce7 30%, #5a4fd4 90%); border-left: 5px solid #8e76ff; }
-
-        .card-stats h5 {
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 1.25rem;
-        }
-        .card-stats p {
-            margin: 2px 0;
-            font-size: 0.95rem;
-        }
-        .card-stats i {
-            font-size: 2.2rem;
-            opacity: 0.7;
-        }
-    </style>
-
-    <div class="row">
-        <div class="card shadow w-100">
-            <div class="card-header">
-                <div class="row justify-content-start">
-                    <div class="col-sm-12 col-md-auto text-start">
-                        <x-backend.action :back="true"/>
-                    </div>
-                </div>
+        <div class="card-custom shadow-sm">
+            <div class="card-header-custom action-btns">
+                <x-backend.action :back="true"/>
             </div>
-            <div class="table-responsive card-body">
+
+            <div class="card-body p-0">
                 <form id="rawMaterialVariationListFilterForm" method="GET"
                       action="{{ route('raw-material-variation.list', $rawMaterial) }}">
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-bordered table-hover">
+                        <table class="table mb-0">
                             <thead>
                             <tr class="text-center">
                                 <th class="col-id">{!! sortLink('id', 'Id') !!}</th>
-                                <th>{!! sortLink('code', 'Код') !!}</th>
-                                <th>{!! sortLink('title', 'Номи') !!}</th>
-                                <th>{!! sortLink('image', 'Расм') !!}</th>
-                                <th>{!! sortLink('price', 'Нархи') !!}</th>
-                                <th>{!! sortLink('count', 'Микдори') !!}</th>
-                                <th>{!! sortLink('total_price', 'Умумий (сўм)') !!}</th>
+                                <th>{!! sortLink('code_title', 'Код/Номи') !!}</th>
+                                <th>{!! sortLink('raw_material_code_title', 'Нархи/Миқдори') !!}</th>
                                 <th>{!! sortLink('status', 'Статус') !!}</th>
                                 <th>{!! sortLink('created_at', 'Яратилди') !!}</th>
                                 <th></th> {{-- Search btn --}}
@@ -73,20 +31,14 @@
                             {{-- Filter Inputs --}}
                             <tr>
                                 <th><input type="text" name="filters[id]" value="{{ request('filters.id') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
-                                <th><input type="text" name="filters[code]" value="{{ request('filters.code') }}"
-                                           class="form-control form-control-sm w-100"></th>
-                                <th><input type="text" name="filters[title]" value="{{ request('filters.title') }}"
-                                           class="form-control form-control-sm w-100"></th>
-                                <th><input type="text" name="filters[image]" value="{{ request('filters.image') }}"
-                                           class="form-control form-control-sm w-100" style="display: none;"></th>
-                                <th><input type="text" name="filters[price]" value="{{ request('filters.price') }}"
+                                           class="form-control form-control-sm w-100 filter-numeric" placeholder="№...">
+                                </th>
+                                <th><input type="text" name="filters[raw_material_code_title]"
+                                           value="{{ request('filters.raw_material_code_title') }}"
+                                           class="form-control form-control-sm w-100" placeholder="Қидирув..."></th>
+                                <th><input type="text" name="filters[raw_material_count_total_price]"
+                                           value="{{ request('filters.raw_material_count_total_price') }}"
                                            class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
-                                <th><input type="text" name="filters[count]" value="{{ request('filters.count') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric-decimal"></th>
-                                <th><input type="text" name="filters[total_price]"
-                                           value="{{ request('filters.total_price') }}"
-                                           class="form-control form-control-sm w-100 filter-numeric"></th>
                                 <th>
                                     <select name="filters[status]" class="form-control form-control-sm w-100">
                                         <option value="">Барчаси</option>
@@ -97,14 +49,14 @@
                                     </select>
                                 </th>
                                 <th>
-                                  <div class="d-flex">
-                                      <input type="date" name="filters[created_from]"
-                                             value="{{ request('filters.created_from') }}"
-                                             class="form-control form-control-sm me-1" placeholder="From">
-                                      <input type="date" name="filters[created_to]"
-                                             value="{{ request('filters.created_to') }}"
-                                             class="form-control form-control-sm" placeholder="To">
-                                  </div>
+                                    <div class="d-flex">
+                                        <input type="date" name="filters[created_from]"
+                                               value="{{ request('filters.created_from') }}"
+                                               class="form-control form-control-sm me-1" placeholder="From">
+                                        <input type="date" name="filters[created_to]"
+                                               value="{{ request('filters.created_to') }}"
+                                               class="form-control form-control-sm" placeholder="To">
+                                    </div>
                                 </th>
 
                                 @if(session('date_format_errors'))
@@ -117,9 +69,13 @@
                                     </div>
                                 @endif
 
-                                <th>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i
-                                            class="fa fa-search"></i></button>
+                                <th class="p-0">
+                                    <div class="d-flex justify-content-center align-items-center"
+                                         style="min-height: 75px;">
+                                        <button type="submit" class="btn btn-custom-search" title="Филтрлаш">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
                                 </th>
                             </tr>
                             </thead>
@@ -127,27 +83,22 @@
                             @forelse($rawMaterialVariations as $variation)
                                 <tr class="text-center" id="row-desktop-{{ $variation->id }}">
                                     <td class="col-id">{{ $variation->id }}</td>
-                                    <td>{{ $variation->code }}</td>
                                     <td>{{ $variation->title }}</td>
-                                    <td>
-                                        @if(optional($variation->file)->path)
-                                            <img src="{{ asset('storage/' . $variation->file->path) }}" alt="Image"
-                                                 style="width: 50px; height: auto;">
-                                        @endif
+                                    <td class="fw-bold text-center" style="line-height: 1;">
+                                        <div
+                                            class="price fw-bold text-success">{{ PriceHelper::format($variation->price, $variation->currency) }}</div>
+                                        <div class="line"></div>
+                                        <div
+                                            class="count fw-bold text-primary">{{ CountHelper::format($variation->count, $variation->unit) }}</div>
+                                        <div class="line"></div>
+                                        <div
+                                            class="total_price fw-bold text-info">{{ PriceHelper::format($variation->total_price, $variation->currency, false) }}
+                                            сўм
+                                        </div>
                                     </td>
-                                    <td class="price fw-bold text-success">
-                                        {{ PriceHelper::format($variation->price, $variation->currency) }}
-                                    </td>
-                                    <td class="count fw-bold text-primary">
-                                        {{ CountHelper::format($variation->count, $variation->unit) }}
-                                    </td>
-                                    <td class="total_price fw-bold text-info text-nowrap">
-                                        {{ PriceHelper::format($variation->total_price, $variation->currency, false) }}
-                                    </td>
-                                    {{--<td>{{ $variation->type }}</td>--}}
                                     <td>{{StatusService::getList()[$variation->status] ?? '-' }}</td>
                                     <td>{{ $variation->created_at?->format('Y-m-d H:i') }}</td>
-                                    <td>
+                                    <td class="text-center action-btns">
                                         <button type="button" class="btn btn-sm btn-success add-count-btn"
                                                 data-id="{{ $variation->id }}"
                                                 data-title="{{ $variation->title }}"
@@ -162,7 +113,11 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="14" class="text-center">Маълумот топилмади</td>
+                                    <td colspan="8" class="py-5 text-center">
+                                        <img src="{{ asset('images/systems/reference-not-found.png') }}" width="60"
+                                             class="mb-3 opacity-20" alt="">
+                                        <p class="text-muted">Маълумот топилмади</p>
+                                    </td>
                                 </tr>
                             @endforelse
                             </tbody>
@@ -170,136 +125,169 @@
                     </div>
 
                     {{-- Mobile version start --}}
-                    <div class="d-md-none">
-                        <div class="d-flex mb-2">
-                          <input type="text" name="filters[search]" value="{{ request('filters.search') }}"
-                               class="form-control form-control-sm me-1"
-                               placeholder="Код ёки номни киритинг">
-                            <button type="submit" class="btn btn-sm btn-outline-info" title="Қидириш">
-                                <i class="fa fa-search"></i>
-                            </button>
+                    <div class="d-md-none p-3">
+                        <div class="search-box-mobile mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"
+                                      style="border-radius: 12px 0 0 12px;"><i
+                                        class="fa fa-search text-muted"></i></span>
+                                <input type="text" name="filters[raw_material_code_title]"
+                                       value="{{ request('filters.raw_material_code_title') }}"
+                                       class="form-control border-start-0 ps-0" placeholder="     Қидирув..."
+                                       style="border-radius: 0 12px 12px 0; height: 48px;">
+                                <button type="submit" class="btn btn-primary ms-2"
+                                        style="border-radius: 12px; width: 48px;"><i class="fa fa-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
                         @forelse($rawMaterialVariations as $variation)
-                            <div class="card border" id="row-mobile-{{ $variation->id }}">
-                                <div class="card-body">
-                                    @if(optional($variation->file)->path)
-                                        <div class="text-center mb-2">
-                                            <img src="{{ asset('storage/' . $variation->file->path) }}"
-                                                 alt="Image" class="img-fluid" style="max-width: 256px;">
+                            <div class="mobile-card shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="img-wrapper me-3" style="width: 55px; height: 55px;">
+                                            @if(optional($variation->file)->path)
+                                                <img src="{{ asset('storage/' . $variation->file->path) }}"
+                                                     alt="">
+                                            @else
+                                                <div
+                                                    class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                                    <i class="bi bi-image"></i></div>
+                                            @endif
                                         </div>
-                                    @endif
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('id', 'ID:') !!}</strong> {{ $variation->id }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('code', 'Код:') !!}</strong> {{ $variation->code }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('title', 'Номи:') !!}</strong> {{ $variation->title }}</p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('price', 'Нархи:') !!}</strong><span
-                                            class="fw-bold text-success">{{ PriceHelper::format($variation->price, $variation->currency, false) }}</span> {{ StatusService::getCurrency()[$variation->currency] }}
-                                    </p>
-                                    <p class="card-text"><strong>{!! sortLink('count', 'Сони:') !!} </strong><span
-                                            class="count fw-bold text-primary">{{ CountHelper::format($variation->count, $variation->unit, false) }}</span> {{ StatusService::getTypeCount()[$variation->unit] }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('total_price', 'Умумий:') !!} </strong><span
-                                            class="total_price fw-bold text-info">{{ PriceHelper::format($variation->total_price, $variation->currency, false) }}</span> {{ StatusService::getCurrency()[$variation->currency] }}
-                                    </p>
-                                    <p class="card-text">
-                                        <strong>{!! sortLink('status', 'Статус:') !!}</strong> {{StatusService::getList()[$variation->status] ?? '-' }}
-                                    </p>
-
-                                    <div class="btn-group w-100">
-                                        <div class="btn-group w-100">
-                                            <x-backend.action route="raw-material-variation" :id="$variation->id"
-                                                              :variation="$variation"
-                                                              addCountTitle="Хомашё микдорини ошириш" :addCount="true"
-                                                              :view="true" :edit="true" :delete="true"/>
+                                        <div>
+                                            <div
+                                                class="fw-bold mb-0 text-dark">{{ $variation->title }}</div>
+                                            <span class="text-muted small">ID: {{ $variation->id }}</span>
                                         </div>
+                                    </div>
+                                    <span class="badge-custom {{ StatusService::getTypeClass()[4] }}">
+                                        <div class="fw-bold text-center" style="line-height: 1;">
+                                            <div
+                                                class="text-success">{{ PriceHelper::format($variation->price, $variation->currency) }}</div>
+                                            <div style="height: 2px; background-color: #000; margin: 3px 0;"></div>
+                                            <div
+                                                class="text-primary">{{ CountHelper::format($variation->count, $variation->unit) }}</div>
+                                                <div style="height: 2px; background-color: #000; margin: 3px 0;"></div>
+                                            <div
+                                                class="text-info">{{ PriceHelper::format($variation->total_price, $variation->currency, false) }}
+                                                сўм
+                                            </div>
+                                        </div>
+                                    </span>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase"
+                                               style="font-size: 0.65rem;">Хомашё тури</small>
+                                        <span
+                                            class="small fw-medium">{{ $variation->rawMaterial->title }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase"
+                                               style="font-size: 0.65rem;">Яратилди</small>
+                                        <span
+                                            class="small fw-medium">{{ $variation->created_at?->format('d.m.Y H:i') }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="small text-muted"><i class="bi bi-person me-1"></i><span
+                                                class="badge bg-info">{{ optional($variation->rawMaterial->warehouse)->title }}</span></span>
+                                    <div class="action-btns">
+                                        <x-backend.action route="raw-material-variation" :id="$variation->id"
+                                              :variation="$variation"
+                                              addCountTitle="Хомашё миқдорини ошириш" :addCount="true"
+                                              :view="true" :edit="true" :delete="true"/>
                                     </div>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-center">Маълумот топилмади</p>
+                            <div class="py-5 text-center">
+                                <img src="{{ asset('images/systems/reference-not-found.png') }}" width="45"
+                                     class="mb-3 opacity-20" alt="">
+                                <div class="py-4">Маълумот топилмади</div>
+                            </div>
                         @endforelse
                     </div>
                     {{-- Mobile version end --}}
                 </form>
+            </div>
 
-                <!-- Add Count Modal -->
-                <div class="modal fade" id="addCountModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-top">
-                        <div class="modal-content">
-                            <form id="addCountForm">
-                                @csrf
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Хомашё микдорини ошириш.</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <!-- Add Count Modal -->
+            <div class="modal fade" id="addCountModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-top">
+                    <div class="modal-content">
+                        <form id="addCountForm">
+                            @csrf
+                            <div class="modal-header">
+                                <h5 class="modal-title">Хомашё микдорини ошириш.</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="variation_id">
+                                <div class="mb-3">
+                                    <label>Хомашё номи:</label>
+                                    <input type="text" id="variation_title" class="form-control" disabled>
                                 </div>
-                                <div class="modal-body">
-                                    <input type="hidden" id="variation_id">
-                                    <div class="mb-3">
-                                        <label>Хомашё номи:</label>
-                                        <input type="text" id="variation_title" class="form-control" disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Ҳозирги микдори:</label>
-                                        <input type="text" id="current_count" class="form-control" disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Қўшиладиган хомашё микдори:</label>
-                                        <input type="number" id="add_count" name="add_count" class="form-control"
-                                               min="0.001" step="0.001" required>
-                                    </div>
+                                <div class="mb-3">
+                                    <label>Ҳозирги микдори:</label>
+                                    <input type="text" id="current_count" class="form-control" disabled>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Бекор қилиш
-                                    </button>
-                                    <button type="submit" class="btn btn-info">Сақлаш</button>
+                                <div class="mb-3">
+                                    <label>Қўшиладиган хомашё микдори:</label>
+                                    <input type="number" id="add_count" name="add_count" class="form-control"
+                                           min="0.001" step="0.001" required>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Бекор қилиш
+                                </button>
+                                <button type="submit" class="btn btn-info">Сақлаш</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+            </div>
 
-                <div class="d-flex justify-content-center mt-3">
+            <div class="card-footer bg-white border-top-0 p-4">
+                <div class="d-flex justify-content-center">
                     {{ $rawMaterialVariations->links('pagination::bootstrap-4') }}
                 </div>
+            </div>
+        </div>
 
-                <div class="d-flex flex-wrap gap-3 mt-4">
-                    <!-- UZS -->
-                    <div class="card-stats uzs">
-                        <div class="w-100">
-                            <h5>🇺🇿 UZS</h5>
-                            <p>Хомашёлар (сўм):</p>
-                            <h5><strong>{{ number_format($allCountUzs, 0, '', ' ') }} та</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-wallet2"></i>
-                        </div>
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <!-- UZS -->
+                <div class="card-stats uzs">
+                    <div class="w-100">
+                        <h5>🇺🇿 UZS</h5>
+                        <p>Хомашёлар (сўм):</p>
+                        <h5><strong>{{ number_format($allCountUzs, 0, '', ' ') }} та</strong></h5>
                     </div>
-
-                    <!-- USD -->
-                    <div class="card-stats usd">
-                        <div class="w-100">
-                            <h5>🇺🇸 USD</h5>
-                            <p>Хомашёлар ($):</p>
-                            <h5><strong>{{ number_format($allCountUsd, 0, '', ' ') }}  та</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-currency-exchange"></i>
-                        </div>
+                    <div>
+                        <i class="bi bi-wallet2"></i>
                     </div>
+                </div>
 
-                    <!-- TotalPrice -->
-                    <div class="card-stats total">
-                        <div class="w-100">
-                            <p>Умумий сумма</p>
-                            <h5><strong>{{ number_format($totalPrice ?? 0, 0, '', ' ') }} сўм</strong></h5>
-                        </div>
-                        <div>
-                            <i class="bi bi-currency-euro"></i>
-                        </div>
+                <!-- USD -->
+                <div class="card-stats usd">
+                    <div class="w-100">
+                        <h5>🇺🇸 USD</h5>
+                        <p>Хомашёлар ($):</p>
+                        <h5><strong>{{ number_format($allCountUsd, 0, '', ' ') }} та</strong></h5>
+                    </div>
+                    <div>
+                        <i class="bi bi-currency-exchange"></i>
+                    </div>
+                </div>
+
+                <!-- TotalPrice -->
+                <div class="card-stats total">
+                    <div class="w-100">
+                        <p>Умумий сумма</p>
+                        <h5><strong>{{ number_format($totalPrice ?? 0, 0, '', ' ') }} сўм</strong></h5>
+                    </div>
+                    <div>
+                        <i class="bi bi-currency-euro"></i>
                     </div>
                 </div>
             </div>
@@ -309,7 +297,7 @@
     <script>
         document.getElementById('rawMaterialVariationListFilterForm').addEventListener('submit', function (e) {
             // Faqat ko‘rinib turgan selectni qoldiramiz
-            this.querySelectorAll('input[name="filters[title]"]').forEach(select => {
+            this.querySelectorAll('input[name="filters[raw_material_code_title]"]').forEach(select => {
                 if (select.offsetParent === null) {
                     select.disabled = true;
                 }

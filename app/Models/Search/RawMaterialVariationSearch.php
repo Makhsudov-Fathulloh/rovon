@@ -21,38 +21,47 @@ class RawMaterialVariationSearch
             $query->where('id', $filters['id']);
         }
 
-        if (!empty($filters['raw_material_id'])) {
-            $query->where('raw_material_id', $filters['raw_material_id']);
-        }
+        if (!empty($filters['raw_material_code_title'])) {
+            $keyword = strtolower($filters['raw_material_code_title']);
 
-        if (!empty($filters['search'])) {
-            $search = strtolower($filters['search']);
-            $query->where(function($q) use ($search) {
-                $q->whereRaw('LOWER(code) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
+            $query->where(function($q) use ($keyword) {
+                // 1. Standart qidiruv (code va title)
+                $q->whereRaw('LOWER(code) LIKE ?', ["%{$keyword}%"])
+                    ->orWhereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
+                    ->orWhereHas('rawMaterial', function($subQuery) use ($keyword) {
+                        $subQuery->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"]);
+                    });
+
+                // 2. Agar qidiruvda nuqta bo'lsa (Masalan: "Meva.Olma")
+                if (str_contains($keyword, '.')) {
+                    $parts = explode('.', $keyword);
+                    $rawMaterialPart = trim($parts[0]);
+                    $titlePart = trim($parts[1]);
+
+                    $q->orWhere(function($subQ) use ($rawMaterialPart, $titlePart) {
+                        $subQ->whereRaw('LOWER(title) LIKE ?', ["%{$titlePart}%"])
+                            ->whereHas('rawMaterial', function($pQ) use ($rawMaterialPart) {
+                                $pQ->whereRaw('LOWER(title) LIKE ?', ["%{$rawMaterialPart}%"]);
+                            });
+                    });
+                }
             });
-        }
-
-        if (!empty($filters['code'])) {
-            $query->whereRaw('LOWER(code) LIKE ?', ['%' . strtolower($filters['code']) . '%']);
-        }
-
-        if (!empty($filters['title'])) {
-            $query->whereRaw('LOWER(title) LIKE ?', ['%' . strtolower($filters['title']) . '%']);
         }
 
         if (!empty($filters['subtitle'])) {
             $query->whereRaw('LOWER(subtitle) LIKE ?', ['%' . strtolower($filters['subtitle']) . '%']);
         }
 
-        if (isset($filters['price']) && $filters['price'] !== '') {
-            $filters['price'] = preg_replace('/[^\d.]/', '', $filters['price']);
-            $query->where('price', (float) $filters['price']);
-        }
+        if (isset($filters['raw_material_count_total_price']) && $filters['raw_material_count_total_price'] !== '') {
+            $numeric = preg_replace('/[^\d.]/', '', $filters['raw_material_count_total_price']);
 
-        if (isset($filters['count']) && $filters['count'] !== '') {
-            $filters['count'] = preg_replace('/[^\d.]/', '', $filters['count']);
-            $query->where('count', (float) $filters['count']);
+            if ($numeric !== '') {
+                $query->where(function ($q) use ($numeric) {
+                    $q->whereRaw('CAST(count AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(price AS TEXT) LIKE ?', ["%{$numeric}%"])
+                        ->orWhereRaw('CAST(total_price AS TEXT) LIKE ?', ["%{$numeric}%"]);
+                });
+            }
         }
 
         if (!empty($filters['unit'])) {
@@ -61,11 +70,6 @@ class RawMaterialVariationSearch
 
         if (!empty($filters['currency'])) {
             $query->where('currency', $filters['currency']);
-        }
-
-        if (isset($filters['total_price']) && $filters['total_price'] !== '') {
-            $filters['total_price'] = preg_replace('/[^\d.]/', '', $filters['total_price']);
-            $query->where('total_price', (float) $filters['total_price']);
         }
 
         if (!empty($filters['type'])) {

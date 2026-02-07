@@ -164,12 +164,11 @@
                                     </div>
                                     <div class="col-6">
                                         <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Яратилди</small>
-                                        <span
-                                            class="small fw-medium">{{ $product->created_at?->format('d.m.Y H:i') }}</>
+                                        <span class="small fw-medium">{{ $product->created_at?->format('d.m.Y H:i') }}</span>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <span class="small text-muted"><i class="bi bi-person me-1"></i>{{ optional($product->category)->title }}</span>
+                                    <span class="small text-muted"><i class="bi bi-person me-1"></i><span class="badge bg-info">{{ optional($product->category)->title }}</span></span>
                                     <div class="action-btns">
                                         <x-backend.action
                                             route="product" listRoute="product-variation" :id="$product->id"

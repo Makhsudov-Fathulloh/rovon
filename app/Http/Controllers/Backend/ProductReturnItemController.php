@@ -43,7 +43,7 @@ class ProductReturnItemController extends Controller
             $filteredQuery = clone $query;
 
             $allCount = (clone $filteredQuery)->whereYear('created_at', now()->year)->count();
-            $totalAmount = (clone $filteredQuery)->whereYear('created_at', now()->year)->sum('total_amount');
+            $totalAmount = (clone $filteredQuery)->whereYear('created_at', now()->year)->sum('total_price');
         } else {
             $allCount = ProductReturnItem::where('product_return_id', $product_return_id)->whereYear('created_at', now()->year)->count();
             $totalAmount = ProductReturnItem::where('product_return_id', $product_return_id)->whereYear('created_at', now()->year)->sum('total_price');

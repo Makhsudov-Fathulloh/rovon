@@ -15,7 +15,6 @@
 
             <div class="card-body p-0">
                 <form id="productVariationFilterForm" method="GET" action="{{ route('product-variation.index') }}">
-
                     <div class="table-responsive d-none d-md-block">
                         <table class="table mb-0">
                             <thead>

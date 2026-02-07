@@ -83,9 +83,13 @@
                                     </div>
                                 @endif
 
-                                <th>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Қидириш"><i
-                                            class="fa fa-search"></i></button>
+                                <th class="p-0">
+                                    <div class="d-flex justify-content-center align-items-center"
+                                         style="min-height: 75px;">
+                                        <button type="submit" class="btn btn-custom-search" title="Филтрлаш">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
                                 </th>
                             </tr>
                             </thead>
@@ -145,15 +149,14 @@
                     <div class="d-md-none p-3">
                         <div class="search-box-mobile mb-4">
                             <div class="input-group">
-                                    <span class="input-group-text bg-white border-end-0"
-                                          style="border-radius: 12px 0 0 12px;"><i
-                                            class="fa fa-search text-muted"></i></span>
+                                <span class="input-group-text bg-white border-end-0"
+                                    style="border-radius: 12px 0 0 12px;"><i class="fa fa-search text-muted"></i></span>
                                 <input type="text" name="filters[product_code_title]"
-                                       value="{{ request('filters.product_code_title') }}"
-                                       class="form-control border-start-0 ps-0" placeholder="     Қидирув..."
-                                       style="border-radius: 0 12px 12px 0; height: 48px;">
+                                    value="{{ request('filters.product_code_title') }}"
+                                    class="form-control border-start-0 ps-0" placeholder="     Қидирув..."
+                                    style="border-radius: 0 12px 12px 0; height: 48px;">
                                 <button type="submit" class="btn btn-primary ms-2"
-                                        style="border-radius: 12px; width: 48px;"><i class="fa fa-arrow-right"></i>
+                                    style="border-radius: 12px; width: 48px;"><i class="fa fa-arrow-right"></i>
                                 </button>
                             </div>
                         </div>
